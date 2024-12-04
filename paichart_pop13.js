@@ -34,7 +34,7 @@ var isChartVisible22 = false;
 // Function to update the data based on the selected MWS ID
 function updateData2(selectMWSID) {
     // Construct the GeoJSON URL using the selectMWSID
-	var geojsonUrl = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${selectMWSID}/ED_07_SED_PPL_poly_v1.geojson`;
+	var geojsonUrl = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/07_SED/SED_PPL/SED_PPL_MWS_${selectMWSID}.geojson`;
 
     // Fetch the GeoJSON data from the constructed URL
     fetch(geojsonUrl)
