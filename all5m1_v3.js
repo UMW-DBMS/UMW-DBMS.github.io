@@ -787,10 +787,10 @@ function loadGeoJsonLayer(url, layerName) {
                     let colors = [];
 
                     // Example: If the layer has a specific property like 'classLULC', use it to define categories
-                    if (layerName === 'Rainfall' || layerName === 'Temperature') {
+                    if (layerName === 'Rainfall' || layerName === 'Temporature') {
                         categories = ['Low', 'Medium', 'High'];
                         colors = ['#00FF00', '#FFFF00', '#FF0000'];
-                    } else if (layerName === 'Evaporation') {
+                    } else if (layerName === 'Evoporation') {
                         categories = ['Low', 'Medium', 'High'];
                         colors = ['#32CD32', '#FFD700', '#FF6347'];
                     } else if (layerName === 'Water Quality') {
