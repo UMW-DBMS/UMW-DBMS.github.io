@@ -695,7 +695,7 @@ function loadGeoJsonLayer(url, layerName) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
-                    } else if (layerName === 'Temperature') {
+                    } else if (layerName === 'Temporature') {
                         icon = L.divIcon({
                             className: 'temperature-icon',
                             html: `
@@ -707,7 +707,7 @@ function loadGeoJsonLayer(url, layerName) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
-                    } else if (layerName === 'Evaporation') {
+                    } else if (layerName === 'Evoporation') {
                         icon = L.divIcon({
                             className: 'evaporation-icon',
                             html: `
