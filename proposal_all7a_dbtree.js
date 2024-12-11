@@ -1,21 +1,52 @@
 const tablePanel = document.getElementById('tablePanel');
-const mwsDropdown = document.getElementById('selectMWSID'); // Dropdown for selecting mwsID
+const mwsDropdown = document.getElementById('selectMWSID'); // Dropdown for selecting MWS_ID
 let csvData = [];
 let currentPages = 1;
 const rowsPerPages = 20;
 
-// Example: Add an event listener for mwsID selection
+// Function to reset UI to default
+function resetToDefault() {
+    // Clear the table panel
+    tablePanel.innerHTML = '';
+
+        const staticContent = `
+            Data Table
+            <button class="hide-btn" onclick="hidePanel('tablePanel')">Close</button>
+        `;
+        tablePanel.innerHTML = staticContent;
+    // Reset page count
+    currentPages = 1;
+
+    // Clear any existing download buttons
+    const existingDownloadButton = document.querySelector('button[download]');
+    if (existingDownloadButton) {
+        existingDownloadButton.remove();
+    }
+
+    // Optionally reset other UI components or state variables
+    const anotherDropdown = document.getElementById('anotherDropdown'); // Example
+    if (anotherDropdown) {
+        anotherDropdown.value = ''; // Reset dropdown to default
+    }
+}
+
+// Event listener for MWS_ID selection
 mwsDropdown.addEventListener('change', function(event) {
-    var selectedMwsID = event.target.value;
-    var processedMwsID = selectedMwsID.replace(/-/g, '_'); // Process the selected mwsID
+    const selectedMwsID = event.target.value;
+    const processedMwsID = selectedMwsID.replace(/-/g, '_'); // Process the selected MWS_ID
     const csvUrl = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/Proposal/MWS_${processedMwsID}/MWS_${processedMwsID}_table.csv`;
-    
+
+    // Reset everything to default first
+    resetToDefault();
+
+    // Load new data only if a valid MWS_ID is selected
     if (processedMwsID) {
-        fetchAndLoadMainCsv(csvUrl); // Load the CSV when a valid mwsID is selected
+        fetchAndLoadMainCsv(csvUrl);
     } else {
         tablePanel.innerHTML = '<p>Please select a valid MWS ID.</p>';
     }
 });
+
 
 // Fetch the main CSV file based on the processed mwsID
 function fetchAndLoadMainCsv(csvUrl) {
