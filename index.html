@@ -131,9 +131,10 @@
     top: 70px;           /* 70px below the header */
     left: 50%;           /* Center horizontally */
     transform: translateX(-50%); /* Shift the element to the left by 50% of its width */
-    width: 800px;        /* Set the width of the table panel */
+    width: 100%;        /* Set the width of the table panel */
     max-height: 400px;   /* Limit the height to fit within the page */
     overflow-y: auto;    /* Enable scrolling if content exceeds the max height */
+	overflow-x: auto;    /* Enable scrolling if content exceeds the max height */
         }
 		
         #statPanel {
@@ -163,9 +164,10 @@
     top: 70px;           /* 70px below the header */
     left: 50%;           /* Center horizontally */
     transform: translateX(-50%); /* Shift the element to the left by 50% of its width */
-    width: 800px;        /* Set the width of the table panel */
+    width: 100%;        /* Set the width of the table panel */
     max-height: 400px;   /* Limit the height to fit within the page */
     overflow-y: auto;    /* Enable scrolling if content exceeds the max height */
+	overflow-x: auto;    /* Enable scrolling if content exceeds the max height */
 }
 
 		
@@ -355,8 +357,8 @@
         </select>
 		<!-- Popup panel for coordinates 
 	
-		<div id="infoPopupPanel" style="position:absolute; display:none;"></div>
-			<div id="infoPopupPanel" style="display:none;"></div> -->
+		<div id="infoPopupPanel" style="position:absolute; display:none;"></div>-->
+			<div id="infoPopupPanel" style="display:none;"></div> 
     </footer>
 
     <!-- Side Panels 
@@ -406,7 +408,7 @@
     <div id="statPanel" class="panel"> 
         <div>
             <div id="lulcstatPanel"  class="tab" onclick="selectTab('lulc')">LULC</div>
-            <div id="foreststatPanel"class="tab" onclick="selectTab('forest')">Forest</div>
+            <div id="hazardstatPanel"class="tab" onclick="selectTab('hazard')">Hazard</div>
             <div id="demostatPanel" class="tab" onclick="selectTab('demography')">Demography</div>
             <div id="adminstatPanel" class="tab" onclick="selectTab('admin')">Admin</div>
             <div id="soilstatPanel"class="tab" onclick="selectTab('soil')">Soil</div>
@@ -562,7 +564,7 @@
 
 
 	
-			<script src="all5m1_v3_photo.js" defer> </script>
+			<script src="all5m1_v3_photo_legend.js" defer> </script>
 			<script src="proposal_all7a_dbtree.js"></script>	
 			<script src="table4.js" ></script>	
 			
@@ -584,7 +586,7 @@
 			<script src="paichart_gnd13.js"></script>					
 			<script src="paichart_pop13.js"></script>	
 			<script src="paichart_soil13.js"></script>				
-
+			<script src="paichart_risk13.js"></script>	
 
 
 
