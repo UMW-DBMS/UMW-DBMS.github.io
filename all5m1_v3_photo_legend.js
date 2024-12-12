@@ -568,13 +568,39 @@ if (layerName === 'Economic hubs') {
 }
 
                     else  {
-                        icon = L.divIcon({
-                            className: 'red-cross-icon',
-                            html: '<div style="color: orange; font-size: 30px; transform: rotate(45deg);">+</div>',
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        });
-                    }	
+icon = L.divIcon({
+    className: 'undefine',
+    html: `
+        <div style="position: relative; width: 20px; height: 20px;">
+            <!-- Blue outer circle with transparency -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background-color: rgba(0, 0, 255, 0.5); /* Semi-transparent blue */
+            "></div>
+            <!-- Yellow inner circle -->
+            <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: #FFD700; /* Yellow */
+            "></div>
+        </div>
+    `,
+    iconSize: [20, 20],  // Further reduced size of the icon
+    iconAnchor: [10, 10] // Updated anchor for center alignment
+});
+
+
+}
 
 
                     return L.marker(latlng, { icon: icon });
