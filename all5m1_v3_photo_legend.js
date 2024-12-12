@@ -1097,16 +1097,53 @@ legend.onAdd = function () {
     let categories = [];
     let colors = [];
 
-    if (layerName === 'Rainfall' || layerName === 'Temperature') {
-        categories = ['Low', 'Medium', 'High'];
-        colors = ['#00FF00', '#FFFF00', '#FF0000'];
-    } else if (layerName === 'Evaporation') {
-        categories = ['Low', 'Medium', 'High'];
-        colors = ['#32CD32', '#FFD700', '#FF6347'];
-    } else if (layerName === 'Water Quality') {
-        categories = ['Good', 'Moderate', 'Poor'];
-        colors = ['#32CD32', '#FFD700', '#FF6347'];
-    } else if (layerName === 'Land cover') {
+if (layerName === 'Rainfall') {
+    // Custom SVG symbol for the legend
+    div.innerHTML += `
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <svg width="20" height="20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px;">
+                <circle cx="50" cy="30" r="20" fill="#1E90FF" />
+                <path d="M50,55 C40,70, 50,85, 60,70 C50,85, 50,95, 50,85" fill="#1E90FF" />
+            </svg>
+            <span>Rainfall</span>
+        </div>
+    `;
+} else if (layerName === 'Temporature') {
+    // Custom SVG symbol for the legend
+    div.innerHTML += `
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <svg width="20" height="20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px;">
+                <rect x="45" y="20" width="10" height="60" fill="#FF4500"/>
+                <circle cx="50" cy="85" r="10" fill="#FF4500"/>
+            </svg>
+            <span>Temperature</span>
+        </div>
+    `;
+} else if (layerName === 'Evoporation') {
+    // Custom SVG symbol for the legend
+    div.innerHTML += `
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <svg width="20" height="20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px;">
+                <path d="M50 20 C30 30, 30 60, 50 80 C70 60, 70 30, 50 20 Z" fill="#32CD32"/>
+                <path d="M40 20 Q45 10, 50 20 T60 20" stroke="#228B22" stroke-width="2" fill="transparent"/>
+                <path d="M40 15 Q45 5, 50 15 T60 15" stroke="#228B22" stroke-width="2" fill="transparent"/>
+            </svg>
+            <span>Evaporation</span>
+        </div>
+    `;
+} else if (layerName === 'Water Quality') {
+    // Custom SVG symbol for the legend
+    div.innerHTML += `
+        <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <svg width="20" height="20" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="margin-right: 5px;">
+                <path d="M50 10 C30 30, 30 50, 50 70 C70 50, 70 30, 50 10 Z" fill="#1E90FF"/>
+                <rect x="40" y="70" width="20" height="30" fill="#2E8B57"/>
+            </svg>
+            <span>Water Quality</span>
+        </div>
+    `;
+}
+else if (layerName === 'Land cover') {
         categories = [
             'Tea', 'Perennials', 'Paddy', 'Seasonal crop', 'Farms/other', 
             'Home garden', 'Forest', 'Forest Plantation', 'Grassland', 
