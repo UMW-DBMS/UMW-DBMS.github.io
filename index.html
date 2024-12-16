@@ -268,6 +268,21 @@
     background-color: #45a049;
 }		
 
+.button-container {
+  display: block;
+  position: absolute; /* Positioned within the right panel */
+  bottom: 0px;
+  right: 10px;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+}
+        .button-container button:hover {
+            background-color: #45a049;
+        }
 
 
 
@@ -354,7 +369,9 @@
     <div id="map" class="map"></div>
 	
 
-	
+    <div class="button-container">
+        <button onclick="openNewTab()">Open MWS Data Catalog</button>
+    </div>	
 	
     <footer>
         <select id="baseLayerSelect" onchange="changeBaseLayer()">
@@ -609,6 +626,15 @@
 	    <script src="readmetext.js"></script>
 		<script src="navigate.js"></script>
 
+    <div class="button-container">
+        <button onclick="openNewTab()">Open MWS Data Catalog</button>
+    </div>
+
+    <script>
+        function openNewTab() {
+            window.open("https://umw-dbms.github.io/MWSDataCatalog.html", "_blank");
+        }
+    </script>
 		
 </body>
 </html>
