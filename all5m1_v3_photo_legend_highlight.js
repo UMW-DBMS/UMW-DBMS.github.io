@@ -349,9 +349,12 @@ const colorRanges = {
     ],
 	
     'Slope': [
-        { range: 'Low', color: '#f7f7f7' },       // Light gray for low slope
-        { range: 'Moderate', color: '#a6d96a' },  // Light green for moderate slope
-        { range: 'High', color: '#d73027' }       // Red for high slope
+        { "range": "0-2", "color": "#10f500" },
+        { "range": "5-2", "color": "#80f700" },
+        { "range": "10-5", "color": "#d2f700" },
+        { "range": "20-10", "color": "#facc00" },
+        { "range": "20-45", "color": "#fc7600" },
+        { "range": ">45", "color": "#f50000" }
     ],
 	
 	    'Monthly NDVI -01': [
