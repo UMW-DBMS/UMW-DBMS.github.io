@@ -9,7 +9,7 @@ document.getElementById('mwsInfoBtn').addEventListener('click', function () {
     const mwsID = selectElement.value;
 
     if (mwsID) {
-        const xlsxFilePath = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/Pathahewaheta_name%20lists.xlsx';
+        const xlsxFilePath = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/Pathahewaheta_name_lists.xlsx';
 
         fetch(xlsxFilePath)
             .then(response => {
@@ -20,7 +20,7 @@ document.getElementById('mwsInfoBtn').addEventListener('click', function () {
             })
             .then(arrayBuffer => {
                 const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[1];
+                const firstSheetName = workbook.SheetNames[0];
                 sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { header: 1 });
                 filteredData = sheetData.slice(); // Start with all data being visible
                 currentPage = 1; // Reset to the first page when new data is loaded
