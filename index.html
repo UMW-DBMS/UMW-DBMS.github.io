@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Map with Dropdowns</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.pm/dist/leaflet.pm.min.js"></script>
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- Include the dropdown.js file-->	
+	<script src="scripts.js" defer></script>
+    <script src="dropdown.js" defer></script>	 
+
+
+    <script src="https://unpkg.com/papaparse/papaparse.min.js"></script> <!-- PapaParse Library -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> <!-- Leaflet Library -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> <!-- Leaflet CSS -->
+	<script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
+	<link rel="stylesheet" href="readmetext.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	
+	
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: linear-gradient(to bottom, #e0f7e5, #c8e6c9);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            font-size: 12px; /* Small header */
+        }
+        footer {
+            background-color: #388e3c;
+            padding: 10px;
+        }
+        .map {
+            flex: 1;
+            position: relative;
+        }
+        .button {
+            background-color: #4caf50;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            cursor: pointer;
+            margin: 0 5px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+			font-size: 10px; /* Adjust the size to your preference */
+        }
+        .button.active {
+            background-color: #66bb6a; /* Lighter green for active buttons */
+        }
+        .button.disabled {
+            background-color: #a5d6a7; /* Shade green for deactivated buttons */
+            cursor: not-allowed;
+        }
+        .panel {
+            display: none; /* Start hidden */
+            position: absolute;
+            background: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            max-width: 1000px;
+            overflow: auto;
+            font-size: 9px; /* Smaller font for panels */
+        }
+        .hide-btn {
+            background: #f44336;
+            border: none;
+            color: white;
+            padding: 5px;
+            cursor: pointer;
+            float: right;
+            border-radius: 3px;
+        }
+        /* Positioning panels */
+        #basePanel {
+            top: 70px; /* Below the header */
+            left: 0; /* From the left edge */
+			width: 200px;
+        }
+        #proposalPanel {
+            top: 70px; /* Below the header */
+            left: 0; /* From the left edge */
+			width: 200px;
+        }
+        #infoPanel {
+            top: 70px; /* Below the header */
+            right: 0; /* From the left edge */
+			width: 500px;
+        }
+        #climPanel {
+            top: 70px; /* Below the header */
+            left: 0; /* From the left edge */
+			width: 200px;
+        }
+		
+#infoPopupPanel {
+    position: relative;
+    right: 10px; /* Position 10px from the right edge of the footer */
+    top: 00%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust for perfect vertical centering */
+    font-size: 10px;
+    color: #333; /* Text color */
+    background-color: #f9f9f9; /* Background color */
+    padding: 0px;
+    border: 1px solid #ccc; /* Optional: border */
+    border-radius: 4px; /* Rounded corners */
+    display: none; /* Initially hidden */
+	width:20%
+
+}
+	
+        #catalogPanel {
+   position: absolute;  /* Ensure it is positioned absolutely on the page */
+    top: 70px;           /* 70px below the header */
+    left: 50%;           /* Center horizontally */
+    transform: translateX(-50%); /* Shift the element to the left by 50% of its width */
+    width: 100%;        /* Set the width of the table panel */
+    max-height: 400px;   /* Limit the height to fit within the page */
+    overflow-y: auto;    /* Enable scrolling if content exceeds the max height */
+	overflow-x: auto;    /* Enable scrolling if content exceeds the max height */
+        }
+		
+        #statPanel {
+            top: 70px; /* Below the header */
+            right: 0; /* From the left edge */
+			width: 300px; 
+        }
+#catalogPanel table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#catalogPanel th, #catalogPanel td {
+    padding: 4px 8px;    /* Reduce padding to decrease row height */
+    text-align: left;
+    border: 1px solid #ddd;
+    font-size: 10px;      /* Adjust font size to make rows more compact */
+    line-height: 0.5;     /* Set line height to control row height */
+}
+
+
+#catalogPanel th {
+    background-color: #f2f2f2;
+}		
+#tablePanel {
+    position: absolute;  /* Ensure it is positioned absolutely on the page */
+    top: 70px;           /* 70px below the header */
+    left: 50%;           /* Center horizontally */
+    transform: translateX(-50%); /* Shift the element to the left by 50% of its width */
+    width: 100%;        /* Set the width of the table panel */
+    max-height: 400px;   /* Limit the height to fit within the page */
+    overflow-y: auto;    /* Enable scrolling if content exceeds the max height */
+	overflow-x: auto;    /* Enable scrolling if content exceeds the max height */
+}
+
+		
+        #attributePanel {
+            top: 90px; /* Below the header */
+            right: 0; /* From the left edge */
+			width: 300px; 
+        }
+		
+
+		
+        .tab {
+            display: inline-block;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background-color: #4caf50;
+            color: white;
+        }
+		
+	        #sidePanel {
+            width: 30%;
+            padding: 20px;
+            background-color: #f7f7f7;
+            border-left: 1px solid #ddd;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            transform: translateX(100%); /* Hidden by default */
+            transition: transform 0.3s ease;
+            z-index: 999; /* Ensure it's above the map */
+        }
+
+        #sidePanel.open {
+            transform: translateX(0); /* Slide in when open */
+        }
+
+        #toggleButton {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000; /* Make sure it's above the map */
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #downloadButton {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .tab.active {
+            background-color: #4caf50;
+            color: white;
+        }
+        #areaPieChart {
+            width: 100%;
+            height: 400px;
+        }
+
+        h3 {
+            margin-top: 0;
+        }
+.show-all-btn {
+    margin: 10px;
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.rainfall-icon div, .temperature-icon div, .evaporation-icon div, .water-quality-icon div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.show-all-btn:hover {
+    background-color: #45a049;
+}		
+
+
+
+
+		/* Style for mobile responsiveness */
+        @media (max-width: 600px) {
+			.panel {
+             width: 100%;
+			 height: 100%;
+            }
+        }
+		
+    </style>
+</head>
+<body>
+
+    <!-- Legend items will be dynamically added here -->
+</div>
+    <!-- README Modal -->
+    <div id="readme-modal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome to UMW Watershed Management Plan</h2>
+            <ul>
+                <li><strong>Step 1:</strong> Select your Divisional Secretariat Division name.</li>
+                <li><strong>Step 2:</strong> 
+                    <ul>
+                        <li>If you know the Mini Watershed (MWS) ID, select it.</li>
+                        <li>If not, click a location on the map to see its MWS ID in the popup.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 3:</strong> Click "GO".</li>
+                <li><strong>Step 4:</strong> Use the footer menu to switch background map (e.g., Satellite, OSM).</li>
+                <li><strong>Step 5:</strong> 
+                    <ul>
+                        <li>Select "Base Layers" to explore GIS data layers.</li>
+                        <li>Select "Attribute" to view detailed information by clicking features on the map.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 6:</strong> Select "Proposal" to explore proposal locations.</li>
+                <li><strong>Step 7:</strong> Select "Climate Layer" for weather data and use "Attribute" for time-series exploration.</li>
+                <li><strong>Step 8:</strong> Select "MWS Info" for watershed committee details.</li>
+                <li><strong>Step 9:</strong> Select "Data Catalog" to access metadata and downloads.</li>
+                <li><strong>Step 10:</strong> Select "Statistics" for MWS-level statistics (e.g., land cover, population).</li>
+                <li><strong>Step 11:</strong> To explore another MWS, close panels, change the MWS ID, and click "GO".</li>
+            </ul>
+            <button id="close-readme">Close</button>
+        </div>
+    </div>
+
+
+	
+    <header>
+
+        <div>Watershed Management Plan</div>
+		
+        <div>
+
+            <select id="selectDSD">
+                <option value="">--Select DSD--</option>
+            </select>
+	
+            <select id="selectMWSID">
+                <option value="">--Select MWS_ID--</option>
+            </select>
+
+            <button id="goBtn" class="button" onclick="activateButtons()">Go</button>
+        </div>
+
+
+        <div>
+            <button id="baseLayersBtn" class="button" onclick="handleButtonClick('baseLayersBtn', 'basePanel')">Base Layers</button>
+            <button id="proposalBtn" class="button" onclick="handleButtonClick('proposalBtn', 'proposalPanel')">Proposal</button>
+            <button id="mwsInfoBtn" class="button" onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS Info</button>
+            <button id="climateLayerBtn" class="button" onclick="handleButtonClick('climateLayerBtn', 'climPanel')">Climate Layer</button>
+            <button id="dataCatalogBtn" class="button" onclick="handleButtonClick('dataCatalogBtn', 'catalogPanel')">Data Catalog</button>
+			<button id="tableBtn" class="button" onclick="handleButtonClick('tableBtn', 'tablePanel')">Data Table</button>
+            <button id="statisticBtn" class="button" onclick="handleButtonClick('statisticBtn', 'statPanel')">Statistics</button>
+			<button id="attributeBtn" class="button" onclick="handleButtonClick('attributeBtn', 'attributePanel')">Attribute</button>
+			<button id="help-button" class="button">Help</button>
+        </div>
+    </header>
+	
+
+
+    <div id="map" class="map"></div>
+	
+
+	
+	
+    <footer>
+        <select id="baseLayerSelect" onchange="changeBaseLayer()">
+            <option value="osm">OpenStreetMap</option>
+            <option value="esri">ESRI Satellite View</option>
+            <option value="opentopo">OpenTopoMap</option>
+            <option value="custom">Custom URL</option>
+        </select>
+		<!-- Popup panel for coordinates 
+	
+		<div id="infoPopupPanel" style="position:absolute; display:none;"></div>-->
+			<div id="infoPopupPanel" style="display:none;"></div> 
+    </footer>
+
+    <!-- Side Panels 
+	<div>
+    <input type="text" id="metadataSearch" placeholder="Search metadata..." />
+    <button id="searchBtn" onclick="searchMetadata()">Search</button>
+</div>
+-->
+
+    <div id="basePanel" class="panel">Base Layers Content <button class="hide-btn" onclick="hidePanel('basePanel')">Close</button></div>
+ <div id="proposalPanel" class="panel">
+    Proposal Content
+    <button class="hide-btn" onclick="hidePanel('proposalPanel')">Close</button>
+    <button id="showAllButton" class="show-all-btn">Show All</button>
+</div>
+
+    <div id="infoPanel" class="panel">MWS Info Content <button class="hide-btn" onclick="hidePanel('infoPanel')">Close</button></div>
+    <div id="climPanel" class="panel">Climate Layer Content <button class="hide-btn" onclick="hidePanel('climPanel')">Close</button></div>
+    <div id="attributePanel" class="panel">Climate Layer Content <button class="hide-btn" onclick="hidePanel('attributePanel')">Close</button></div>
+	<div id="tablePanel" class="panel">Data Table <button class="hide-btn" onclick="hidePanel('tablePanel')">Close</button>		
+
+</div>	
+    <div id="catalogPanel" class="panel">Data Catalog Content <button class="hide-btn" onclick="hidePanel('catalogPanel')">Close</button>
+
+
+	<table id="csvTable">
+    <thead>
+        <tr>
+            <th><select id="filterID"><option value="">All IDs</option></select></th>
+            <th><select id="filterDatabase"><option value="">All Databases</option></select></th>
+            <th><select id="filterLayer"><option value="">All Layers</option></select></th>
+            <th><select id="filterProvider"><option value="">All Data Providers</option></select></th>
+
+        </tr>
+        <tr>
+            <th>ID</th>
+            <th>Database</th>
+            <th>Layer</th>
+            <th>Data provider</th>
+            <th>Download</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+	</div>
+    <div id="statPanel" class="panel"> 
+        <div>
+            <div id="lulcstatPanel"  class="tab" onclick="selectTab('lulc')">LULC</div>
+            <div id="hazardstatPanel"class="tab" onclick="selectTab('hazard')">Hazard</div>
+            <div id="demostatPanel" class="tab" onclick="selectTab('demography')">Demography</div>
+            <div id="adminstatPanel" class="tab" onclick="selectTab('admin')">Admin</div>
+            <div id="soilstatPanel"class="tab" onclick="selectTab('soil')">Soil</div>
+			<button class="hide-btn" onclick="hidePanel('statPanel')">Close</button>
+		
+		<canvas id="areaPieChart"></canvas>
+        <button id="downloadButton">Download CSV</button>
+        <button id="downloadChartButton">Download Chart as Image</button>
+		
+		
+        </div>
+
+
+
+		<div id="tablePanel" class="panel">Data Table <button class="hide-btn" onclick="hidePanel('tablePanel')">Close</button>		
+
+<div id="statContent"></div>
+
+    <!-- <div id="infoPopupPanel" class="panel"></div> -->
+    
+
+
+
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+	<!-- 
+    <div class="layer-control">
+        <h4>Toggle Layers</h4>
+        <label><input type="checkbox" id="toggleAgroeco" checked> Agroeco Layer</label><br>
+        <label><input type="checkbox" id="toggleLuppd" checked> LUPPD Layer</label><br>
+        <label><input type="checkbox" id="toggleAnotherLayer" checked> Another Layer</label><br>
+		<label><input type="checkbox" id="toggleBoundaryLayer" checked>> Boundaryher Layer</label>
+    </div>	
+	-->
+
+    <script>
+        const map = L.map('map').setView([7.8731, 80.7718], 8); // Centered on Sri Lanka
+
+        // Base layers
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        const esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+        const openTopoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
+        const customLayer = L.tileLayer('https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Farming/MapServer', { maxZoom: 19 });
+
+        let activePanel = null;
+
+        // Activate buttons on 'Go' click
+        function activateButtons() {
+            const dsdValue = document.getElementById('selectDSD').value;
+            const mwsIdValue = document.getElementById('selectMWSID').value;
+
+            if (dsdValue && mwsIdValue) {
+                document.querySelectorAll('header .button').forEach(button => {
+                    if (button.id !== 'goBtn') {
+                        button.classList.remove('disabled');
+                    }
+                });
+            } else {
+                document.querySelectorAll('header .button').forEach(button => {
+                    button.classList.add('disabled');
+                });
+            }
+        }
+
+
+
+        // Handle button click
+        function handleButtonClick(buttonId, panelId) {
+            if (activePanel) {
+                hidePanel(activePanel.id);
+            }
+
+            const panel = document.getElementById(panelId);
+            panel.style.display = 'block';
+            activePanel = panel;
+            document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
+            document.getElementById(buttonId).classList.add('active');
+        }
+
+        // Hide panel function
+        function hidePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.style.display = 'none';
+            activePanel = null; // Clear the active panel
+            document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
+        }
+        // Tab selection in statistics panel
+        function selectTab(tabName) {
+            const statContent = document.getElementById('statContent');
+            statContent.innerHTML = `<p>Data for ${tabName}</p>`;
+            document.querySelectorAll('#statPanel .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+		
+        // Map click event to show popup with coordinates
+        map.on('click', function (e) {
+            const infoPopup = document.getElementById('infoPopupPanel');
+            infoPopup.style.left = `${e.layerX}px`;
+            infoPopup.style.top = `${e.layerY}px`;
+            infoPopup.style.display = 'block';
+            infoPopup.innerHTML = `Coordinates: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} `;
+ 
+
+ });
+
+
+
+        // Change base layer function
+        function changeBaseLayer() {
+            const baseLayerSelect = document.getElementById('baseLayerSelect');
+            const selectedLayer = baseLayerSelect.value;
+
+            // Remove all layers
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.TileLayer) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Add selected layer
+            switch (selectedLayer) {
+                case 'osm':
+                    osmLayer.addTo(map);
+                    break;
+                case 'esri':
+                    esriLayer.addTo(map);
+                    break;
+                case 'opentopo':
+                    openTopoLayer.addTo(map);
+                    break;
+                case 'custom':
+                    customLayer.addTo(map);
+                    break;
+            }
+        }
+		
+    </script>
+	
+
+			<!-- 
+						<script src="baselayerPop.js" > </script>
+
+			<script src="baselayer.js"></script>		
+			<script src="proposal.js"></script>	
+	
+			<script src="clim.js"></script>				
+
+
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>		
+			-->	
+	
+
+
+
+	
+			<script src="all5m1_v3_photo_legend_highlight.js" defer> </script>
+			<script src="proposal_all7a_dbtree.js"></script>	
+			<script src="table4.js" ></script>	
+			
+
+			<!-- Panel to display the table -->
+<!-- 
+			<script src="all4m2.js" > </script>
+			<script src="all3m2.js" > </script>
+			<script src="infoPanel.js"></script>			
+ -->			
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> 
+			<script src="infoPanelxlsx4.js"></script>				
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include Turf.js for area calculation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turf/6.5.0/turf.min.js"></script>
+
+			<script src="paichart13.js"></script>
+			<script src="paichart_gnd13.js"></script>					
+			<script src="paichart_pop13.js"></script>	
+			<script src="paichart_soil13.js"></script>				
+			<script src="paichart_risk13.js"></script>	
+
+
+
+						<!-- 
+			<script src="luppd.js"></script>			
+			-->	
+						<script src="scale.js"></script>
+<!-- 					<div id="scale-bar">Scale: 0 m</div> Scale bar container -->
+    <!-- Help Button -->
+
+
+	    <script src="readmetext.js"></script>
+		<script src="navigate.js"></script>
+
+		
+</body>
+</html>
