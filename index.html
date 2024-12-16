@@ -290,7 +290,7 @@
             background-color: #45a049;
         }
 
-        #layerInputContainer { margin: 10px; }
+
 
 		/* Style for mobile responsiveness */
         @media (max-width: 600px) {
@@ -369,10 +369,7 @@
 			<button id="help-button" class="button">Help</button>
         </div>
     </header>
-    <div id="layerInputContainer">
-        <input type="text" id="layerUrl" placeholder="Enter layer URL" style="width: 300px;" />
-        <button onclick="addLayerNSDI()">Add MWS Layer</button>
-    </div>	
+	
 
 
     <div id="map" class="map"></div>
@@ -402,7 +399,6 @@
 </div>
 -->
 
-	
     <div id="basePanel" class="panel">Base Layers Content <button class="hide-btn" onclick="hidePanel('basePanel')">Close</button></div>
  <div id="proposalPanel" class="panel">
     Proposal Content
@@ -488,79 +484,7 @@
         const openTopoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
         const customLayer = L.tileLayer('https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Farming/MapServer', { maxZoom: 19 });
 
-        
-        // Create an object to store the overlay layers for the control
-        const overlayMapsNSDI = {};
-
-        // Define the SLNSDI layers you want to add
-        const layerConfigs = [
-            { id: 'Economy', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Economy/MapServer', name: 'Economy Layer' },
-            { id: 'Climate_Meteorology', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Climate_Meteorology/MapServer', name: 'Climate & Meteorology Layer' },
-            { id: 'Farming', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Farming/MapServer', name: 'Farming Layer' },
-            { id: 'Inland_Waters', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Inland_Waters/MapServer', name: 'Inland Waters Layer' },
-            { id: 'Land_Use', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Land_Use/MapServer', name: 'Land Use Layer' },
-            { id: 'Transport', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Transport/MapServer', name: 'Transport Layer' },
-            { id: 'Boundary', url: 'https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Boundary/MapServer', name: 'Boundary Layer' }
-        ];
-
-        // Iterate over each layer config to create a dynamic map layer
-        layerConfigs.forEach(layerConfig => {
-            const dynamicLayer = L.esri.dynamicMapLayer({
-                url: layerConfig.url,
-                useCors: false // Set this to true if CORS is enabled
-            });
-
-            // Add the layer to the overlay control object with a descriptive name
-            overlayMapsNSDI[layerConfig.name] = dynamicLayer.addTo(map);
-        });
-
-        // Add layer control to toggle layers on and off
-        L.control.layers(null, overlayMapsNSDI).addTo(map);
-
-        // Function to add custom MWS layer based on user input
-// Function to add custom MWS layer based on user input
-        // Function to add custom layers based on user input
-        function addLayerNSDI() {
-            const layerUrl = document.getElementById('layerUrl').value.trim(); // Get user input
-
-            if (layerUrl) {
-                // Fetch service metadata to validate and fetch layer details
-                fetch(layerUrl + '?f=pjson')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.layers) {
-                            const availableLayers = data.layers.map(layer => layer.name).join(', ');
-                            alert("Available layers: " + availableLayers);
-
-                            // Add the custom layer
-                            const customLayer = L.esri.dynamicMapLayer({
-                                url: layerUrl,
-                                useCors: false
-                            });
-
-                            customLayer.addTo(map);
-
-                            // Update layer control
-                            const layerName = "Custom Layer (" + layerUrl + ")";
-                            overlayMapsNSDI[layerName] = customLayer;
-                            L.control.layers(null, overlayMapsNSDI).addTo(map);
-                        } else {
-                            alert("No layers found or the service is inaccessible.");
-                        }
-                    })
-                    .catch(error => {
-                        alert("Failed to fetch service metadata. Please check the URL.");
-                        console.error(error);
-                    });
-            } else {
-                alert("Please enter a valid layer URL.");
-            }
-        }
-		
-		
-		
-		
-		let activePanel = null;
+        let activePanel = null;
 
         // Activate buttons on 'Go' click
         function activateButtons() {
