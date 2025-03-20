@@ -32,16 +32,21 @@ fetch(geojsonURL1)
             },
             onEachFeature: function (feature, layer) {
                 // Add MWS_ID to the dropdown
-                var mwsId = feature.properties.MWS_ID; // Replace with the correct property name for MWS_ID
-                if (mwsId && !Array.from(mwsIdSelect.options).some(option => option.value === mwsId)) {
-                    var option = document.createElement('option');
-                    option.value = mwsId;
-                    option.text = mwsId;
-                    mwsIdSelect.appendChild(option);
+            // Add MWS_ID to the dropdown
+            var mwsId = feature.properties.MWS_ID; // Replace with the correct property name for MWS_ID
+            var dsdName = feature.properties.MainDSD; // Replace with the correct property name for dsd_name
+			var distName = feature.properties.District; // Replace with the correct property name for dsd_name
+            if (mwsId && !Array.from(mwsIdSelect.options).some(option => option.value === mwsId)) {
+                var option = document.createElement('option');
+                option.value = mwsId;
+                option.text = mwsId;
+                mwsIdSelect.appendChild(option);
                 }
 
                 // Add popup for MWS_ID
-                layer.bindPopup(mwsId);
+                //layer.bindPopup(mwsId);
+            var popupContent = "MWS ID: " + mwsId + "<br>DSD: " + dsdName+ "<br>District: " + distName; // Customize the content as needed
+            layer.bindPopup(popupContent);				
             }
         }).addTo(map);
 
