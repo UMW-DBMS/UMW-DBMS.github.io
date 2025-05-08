@@ -1025,18 +1025,23 @@ const styleOptions = {
 "Tea": { color: "rgb(122, 245, 202)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
 "Perennials": { color: "rgb(255, 211, 127)", fillOpacity: 0.6, weight: 0.1 },         // Light yellow for Perennials
 "Paddy": { color: "rgb(85, 255, 0)", fillOpacity: 0.6, weight: 0.1 },                // Bright green for Paddy
-"Seasonal crop": { color: "rgb(238, 241, 160)", fillOpacity: 0.6, weight: 0.1 },      // Pale yellow for Seasonal crop
-"Farms/other": { color: "rgb(197, 0, 255)", fillOpacity: 0.6, weight: 0.1 },          // Purple for Farms/other
+"Seasonal crops": { color: "rgb(238, 241, 160)", fillOpacity: 0.6, weight: 0.1 },      // Pale yellow for Seasonal crops
+"Farms": { color: "rgb(197, 0, 255)", fillOpacity: 0.6, weight: 0.1 },          // Purple for Farms
+"Chena": { color: "rgb(227, 158, 0)", fillOpacity: 0.6, weight: 0.1 },           // Tangerine for Chena
 "Home garden": { color: "rgb(255, 255, 190)", fillOpacity: 0.6, weight: 0.1 },        // Light yellow for Home garden
-"Forest": { color: "rgb(38, 115, 0)", fillOpacity: 0.6, weight: 0.1 },               // Dark green for Forest
-"Forest Plantation": { color: "rgb(137, 205, 102)", fillOpacity: 0.6, weight: 0.1 }, // Light green for Forest Plantation
-"Grassland": { color: "rgb(0, 0, 0)", fillOpacity: 0.6, weight: 0.1 },               // Black for Grassland
+"Forest lands": { color: "rgb(38, 115, 0)", fillOpacity: 0.6, weight: 0.1 },               // Dark green for Forest
+"Forest plantation": { color: "rgb(137, 205, 102)", fillOpacity: 0.6, weight: 0.1 }, // Light green for Forest Plantation
+"Grass land": { color: "rgb(211, 255, 190)", fillOpacity: 0.6, weight: 0.1 },               // Black pattern in greenish background for Grassland
 "Scrub land": { color: "rgb(0, 168, 132)", fillOpacity: 0.6, weight: 0.1 },           // Greenish teal for Scrub land
-"Water Bodies": { color: "rgb(151, 219, 242)", fillOpacity: 0.6, weight: 0.1 },       // Light blue for Water Bodies
-"Urban area": { color: "rgb(255, 0, 0)", fillOpacity: 0.6, weight: 0.1 },             // Red for Urban area
-"Rocks": { color: "rgb(0, 0, 0)", fillOpacity: 0.6, weight: 0.1 },                    // Black for Rocks
-"Wetland": { color: "rgb(0, 112, 255)", fillOpacity: 0.6, weight: 0.1 },              // Blue for Wetland
-"Bareland": { color: "rgb(204, 204, 204)", fillOpacity: 0.6, weight: 0.1 },           // Light gray for Barelands
+"Bare land": { color: "rgb(215, 176, 158)", fillOpacity: 0.6, weight: 0.1 },           //  for Barelands
+"Builtup land": { color: "rgb(255, 127, 127)", fillOpacity: 0.6, weight: 0.1 },             // Red for Builtup area
+"Wetland": { color: "rgb(0, 112, 255)", fillOpacity: 0.6, weight: 0.1 },              // Blue pattern in white background for Wetland
+"Water bodies": { color: "rgb(151, 219, 242)", fillOpacity: 0.6, weight: 0.1 },       // Light blue for Water Bodies
+"Rocky area": { color: "rgb(0, 0, 0)", fillOpacity: 0.6, weight: 0.1 },                    // Black for Rocky area
+"Defense" : { color: "rgb(78,78,78)", fillOpacity: 0.6, weight: 0.1 },           // Black line pattern in white background for Defense
+"Miscellaneous" : { color: "rgb(225, 225, 225)", fillOpacity: 0.6, weight: 0.1 },           // White for Miscellaneous
+"Mining Sites" : { color: "rgb(255, 245, 0)", fillOpacity: 0.6, weight: 0.1 },           // Yellow for Mining sites
+"Waste Management" : { color: "rgb(204, 204, 204)", fillOpacity: 0.6, weight: 0.1 },           // Light gray for Waste Management
 	
 	
 "Low": { color: "#FFFFBE", fillOpacity: 0.6, weight: 0 },               // Yellow for low
@@ -1291,17 +1296,20 @@ if (layerName === 'Rainfall') {
 }
 else if (layerName === 'Land cover') {
         categories = [
-            'Tea', 'Perennials', 'Paddy', 'Seasonal crop', 'Farms/other', 
-            'Home garden', 'Forest', 'Forest Plantation', 'Grassland', 
-            'Scrub land', 'Water Bodies', 'Urban area', 'Rocks', 
-            'Wetland', 'Bareland'
+            'Tea', 'Perennials', 'Paddy', 'Seasonal crops', 'Farms', 'Chena', 
+            'Home garden', 'Forest lands', 'Forest plantation', 'Grass land', 
+            'Scrub land', 'Bare land', 'Builtup land','Wetland', 'Water bodies', 
+            'Rocky area', 'Defense', 'Miscellaneous', 'Mining Sites', 
+            'Waste Management'
         ];
         colors = [
-            "rgb(122, 245, 202)", "rgb(255, 211, 127)", "rgb(85, 255, 0)", 
-            "rgb(238, 241, 160)", "rgb(197, 0, 255)", "rgb(255, 255, 190)", 
-            "rgb(38, 115, 0)", "rgb(137, 205, 102)", "rgb(0, 0, 0)", 
-            "rgb(0, 168, 132)", "rgb(151, 219, 242)", "rgb(255, 0, 0)", 
-            "rgb(0, 0, 0)", "rgb(0, 112, 255)", "rgb(204, 204, 204)"
+            "rgb(163, 255, 115)", "rgb(255, 211, 127)", "rgb(85, 255, 0)", 
+            "rgb(238, 241, 160)", "rgb(197, 0, 255)", "rgb(227, 158, 0)",  
+            "rgb(255, 255, 190)", "rgb(38, 115, 0)", "rgb(137, 205, 102)", 
+            "rgb(211, 255, 190)", "rgb(0, 168, 132)", "rgb(215, 176, 158)", 
+            "rgb(255, 127, 127)", "rgb(0, 112, 255)", "rgb(151, 219, 242)", 
+            "rgb(0, 0, 0)", "rgb(78,78,78)", "rgb(225, 225, 225)", 
+            "rgb(255, 245, 0)", "rgb(204, 204, 204)"
         ];
     } else if (layerName === 'Conservation forest') {
         categories = ['Conservation forest'];
