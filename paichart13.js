@@ -1,22 +1,25 @@
 // Define a color map for unique classes
 var colorMap = {
-    "Forest": "#006400",
-    "Forest Plantation": "#228B22",
-    "AG": "#3CB371",
-    "urban": "#808080",
-    "Paddy": "#FFD700",
-    "Tea": "#8B4513",
-    "Perennials": "#556B2F",
-    "Seasonal crop": "#32CD32",
-    "Bareland": "#D2B48C",
-    "Farms/other": "#B8860B",
-    "Home garden": "#66CDAA",
-    "Urban area": "#696969",
-    "Grassland": "#ADFF2F",
-    "Scrub land": "#8B0000",
-    "Rocks": "#A9A9A9",
-    "Water Bodies": "#4682B4",
-    "Wetland": "#00CED1"
+    "Tea": { color: "rgb(122, 245, 202)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
+    "Perennials": { color: "rgb(255, 211, 127)", fillOpacity: 0.6, weight: 0.1 },         // Light yellow for Perennials
+    "Paddy": { color: "rgb(85, 255, 0)", fillOpacity: 0.6, weight: 0.1 },                // Bright green for Paddy
+    "Seasonal crops": { color: "rgb(238, 241, 160)", fillOpacity: 0.6, weight: 0.1 },      // Pale yellow for Seasonal crops
+    "Farms": { color: "rgb(197, 0, 255)", fillOpacity: 0.6, weight: 0.1 },          // Purple for Farms
+    "Chena": { color: "rgb(227, 158, 0)", fillOpacity: 0.6, weight: 0.1 },           // Tangerine for Chena
+    "Home garden": { color: "rgb(255, 255, 190)", fillOpacity: 0.6, weight: 0.1 },        // Light yellow for Home garden
+    "Forest lands": { color: "rgb(38, 115, 0)", fillOpacity: 0.6, weight: 0.1 },               // Dark green for Forest
+    "Forest plantation": { color: "rgb(137, 205, 102)", fillOpacity: 0.6, weight: 0.1 }, // Light green for Forest Plantation
+    "Grass land": { color: "rgb(211, 255, 190)", fillOpacity: 0.6, weight: 0.1 },               // Black pattern in greenish background for Grassland
+    "Scrub land": { color: "rgb(0, 168, 132)", fillOpacity: 0.6, weight: 0.1 },           // Greenish teal for Scrub land
+    "Bare land": { color: "rgb(215, 176, 158)", fillOpacity: 0.6, weight: 0.1 },           //  for Barelands
+    "Builtup land": { color: "rgb(255, 127, 127)", fillOpacity: 0.6, weight: 0.1 },             // Red for Builtup area
+    "Wetland": { color: "rgb(0, 112, 255)", fillOpacity: 0.6, weight: 0.1 },              // Blue pattern in white background for Wetland
+    "Water bodies": { color: "rgb(151, 219, 242)", fillOpacity: 0.6, weight: 0.1 },       // Light blue for Water Bodies
+    "Rocky area": { color: "rgb(0, 0, 0)", fillOpacity: 0.6, weight: 0.1 },                    // Black for Rocky area
+    "Defense" : { color: "rgb(78,78,78)", fillOpacity: 0.6, weight: 0.1 },           // Black line pattern in white background for Defense
+    "Miscellaneous" : { color: "rgb(225, 225, 225)", fillOpacity: 0.6, weight: 0.1 },           // White for Miscellaneous
+    "Mining Sites" : { color: "rgb(255, 245, 0)", fillOpacity: 0.6, weight: 0.1 },           // Yellow for Mining sites
+    "Waste Management" : { color: "rgb(204, 204, 204)", fillOpacity: 0.6, weight: 0.1 }
 };
 
 // Initialize an object to hold total areas for each class
