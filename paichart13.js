@@ -1,6 +1,6 @@
 // Define a color map for unique classes
 var colorMap = {
-    "Tea": { color: "rgb(122, 245, 202)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
+    "Tea": { color: "rgb(163, 255, 115)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
     "Perennials": { color: "rgb(255, 211, 127)", fillOpacity: 0.6, weight: 0.1 },         // Light yellow for Perennials
     "Paddy": { color: "rgb(85, 255, 0)", fillOpacity: 0.6, weight: 0.1 },                // Bright green for Paddy
     "Seasonal crops": { color: "rgb(238, 241, 160)", fillOpacity: 0.6, weight: 0.1 },      // Pale yellow for Seasonal crops
