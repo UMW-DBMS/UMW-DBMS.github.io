@@ -1022,7 +1022,7 @@ const styleOptions = {
     // Land cover-specific styles
 
 	
-"Tea": { color: "rgb(122, 245, 202)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
+"Tea": { color: "rgb(163, 255, 115)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
 "Perennials": { color: "rgb(255, 211, 127)", fillOpacity: 0.6, weight: 0.1 },         // Light yellow for Perennials
 "Paddy": { color: "rgb(85, 255, 0)", fillOpacity: 0.6, weight: 0.1 },                // Bright green for Paddy
 "Seasonal crops": { color: "rgb(238, 241, 160)", fillOpacity: 0.6, weight: 0.1 },      // Pale yellow for Seasonal crops
@@ -1303,7 +1303,7 @@ else if (layerName === 'Land cover') {
             'Waste Management'
         ];
         colors = [
-            "rgb(122, 245, 202)", "rgb(255, 211, 127)", "rgb(85, 255, 0)", 
+            "rgb(163, 255, 115)", "rgb(255, 211, 127)", "rgb(85, 255, 0)", 
             "rgb(238, 241, 160)", "rgb(197, 0, 255)", "rgb(227, 158, 0)",  
             "rgb(255, 255, 190)", "rgb(38, 115, 0)", "rgb(137, 205, 102)", 
             "rgb(211, 255, 190)", "rgb(0, 168, 132)", "rgb(215, 176, 158)", 
