@@ -1,20 +1,25 @@
 // Define a color map for unique classes
 var colorMap = {
-    "Tea": "#7AF5CA",
-    "Perennials": "#FFD37F",
-    "Paddy": "#55FF00",
-    "Seasonal crop": "#EEF1A0",
-    "Farms/other": "#C500FF",
-    "Home garden": "#FFFFBE",
-    "Forest": "#267300",
-    "Forest Plantation": "#89CD66",
-    "Grassland": "#000000",
-    "Scrub land": "#00A884",
-    "Water Bodies": "#97DBF2",
-    "Urban area": "#FF0000",
-    "Rocks": "#000000",
-    "Wetland": "#0070FF",
-    "Barelands": "#CCCCCC",
+  "Tea": "#A3FF73",              // Light green for Tea
+  "Perennials": "#FFD37F",       // Light yellow for Perennials
+  "Paddy": "#55FF00",            // Bright green for Paddy
+  "Seasonal crops": "#EEF1A0",   // Pale yellow for Seasonal crops
+  "Farms": "#C500FF",            // Purple for Farms
+  "Chena": "#E39E00",            // Tangerine for Chena
+  "Home garden": "#FFFFBE",      // Light yellow for Home garden
+  "Forest lands": "#267300",     // Dark green for Forest
+  "Forest plantation": "#89CD66",// Light green for Forest Plantation
+  "Grass land": "#D3FFBE",       // Greenish background for Grassland
+  "Scrub land": "#00A884",       // Greenish teal for Scrub land
+  "Bare land": "#D7B09E",        // for Barelands
+  "Builtup land": "#FF7F7F",     // Red for Builtup area
+  "Wetland": "#0070FF",          // Blue for Wetland
+  "Water bodies": "#97DBF2",     // Light blue for Water Bodies
+  "Rocky area": "#000000",       // Black for Rocky area
+  "Defense": "#4E4E4E",          // Grey for Defense
+  "Miscellaneous": "#E1E1E1",    // White for Miscellaneous
+  "Mining Sites": "#FFF500",     // Yellow for Mining sites
+  "Waste Management": "#CCCCCC", // Grey for Waste Management
   "Immature Brown Loams; steeply dissected, hilly and rolling terrain": "#A8A75B",
   "Red-Yellow Pdzolic soils with dark B horizon & RedYellow Podzolic soils with prominent A1 horizon; rolling terrain": "#A4F054",
   "Red-Yellow Podzolic soils & Mountain Regosols; mountainous terrain": "#E0B584",
