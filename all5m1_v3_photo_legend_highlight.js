@@ -595,7 +595,7 @@ style: function (feature) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
-                    } else if (layerName === 'Water Quality') {
+                    } else if (layerName === 'Water Quality -CEA') {
                         icon = L.divIcon({
                             className: 'water-quality-icon',
                             html: `
@@ -607,6 +607,30 @@ style: function (feature) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
+                    } else if (layerName === 'Water Quality -MASL') {
+                        icon = L.divIcon({
+                            className: 'water-quality-icon',
+                            html: `
+                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M50 10 C30 30, 30 50, 50 70 C70 50, 70 30, 50 10 Z" fill="#1C86EE"/>
+                                    <rect x="40" y="70" width="20" height="30" fill="#2E8B57"/>
+                                </svg>
+                            `,
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });
+                    } else if (layerName === 'Water Quality -NWSDB') {
+                        icon = L.divIcon({
+                            className: 'water-quality-icon',
+                            html: `
+                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M50 10 C30 30, 30 50, 50 70 C70 50, 70 30, 50 10 Z" fill="#4682B4"/>
+                                    <rect x="40" y="70" width="20" height="30" fill="#2E8B57"/>
+                                </svg>
+                            `,
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });						
                     } else if (layerName === 'Soil Conservation') {
                         icon = L.divIcon({
                             className: 'red-cross-icon',
