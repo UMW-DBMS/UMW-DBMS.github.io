@@ -76,7 +76,7 @@ function updateData50(selectMWSID) {
                 },
                 onEachFeature: function(feature, layer) {
                     var className = feature.properties.level;
-                    var area = feature.properties.Area_Ha;
+                    var area = feature.properties.Shape_Area;
                     //var Tarea = feature.features[0].properties.AREA;     
                     // Aggregate area by class
                     if (!areaTotals50[className]) {

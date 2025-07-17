@@ -265,7 +265,7 @@ const colorRanges = {
         { "range": "450.0 to 500", "color": "#265c56" },
         { "range": "500.0 to 683.86", "color": "#155f4a" }
     ],
-    "Monthly  Temporature - Max-01": [
+    "Monthly  Temperature - Max-01": [
         { "range": "11.12", "color": "#999bff" },
         { "range": "11.12 to 12", "color": "#99a5ff" },
         { "range": "12.0 to 13", "color": "#9cb3ff" },
@@ -570,7 +570,7 @@ style: function (feature) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
-                    } else if (layerName === 'Temporature') {
+                    } else if (layerName === 'Temperature') {
                         icon = L.divIcon({
                             className: 'temperature-icon',
                             html: `
@@ -745,7 +745,7 @@ icon = L.divIcon({
                 // Define actions for each feature (e.g., polygons, lines)
    onEachFeature: function (feature, layer) {
         layer.on('click', function () {
-            updateInfoPanel(feature.properties, 'Layer Name', layer);
+            updateInfoPanel(feature.properties, layerName, layer);
 			highlightFeature(layer);
 			
         });
@@ -1171,7 +1171,7 @@ function loadGeoJsonLayer(url, layerName) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
-                    } else if (layerName === 'Temporature') {
+                    } else if (layerName === 'Temperature') {
                         icon = L.divIcon({
                             className: 'temperature-icon',
                             html: `
@@ -1267,11 +1267,11 @@ function loadGeoJsonLayer(url, layerName) {
                 },
    onEachFeature: function (feature, layer) {
         layer.on('click', function () {
-            updateInfoPanel(feature.properties, 'Layer Name', layer);
+            updateInfoPanel(feature.properties, layerName, layer);
 			highlightFeature(layer);
         });
     }
-            });
+            }).addTo(map);
 
             // Store and add the layer to the map
             geoJsonLayers[layerName] = geoJsonLayer;
@@ -1307,7 +1307,7 @@ if (layerName === 'Rainfall') {
             <span>Rainfall</span>
         </div>
     `;
-} else if (layerName === 'Temporature') {
+} else if (layerName === 'Temperature') {
     // Custom SVG symbol for the legend
     div.innerHTML += `
         <div style="display: flex; align-items: center; margin-bottom: 5px;">
@@ -1457,8 +1457,23 @@ function removeLayerAndLegend(layerName) {
 // Function to update the attribute panel with properties of the clicked feature
 // Function to update the attribute panel with properties of the clicked feature
 function updateInfoPanel(properties, layerName, featureLayer) {
-    const attributePanel = document.getElementById('attributePanel');
-    attributePanel.innerHTML = ''; // Clear previous content
+    //const attributePanel = document.getElementById('attributePanel');
+    //attributePanel.innerHTML = ''; // Clear previous content
+	const attributePanel = document.getElementById('attributePanel');
+	attributePanel.style.display = 'block';  // <-- Show panel automatically
+	attributePanel.innerHTML = ''; // Clear previous content
+const title = document.createElement('h4');
+title.textContent = 'Feature Info';
+attributePanel.appendChild(title);
+
+    const closeButton = document.createElement('button');
+    closeButton.classList.add('hide-btn');
+    closeButton.textContent = 'Close';
+    closeButton.onclick = function () {
+        hidePanel('attributePanel');
+    };
+
+	attributePanel.appendChild(closeButton);  // ✅ Append the close button here
 
     // Create a list to display properties
     const list = document.createElement('ul');
