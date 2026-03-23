@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Application Walkthrough</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    margin:0;
+    background:#f4f6f9;
+}
+
+header{
+    background:#2c3e50;
+    color:white;
+    padding:15px 30px;
+}
+
+.container{
+    display:flex;
+}
+
+.sidebar{
+    width:250px;
+    min-width:220px;
+    background:#e6f7e6;
+    padding:20px;
+    border-right:1px solid #ddd;
+    box-shadow: 2px 0 8px rgba(150, 235, 147, 0.04);
+    height:100vh;
+    position:sticky;
+    top:0;
+    overflow-y:auto;
+}
+
+.sidebar h3{
+    margin:0 0 12px;
+    font-size:16px;
+    text-transform:uppercase;
+    letter-spacing:0.5px;
+    color:#2c3e50;
+}
+
+.sidebar a{
+    display:block;
+    padding:8px;
+    color:#333;
+    text-decoration:none;
+    border-radius:4px;
+}
+
+.sidebar a:hover{
+    background:#f0f0f0;
+}
+
+.content{
+    flex:1;
+    padding:40px;
+}
+
+.step{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:6px;
+    box-shadow:0 2px 5px rgba(0,0,0,0.05);
+}
+
+.step h3{
+    margin-top:0;
+    background:#d7ecff;
+    padding:6px 10px;
+    border-radius:4px;
+}
+
+.code{
+    background:#272822;
+    color:#f8f8f2;
+    padding:10px;
+    border-radius:4px;
+    overflow:auto;
+}
+
+.category-list{
+    font-size:0.9em;
+    list-style:disc;
+    padding-left:20px;
+    margin:8px 0 16px;
+}
+
+.category-list li{
+    margin:4px 0;
+}
+
+.step-image{
+    display:block;
+    max-width:100%;
+    height:auto;
+    width:40%;
+    float:right;
+    margin:0 0 12px 16px;
+    border:1px solid #e2e6ea;
+    border-radius:6px;
+}
+
+.step10-image{
+    width:20%;
+    max-width:200px;
+    height:auto;
+    float:right;
+    margin:0 0 8px 8px;
+}
+
+.step-image-small{
+    width:25%;
+    max-width:220px;
+}
+
+.heading-image{
+    width:25%;
+    max-width:220px;
+    height:auto;
+    margin-left:8px;
+    vertical-align:middle;
+}
+
+.heading-image-small{
+    width:18%;
+    max-width:160px;
+}
+
+.heading-image-tiny{
+    width:1.5%;
+    max-width:100px;
+}
+.heading-image-small{
+    width:25%;
+    max-width:50px;
+}
+.heading-image-large{
+    width:50%;
+    max-width:100px;
+}
+
+.image-modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.7);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:3000;
+}
+
+.image-modal.open{
+    display:flex;
+}
+
+.image-modal-content{
+    background:#fff;
+    border-radius:8px;
+    max-width:92vw;
+    max-height:92vh;
+    padding:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.image-modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+}
+
+.image-modal-actions{
+    display:flex;
+    gap:8px;
+}
+
+.image-modal-actions a,
+.image-modal-actions button{
+    font-size:12px;
+    padding:6px 10px;
+    border:1px solid #c8e6c9;
+    background:#f4fff5;
+    border-radius:6px;
+    cursor:pointer;
+    color:#2c3e50;
+    text-decoration:none;
+}
+
+.image-modal-actions button{
+    background:#fff;
+}
+
+.image-modal-body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    max-height:80vh;
+}
+
+.image-modal-body img{
+    max-width:100%;
+    max-height:80vh;
+    height:auto;
+}
+
+#imageModalDownload{
+    display:inline-block;
+}
+
+#imageModalTitle{
+    font-size:13px;
+    color:#2c3e50;
+    margin:0;
+}
+
+#imageModalClose{
+    border:1px solid #ccc;
+}
+
+#google_translate_element{
+    position:fixed;
+    top:-9999px;
+    left:-9999px;
+    z-index:-1;
+    opacity:0;
+    pointer-events:none;
+}
+
+.language-switcher{
+    position:fixed;
+    right:12px;
+    top:12px;
+    z-index:2001;
+    background:rgba(255,255,255,0.95);
+    border:1px solid #c8e6c9;
+    border-radius:6px;
+    padding:4px 6px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:#333;
+}
+
+.language-switcher select{
+    font-size:11px;
+    padding:3px 5px;
+    border:1px solid #a5d6a7;
+    border-radius:4px;
+    background:#fff;
+}
+
+.zoom-icons{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-left:8px;
+}
+
+.zoom-icon{
+    width:20px;
+    height:20px;
+    border:1px solid #c8e6c9;
+    border-radius:4px;
+    background:#f4fff5;
+    color:#2c3e50;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:14px;
+    line-height:1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top-bar">
+<div id="google_translate_element"></div>
+</div>
+
+<header>
+<h1>UMW Watershed Management Plan Dashboard Guide</h1>
+<p>Step-by-step guide for using the application</p>
+</header>
+
+<div class="language-switcher">
+<label for="languageSelect">Language</label>
+<select id="languageSelect" aria-label="Select language">
+<option value="en">English</option>
+<option value="si">Sinhala</option>
+<option value="ta">Tamil</option>
+</select>
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+<h3>Sections</h3>
+<a href="#intro">Introduction</a>
+<a href="#step1">Step 1:</a>
+<a href="#step2">Base Layers</a>
+<a href="#step3">Proposal</a>
+<a href="#step4">Climate Layer</a>
+<a href="#step5">Station Data</a>
+<a href="#step6">Data Catalog</a>
+<a href="#step7">Data Table</a>
+<a href="#step8">Statistics</a>
+<a href="#step9">Print</a>
+<a href="#step10">Measure</a>
+<a href="#step11">Login</a>
+</div>
+
+<div class="content">
+
+<section id="intro" class="step">
+<h2>Introduction</h2>
+<p>
+This guide explains how to use the system to explore data and maps in the dashboard.</p>
+<p>Follow the steps below to navigate through the application.
+</p><p>Let’s dive in!.🚀</p>
+<h4>Zoom In and Zoom Out <img class="heading-image heading-image-tiny" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Zoom.PNG" alt="Zoom"></h4>
+<p>Use the map zoom controls to adjust the map view.</p>
+<ul class="category-list">
+    <li>Click the "+" button to zoom in </li>
+    <li>Click the "−" button to zoom out </li>
+</ul>
+<h4>Finding Your Data 🔍 <img class="heading-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Select.PNG" alt="Select District, DSD and MWS_ID"></h4>
+<p>To see specific information, follow this quick flow:
+
+<p><b>Select Location:</b> Pick your District (Badulla, Kandy, or Nuwara Eliya) and your DSD.</p>
+
+<p><b>Select a Watershed:</b> Choose your MWS_ID from the list.</p>
+
+<h4>Don’t know the IDs?</h4>
+<p><i>Just click any spot on the map! A popup will instantly tell you the District, DSD, and MWS_ID for that exact location.</i></p>
+<p>After selecting the District and DSD, choose the MWS_ID (Mini Watershed ID) from the dropdown list.</p>
+
+<h4>Change the Language <img class="heading-image heading-image-large" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Language.PNG" alt="Change Language"></h4>
+<p>🌐 Language Note: You can switch the entire dashboard between English, Sinhala, or Tamil at any time using the language selector!</p>
+
+<h4>Change the Base Map<img class="heading-image heading-image-large" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Base.PNG" alt="Change Base Map"></h4>
+Click on the “OpenStreetMap” option in the bottom center ribbon to change the base map style.
+
+<h4>Print the Map<img class="heading-image heading-image-small" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/PrintBtn.PNG" alt="Print Map"></h4>
+<p>Click the Print button to generate and print the map with its elements.</p>
+
+<h4>Learn About Dashboard Functions</h4>
+<p>Click the elements listed in the left-side section bar to learn how each feature works in the dashboard.</p>
+</section>
+
+<section id="step1" class="step">
+<h3>How to Access the Dashboard</h3>
+<p>
+<h4>Select the District:</h4>
+<p>Choose a district from the dropdown list: Badulla, Kandy, or Nuwara Eliya.</p>
+
+<h4>Select the DSD:</h4>
+<p>After selecting the district, choose the relevant DSD (Divisional Secretariat Division) from the available options.</p>
+
+<h4>Select the MWS_ID:</h4>
+<p>If you already know the MWS_ID, select it from the dropdown list.</p>
+<p>If you do not know the MWS_ID, simply click on the map. A popup will appear displaying the MWS_ID along with the corresponding District and DSD information.</p>
+
+<h4>Proceed:</h4>
+<p>After completing all selections, click the “Go” button to load the data.</p>
+</p>
+
+</section>
+
+<section id="step2" class="step">
+<h3>Base Layers</h3>
+<p>Click on the Base Layer button available on the map interface.</p>
+<img class="step-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Base%20Layers.PNG" alt="Base Layers panel">
+
+<h4>Choose the Required Layers</h4>
+<p>In the Base Layer panel, you will see several thematic categories such as:</p>
+
+<ul class="category-list">
+    <li>Administration</li>
+    <li>Land Cover</li>
+    <li>Reservation</li>
+    <li>Topography</li>
+    <li>Soil</li>
+    <li>Risk and Hazard</li>
+    <li>Location</li>
+    <li>Demography</li>
+    <li>Hydrology</li>
+    <li>Water Features</li>
+    <li>Transportation</li>
+</ul>
+
+<h4>Enable Layers</h4>
+<p>Tick the checkbox next to the layer(s) you want to view.</p>
+
+<h4>View the Map</h4>
+<p>The selected layers will appear on the map, displaying the relevant information for the selected Mini Watershed (MWS_ID).</p>
+</section>
+</section>
+
+<section id="step3" class="step">
+<h3>How to Access Proposals</h3>
+<p>
+<h4>Click the Proposal Button</h4>
+<p>After selecting the required Mini Watershed <b>(MWS_ID)</b>, click the Proposal button to display the proposals related to that mini watershed.</p>
+<h4>View Proposal Locations</h4>
+<p>The proposals will appear in the layer panel on the left side.</p>
+<p>To display the proposal locations on the map, tick the relevant checkboxes in the layer panel. The selected proposals will then be shown within the chosen Mini Watershed.</p>
+<ul class="category-list">
+<li>Soil and Water Conservation</li>
+<li>Water Resource Management</li>
+<li>Water Quality Improvement</li>
+<li>Minor Tank Restoration</li>
+</ul>
+<h4>View Detailed Information</h4>
+<p>Click on any proposal point on the map to open a popup displaying detailed information about the selected proposal.</p>
+</p>
+
+
+</section>
+
+<section id="step4" class="step">
+<h3>How to Use the Climate Layer Panel🌡️</h3>
+<p>
+Click on the Climate Layer button to access climate-related data layers for the selected project area.</p>
+<h4>Available Climate Data</h4>
+<p>The panel provides the following monthly datasets:</p>
+<ul class="category-list">
+    <li>Rainfall</li>
+    <li>Maximum Temperature</li>
+    <li>Minimum Temperature</li>
+    <li>Evaporation</li>
+    <li>NDVI (Normalized Difference Vegetation Index)</li>
+</ul>
+<h4>Display Data on the Map</h4>
+<p>Tick the checkbox next to the desired dataset(s) to display the corresponding data layers on the map for the selected project area.</p>
+<h4>View Station Data on the Map</h4>
+<p>Click any point to view more information about the selected station.</p>
+</section>
+<section id="step5" class="step">
+<h3>How to View Station Data</h3>
+<img class="step-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Station.PNG" alt="Station data panel">
+
+<p>Click the Station Data button to access the available station information.</p>
+<h4>View Station Data Layers</h4>
+<p>After clicking the button, the layer panel on the left side will display different types of station data, including:</p>
+<ul class="category-list">
+    <li>Water Quality</li>
+    <li>Rainfall</li>
+    <li>Temperature</li>
+    <li>Evaporation</li>
+</ul>
+
+<h4>Display Stations on the Map</h4>
+<p>Tick the checkboxes next to the required station data layers in the layer panel to display the corresponding stations on the map.</p>
+<h4>View Station Information</h4>
+<p>Click on any station point on the map to open the detailed information about the selected station.</p>
+
+</section>
+
+<section id="step6" class="step">
+<h3>How to Access the Data Catalog</h3>
+<p>Click the <b>Data Catalog</b> Button and then will display the available datasets related to the selected Mini Watershed.</p>
+<h4>Download Data</h4>
+<p>From the catalog, you can select the required data files (geojson/shp) for the chosen Mini Watershed (MWS_ID) and download from the Download button.</p>
+<p>Alternatively, you can click the <b>'Open MWS Data Catalog' </b>button at the bottom right, Enter the <b>MWS_ID</b>, and download the data you need. </p>
+</section>
+<section id="step7" class="step">
+<h3>How to View Data in a Table Format</h3>
+<p>Click the <b>Data Table</b> button to access the tabular data view for the selected Mini Watershed.</p>
+<p>You can download the table in CSV format.</p>
+</section>
+<section id="step8" class="step">
+<h3>How to View Statistics</h3>
+<p>Click the <b></b>Statistics</b> button to access statistical information related to the selected Mini Watershed.</p>
+
+<h4>Select a Category for View Graphs</h4>
+<p></p>Choose one of the following categories to view its statistics for the selected Mini Watershed (MWS_ID):</p>
+
+<ul class="category-list">
+    <li>LULC (Land Use/Land Cover)</li>
+    <li>Hazard</li>
+    <li>Demography</li>
+    <li>Administration</li>
+    <li>Soil</li>
+</ul>
+
+<h4>Download Data</h4>
+<p>Click the <b>'Download CSV'</b> button to export the data in a CSV format.</p>
+<p>Click the <b>'Download Chart as image'</b>button to download the graphical representation of the statistics.</p>
+</section>
+
+<section id="step9" class="step">
+<img class="step-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Print.PNG"  alt="Print Map">
+<h3>How to Print a Map</h3>
+
+<h4>Position the Map</h4>
+<p>Before printing, pan the map so that the required area appears below the <b>“Select District”</b> and <b>“Select DSD” </b>section, ensuring the selected Mini Watershed (MWS_ID) is centered on the screen.</p>
+
+<h4>Click the Print Button</h4>
+<p>Click the Print Map button to generate the map layout.</p>
+
+<h4>Print the Map</h4>
+<p>The system will produce a printable map with the necessary map elements, such as the legend, scale bar, and other relevant information, ready for printing or saving.</p>
+<p>By zooming in or out, you can adjust the map view before printing.</p>
+<p>To Download the Map click Download button with your preferred format:JPG or PNG</p>
+</section>
+<section id="step10" class="step">
+<img class="step-image step10-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Measure.PNG" alt="Measure Distance">
+<h3>How to Measure Distance 📏</h3>
+<p>Click the Measure Distance button to activate the measurement tool.</p>
+<p>First click on the map to place the starting point, then click again to place the ending point.</p>
+<p>The distance will be displayed.</p>
+<p>When you are done measuring, click the Measure Distance button again to deactivate the tool.</p>
+</section>
+<section id="step11" class="step">
+<h3>How to Add new Proposal data through Login</h3>
+<h4>Click the Login Button</h4>
+<p>Click the <b>Login</b> button to access the login page.</p>
+
+<h4>Select District and DSD.</h4>
+<p>Choose the relevant District and DSD (Divisional Secretariat Division) from the dropdown menus.</p>
+
+<h4>Enter Login Credentials</h4>
+<p>Enter the <b>Email</b> and <b>Password</b> provided by the administrator.</p>
+
+<h4>Verify the Login</h4>
+<p>Click <b>Verify Login</b> button to proceed.</p>
+
+<h4>Enter GitHub Token</h4>
+<p>Enter the GitHub token provided by the Administrator.
+<p><i>Only authorized users with the email, password, and GitHub access token are allowed to upload new data.</i></p>
+
+<h4>Select MWS_ID</h4>
+<p> Choose the relevant <b>MWS_ID</b> (Mini Watershed) from the list</p>
+
+<h4>Select the Proposal Type</h4>
+<p>Select the appropriate proposal name from the following list:</p>
+<ul class="category-list">
+    <li>DWS</li>
+    <li>LANDSLIDES</li>
+    <li>MI</li>
+    <li>MT</li>
+    <li>SR</li>
+    <li>SWC_ON</li>
+    <li>SWC_OFF</li>
+    <li>WP</li>
+    <li>WSP</li>
+</ul>
+
+<h4>Enter the Required Data</h4>
+<p>Fill in the necessary proposal details and information in the provided fields.</p>
+
+<h4>Upload a Photo (Optional)</h4>
+<p>If available, upload a photo related to the proposal.</p>
+
+<h4>Photo Size Requirement</h4>
+<p>Ensure that the photo file size is less than 1 MB before uploading.</p></section>
+
+<div id="imageModal" class="image-modal" aria-hidden="true">
+    <div class="image-modal-content" role="dialog" aria-modal="true" aria-labelledby="imageModalTitle">
+        <div class="image-modal-header">
+            <p id="imageModalTitle">Image preview</p>
+            <div class="image-modal-actions">
+                <a id="imageModalDownload" href="#" download>Download</a>
+                <button id="imageModalClose" type="button">Close</button>
+            </div>
+        </div>
+        <div class="image-modal-body">
+            <img id="imageModalImg" src="" alt="Preview">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'si,ta,en',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+    }, 'google_translate_element');
+
+    window.__gtInitialized = true;
+    const savedLang = localStorage.getItem('dashboard_lang') || getCurrentLanguageFromCookie() || 'en';
+    if (savedLang && savedLang !== 'en') {
+        let tries = 0;
+        const timer = setInterval(() => {
+            tries += 1;
+            if (applyLanguage(savedLang) || tries > 25) clearInterval(timer);
+        }, 250);
+    }
+}
+
+function setGoogTransCookie(lang) {
+    const normalizedLang = (lang || 'en').toLowerCase();
+    const value = `/en/${normalizedLang}`;
+    const maxAge = 60 * 60 * 24 * 365;
+    document.cookie = `googtrans=${value};path=/;max-age=${maxAge}`;
+    const hostParts = window.location.hostname.split('.');
+    if (hostParts.length >= 2) {
+        const domain = hostParts.slice(-2).join('.');
+        document.cookie = `googtrans=${value};path=/;domain=.${domain};max-age=${maxAge}`;
+    }
+}
+
+function getCurrentLanguageFromCookie() {
+    const m = document.cookie.match(/(?:^|; )googtrans=([^;]+)/);
+    if (!m) return 'en';
+    const raw = decodeURIComponent(m[1] || '');
+    const parts = raw.split('/');
+    const lang = parts[parts.length - 1];
+    return lang || 'en';
+}
+
+function applyLanguage(lang) {
+    setGoogTransCookie(lang);
+    localStorage.setItem('dashboard_lang', lang);
+    const hashValue = `#googtrans(en|${lang})`;
+    if (window.location.hash !== hashValue) {
+        window.location.hash = hashValue;
+    }
+    const combo = document.querySelector('#google_translate_element select.goog-te-combo');
+    if (!combo) return false;
+    combo.value = lang;
+    combo.dispatchEvent(new Event('change'));
+    return true;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const languageSelect = document.getElementById('languageSelect');
+    if (!languageSelect) return;
+    const initialLang = localStorage.getItem('dashboard_lang') || getCurrentLanguageFromCookie() || 'en';
+    languageSelect.value = initialLang;
+    languageSelect.addEventListener('change', function () {
+        const selectedLang = languageSelect.value;
+        const applied = applyLanguage(selectedLang);
+        if (!applied) {
+            sessionStorage.setItem('lang_reload_once', '1');
+            window.location.reload();
+        }
+    });
+
+    const cookieLang = getCurrentLanguageFromCookie();
+    if (initialLang !== cookieLang) {
+        setGoogTransCookie(initialLang);
+    }
+
+    if (initialLang !== 'en') {
+        let tries = 0;
+        const timer = setInterval(() => {
+            tries += 1;
+            if (applyLanguage(initialLang) || tries > 20) clearInterval(timer);
+        }, 250);
+    }
+
+    if (sessionStorage.getItem('lang_reload_once') === '1') {
+        sessionStorage.removeItem('lang_reload_once');
+    }
+
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('imageModalImg');
+    const modalTitle = document.getElementById('imageModalTitle');
+    const modalDownload = document.getElementById('imageModalDownload');
+    const modalClose = document.getElementById('imageModalClose');
+
+    function openImageModal(img) {
+        const src = img.getAttribute('src');
+        const alt = img.getAttribute('alt') || 'Image preview';
+        modalImg.src = src;
+        modalImg.alt = alt;
+        modalTitle.textContent = alt;
+        modalDownload.href = src;
+        modalDownload.setAttribute('download', '');
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeImageModal() {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+        modalImg.src = '';
+        modalDownload.href = '#';
+    }
+
+    document.querySelectorAll('.content img').forEach(function (img) {
+        img.style.cursor = 'zoom-in';
+        img.addEventListener('click', function () {
+            openImageModal(img);
+        });
+    });
+
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeImageModal();
+    });
+    modalClose.addEventListener('click', closeImageModal);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeImageModal();
+    });
+});
+</script>
+<script type="text/javascript"
+    src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+</body>
+</html>

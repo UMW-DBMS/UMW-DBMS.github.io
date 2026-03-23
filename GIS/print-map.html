@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Print Map</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7f4;
+        }
+
+        .toolbar {
+            padding: 10px;
+            background: #2e7d32;
+            color: #fff;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .toolbar button {
+            border: 0;
+            background: #fff;
+            color: #2e7d32;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .toolbar button:hover {
+            background: #e8f5e9;
+        }
+
+        .print-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+            padding: 12px;
+        }
+
+        .topic-bar {
+            position: absolute;
+            left: 66px;
+            bottom: 10px;
+            max-width: calc(100% - 80px);
+            min-height: 32px;
+            border: 1px solid #ccc;
+            background: rgba(255, 255, 255, 0.95);
+            color: #1d1d1d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            box-sizing: border-box;
+            z-index: 11;
+            border-radius: 4px;
+        }
+
+        .map-image-wrap {
+            position: relative;
+            width: min(900px, 92vw);
+            aspect-ratio: var(--print-map-ratio, 4 / 3);
+            background: #e0e0e0;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        /* Add/Update this in your <style> block */
+        .leaflet-tile-container {
+            left: 0 !important;
+            top: 0 !important;
+        }
+
+        /* Keep map panes in their normal positions so Leaflet can handle panning/zooming correctly. */
+        #printMap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        /* Normalize the tile container so it doesn't drift due to rounding differences */
+        .leaflet-tile-container {
+            left: 0 !important;
+            top: 0 !important;
+        }
+
+        /* Ensure images don't get clipped or misaligned */
+        .leaflet-image-layer {
+            top: 0 !important;
+            left: 0 !important;
+        }
+        #snapshotImage {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            background: #fff;
+        }
+
+        .north-arrow {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 46px;
+            height: 72px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #111;
+            z-index: 10;
+        }
+
+        .north-arrow .arrow {
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 24px solid #111;
+            margin-top: 4px;
+        }
+
+        .legend-panel {
+            width: min(720px, 96vw);
+            max-height: calc(100vh - 90px);
+            overflow: auto;
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            background: #fff;
+            padding: 8px;
+            box-sizing: border-box;
+            font-size: 11px;
+            line-height: 1.25;
+            align-self: center;
+        }
+
+        .legend-panel h4 {
+            margin: 0 0 8px 0;
+        }
+
+        .legend-block {
+            margin-bottom: 8px;
+        }
+
+        .legend-block:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Normalize copied Leaflet legend HTML so it does not clip in print view */
+        #legendContent .legend,
+        #legendContent .info.legend,
+        #legendContent .leaflet-control {
+            position: static !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            bottom: auto !important;
+            float: none !important;
+            clear: both;
+            width: fit-content;
+            max-width: 100%;
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        #legendContent .legend i,
+        #legendContent .info.legend i,
+        #legendContent img,
+        #legendContent svg {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        #legendContent .legend,
+        #legendContent .info.legend,
+        #legendContent .legend-block {
+            overflow: visible !important;
+            max-height: none !important;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        #status {
+            padding: 10px 12px;
+            color: #333;
+            font-size: 13px;
+        }
+        .legend-topic {
+            width: min(720px, 96vw);
+            border: 1px solid #bbb;
+            border-radius: 4px;
+            background: #fff;
+            padding: 6px 10px;
+            box-sizing: border-box;
+            font-size: 12px;
+            font-weight: 700;
+            text-align: center;
+            color: #1d1d1d;
+            align-self: center;
+            display: none;
+        }
+
+        @media print {
+            .toolbar {
+                display: none;
+            }
+
+            .print-wrap {
+                padding: 0;
+            }
+
+            .map-image-wrap {
+                width: min(900px, 92vw);
+                aspect-ratio: var(--print-map-ratio);
+                height: auto;
+            }
+
+            #snapshotImage {
+                display: none;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+            body.snapshot-ready #snapshotImage {
+                display: block;
+            }
+
+            .legend-panel {
+                max-height: none;
+                overflow: visible;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+
+            #status {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="toolbar">
+        <strong>Dashboard Map Snapshot</strong>
+        <button id="downloadPngBtn" type="button">Download PNG</button>
+        <button id="downloadJpgBtn" type="button">Download JPG</button>
+        <button id="printPageBtn" type="button">Print</button>
+    </div>
+
+    <div id="status">Preparing print snapshot...</div>
+
+    <div class="print-wrap" id="captureArea">
+        <div class="map-image-wrap" id="CaptureArea">
+            <div id="printMap"></div>
+            <img id="snapshotImage" alt="Map snapshot" />
+
+            <div class="north-arrow" aria-label="North arrow">
+                <div>N</div>
+                <div class="arrow"></div>
+            </div>
+            <div id="topicBar" class="topic-bar" style="display:none;"></div>
+        </div>
+
+        <div id="legendTopic" class="legend-topic"></div>
+        <div id="legendPanel" class="legend-panel" style="display:none;">
+            <h4>Legend</h4>
+            <div id="legendContent"></div>
+        </div>
+
+    </div>
+
+    <script>
+    const status = document.getElementById('status');
+    const snapshotImage = document.getElementById('snapshotImage');
+    const topicBar = document.getElementById('topicBar');
+    const legendTopic = document.getElementById('legendTopic');
+    function tryParseJson(value) {
+      if (!value || typeof value !== 'string') return null;
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function resolvePrintPayload() {
+      // 1) Fast path: payload passed via popup window.name from opener.
+      const fromWindowName = tryParseJson(window.name || '');
+      if (fromWindowName) return fromWindowName;
+
+      // 2) Fallback: localStorage bridge.
+      try {
+        const fromLocalStorage = tryParseJson(localStorage.getItem('printMapPayload') || '');
+        if (fromLocalStorage) return fromLocalStorage;
+      } catch (e) {
+        // Ignore storage access errors and continue to opener fallback.
+      }
+
+      // 3) Fallback: direct opener object reference.
+      try {
+        if (window.opener && window.opener.__printMapPayload) {
+          return window.opener.__printMapPayload;
+        }
+      } catch (e) {
+        // Ignore cross-context access errors.
+      }
+
+      return null;
+    }
+
+    const payload = resolvePrintPayload();
+
+    if (!payload) {
+      status.textContent = 'No print payload found. Open this page from the main map Print button.';
+      throw new Error('Missing print payload.');
+    }
+
+    const zoom = typeof payload.zoom === 'number' ? payload.zoom : 8;
+    const layerConfigs = Array.isArray(payload.layerConfigs) ? payload.layerConfigs : [];
+    const printBounds = Array.isArray(payload.printBounds) ? payload.printBounds : null;
+    const useExactView = payload.useExactView === true;
+
+    const center = (() => {
+      const c = payload.center;
+      if (Array.isArray(c) && c.length >= 2 && Number.isFinite(c[0]) && Number.isFinite(c[1])) {
+        return { lat: Number(c[0]), lng: Number(c[1]) };
+      }
+      if (c && typeof c === 'object' && Number.isFinite(c.lat) && Number.isFinite(c.lng)) {
+        return { lat: Number(c.lat), lng: Number(c.lng) };
+      }
+      return { lat: 7.06955, lng: 80.71930 };
+    })();
+    const printTopic = String(payload.printTopic || '').trim();
+    const selectedLegendHtml = payload.selectedLegendHtml || '';
+    const incomingMainMapSnapshot = payload.incomingMainMapSnapshot || '';
+    const mapDimensions = payload.mapDimensions || {};
+    const captureArea = document.getElementById('CaptureArea');
+    const ratioW = Number(mapDimensions.width);
+    const ratioH = Number(mapDimensions.height);
+    if (captureArea && Number.isFinite(ratioW) && Number.isFinite(ratioH) && ratioW > 0 && ratioH > 0) {
+      captureArea.style.setProperty('--print-map-ratio', `${ratioW} / ${ratioH}`);
+    }
+
+    // Keep the print map responsive to the container so it stays centered.
+    if (topicBar) {
+      if (printTopic) {
+        topicBar.textContent = printTopic;
+        topicBar.style.display = 'flex';
+      } else {
+        topicBar.style.display = 'none';
+      }
+    }
+    if (legendTopic) {
+      if (printTopic) {
+        legendTopic.textContent = printTopic;
+        legendTopic.style.display = 'block';
+      } else {
+        legendTopic.style.display = 'none';
+      }
+    }
+
+    const printMap = L.map('printMap', {
+    zoomControl: true,
+    dragging: true,
+    scrollWheelZoom: true,
+    doubleClickZoom: true,
+    boxZoom: true,
+    keyboard: true,
+    touchZoom: true
+  }).setView([center.lat, center.lng], zoom);
+
+    // if (printBounds) {
+    //   printMap.fitBounds(printBounds);
+    // }
+
+    layerConfigs.forEach((cfg) => {
+        if (cfg.type === 'tile' && cfg.url) {
+            // Add crossOrigin: true here
+            const tile = L.tileLayer(cfg.url, { 
+                ...cfg.options, 
+                crossOrigin: true 
+            });
+            tile.addTo(printMap);
+            if (typeof cfg.opacity === 'number') tile.setOpacity(cfg.opacity);
+            return;
+        }
+        if (cfg.type === 'imageOverlay' && cfg.url && cfg.bounds) {
+            // Add crossOrigin: true here
+            L.imageOverlay(cfg.url, cfg.bounds, { 
+                ...cfg.options, 
+                crossOrigin: true 
+            }).addTo(printMap);
+            return;
+      }
+      if (cfg.type === 'geojson' && cfg.data) {
+        const vectorStyle = cfg.styleOptions || {};
+        L.geoJSON(cfg.data, {
+          pointToLayer: function (feature, latlng) {
+            const meta = feature && feature.properties ? feature.properties.__printMarker : null;
+            const perFeatureStyle = feature && feature.properties ? feature.properties.__printStyle || {} : {};
+            if (meta && meta.kind === 'divIcon') {
+              const icon = L.divIcon({
+                className: meta.className || '',
+                html: meta.html || '',
+                iconSize: meta.iconSize || null,
+                iconAnchor: meta.iconAnchor || null,
+                popupAnchor: meta.popupAnchor || null
+              });
+              return L.marker(latlng, { icon });
+            }
+            if (meta && meta.kind === 'icon') {
+              const icon = L.icon({
+                iconUrl: meta.iconUrl,
+                iconRetinaUrl: meta.iconRetinaUrl || undefined,
+                shadowUrl: meta.shadowUrl || undefined,
+                iconSize: meta.iconSize || undefined,
+                iconAnchor: meta.iconAnchor || undefined,
+                popupAnchor: meta.popupAnchor || undefined,
+                shadowSize: meta.shadowSize || undefined
+              });
+              return L.marker(latlng, { icon });
+            }
+            const baseColor = perFeatureStyle.color || vectorStyle.color || '#3388ff';
+            const fillColor = perFeatureStyle.fillColor || perFeatureStyle.color || vectorStyle.fillColor || vectorStyle.color || '#3388ff';
+            return L.circleMarker(latlng, {
+              radius: typeof perFeatureStyle.radius === 'number' ? perFeatureStyle.radius : (typeof vectorStyle.radius === 'number' ? vectorStyle.radius : 5),
+              color: baseColor,
+              weight: typeof perFeatureStyle.weight === 'number' ? perFeatureStyle.weight : (typeof vectorStyle.weight === 'number' ? vectorStyle.weight : 2),
+              opacity: typeof perFeatureStyle.opacity === 'number' ? perFeatureStyle.opacity : (typeof vectorStyle.opacity === 'number' ? vectorStyle.opacity : 1),
+              fillColor: fillColor,
+              fillOpacity: typeof perFeatureStyle.fillOpacity === 'number' ? perFeatureStyle.fillOpacity : (typeof vectorStyle.fillOpacity === 'number' ? vectorStyle.fillOpacity : 0.8)
+            });
+          },
+          style: function (feature) {
+            const perFeatureStyle = feature && feature.properties ? feature.properties.__printStyle || {} : {};
+            const baseColor = perFeatureStyle.color || vectorStyle.color || '#3388ff';
+            const fillColor = perFeatureStyle.fillColor || perFeatureStyle.color || vectorStyle.fillColor || vectorStyle.color || '#3388ff';
+            return {
+              color: baseColor,
+              weight: typeof perFeatureStyle.weight === 'number' ? perFeatureStyle.weight : (typeof vectorStyle.weight === 'number' ? vectorStyle.weight : 2),
+              opacity: typeof perFeatureStyle.opacity === 'number' ? perFeatureStyle.opacity : (typeof vectorStyle.opacity === 'number' ? vectorStyle.opacity : 1),
+              fillColor: fillColor,
+              fillOpacity: typeof perFeatureStyle.fillOpacity === 'number' ? perFeatureStyle.fillOpacity : (typeof vectorStyle.fillOpacity === 'number' ? vectorStyle.fillOpacity : 0.4),
+              dashArray: perFeatureStyle.dashArray || vectorStyle.dashArray || null
+            };
+          }
+        }).addTo(printMap);
+      }
+    });
+
+    L.control.scale({ position: 'bottomright', metric: true, imperial: true, maxWidth: 100 }).addTo(printMap);
+
+    (function renderLegend() {
+      const panel = document.getElementById('legendPanel');
+      const content = document.getElementById('legendContent');
+      if (!panel || !content) return;
+
+      let legendHtml = selectedLegendHtml || '';
+
+      // If the payload did not include a legend HTML, try to fall back to the opener page (same-origin).
+      if (!legendHtml && window.opener && !window.opener.closed) {
+        try {
+          const selectors = ['.leaflet-control .info.legend', '.leaflet-control .legend', '.legend', '.info.legend'];
+          const nodes = Array.from(window.opener.document.querySelectorAll(selectors.join(',')));
+          const visibleLegends = nodes
+            .filter((node) => {
+              const style = window.opener.getComputedStyle(node);
+              return style.display !== 'none' && style.visibility !== 'hidden' && node.innerHTML.trim();
+            })
+            .map((node) => `<div class="legend-block">${node.innerHTML.trim()}</div>`);
+          if (visibleLegends.length) {
+            legendHtml = visibleLegends.join('');
+          }
+        } catch (e) {
+          // cross-origin or other access issues; ignore and proceed without a legend.
+        }
+      }
+
+      if (!legendHtml) {
+        panel.style.display = 'none';
+        if (legendTopic) legendTopic.style.display = 'none';
+        return;
+      }
+      content.innerHTML = legendHtml;
+      panel.style.display = 'block';
+    })();
+
+    function waitForTilesReady(timeoutMs) {
+      const tiles = Array.from(document.querySelectorAll('#printMap .leaflet-tile'));
+      if (!tiles.length) return Promise.resolve();
+      return new Promise((resolve) => {
+        const start = Date.now();
+        const timer = setInterval(() => {
+          const done = tiles.every((img) => img.complete) || (Date.now() - start > timeoutMs);
+          if (done) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 150);
+      });
+    }
+
+    function waitForMapReady(timeoutMs) {
+      const start = Date.now();
+      return new Promise((resolve) => {
+        const tick = () => {
+          const tiles = Array.from(document.querySelectorAll('#printMap .leaflet-tile'));
+          const tilesDone = !tiles.length || tiles.every((img) => img.complete);
+          const timedOut = (Date.now() - start) > timeoutMs;
+          if (tilesDone || timedOut) {
+            // Give Leaflet/vector overlays one extra paint cycle.
+            requestAnimationFrame(() => requestAnimationFrame(resolve));
+            return;
+          }
+          setTimeout(tick, 120);
+        };
+        tick();
+      });
+    }
+
+      function generateSnapshot() {
+          const capture = document.getElementById('CaptureArea');
+          if (!capture) return;
+
+          // 1. CRITICAL: Reset the map's internal Viewport origin
+          // This snaps the 'Map Pane' back to the container top-left.
+          printMap.stop(); // Stop any ongoing animations
+          
+          // We use a tiny trick: set the view to itself to force an origin reset
+          printMap.setView(printMap.getCenter(), printMap.getZoom(), { animate: false });
+
+          waitForTilesReady(5000)
+              .then(() => waitForMapReady(1500))
+              .then(() => {
+                  return html2canvas(capture, {
+                      useCORS: true,
+                      scale: 2,
+                      backgroundColor: '#ffffff',
+                      // Note: the cloned DOM should retain its map transforms so the overlay alignment is correct.
+                      // Avoid forcing transforms to 0, as this can shift tiled/geojson layers.
+                      onclone: (clonedDoc) => {
+                        const clonedMap = clonedDoc.getElementById('printMap');
+                        if (!clonedMap) return;
+
+                        // Ensure the cloned map container is fully sized before rendering.
+                        clonedMap.style.width = '100%';
+                        clonedMap.style.height = '100%';
+
+                        // Leaflet uses CSS transforms to position tiles/overlays.
+                        // html2canvas can lose these transforms, so convert them into explicit left/top offsets.
+                        const toPixels = (value) => (typeof value === 'number' ? value : parseFloat(value) || 0);
+
+                        const getTransformOffset = (el) => {
+                          const style = window.getComputedStyle(el);
+                          const transform = style.transform || style.webkitTransform;
+                          if (!transform || transform === 'none') return { x: 0, y: 0 };
+                          const matrix = transform.match(/matrix\(([^)]+)\)/);
+                          if (matrix) {
+                            const parts = matrix[1].split(',').map((v) => parseFloat(v.trim()));
+                            // matrix(a, b, c, d, tx, ty)
+                            return { x: parts[4] || 0, y: parts[5] || 0 };
+                          }
+                          const matrix3d = transform.match(/matrix3d\(([^)]+)\)/);
+                          if (matrix3d) {
+                            const parts = matrix3d[1].split(',').map((v) => parseFloat(v.trim()));
+                            return { x: parts[12] || 0, y: parts[13] || 0 };
+                          }
+                          return { x: 0, y: 0 };
+                        };
+
+                        const fixPaneTransforms = (pane) => {
+                          if (!pane) return;
+                          const offset = getTransformOffset(pane);
+                          // Preserve any existing left/top values, but apply the transform offset.
+                          const curLeft = toPixels(pane.style.left || 0);
+                          const curTop = toPixels(pane.style.top || 0);
+                          pane.style.transform = 'none';
+                          pane.style.left = `${curLeft + offset.x}px`;
+                          pane.style.top = `${curTop + offset.y}px`;
+                        };
+
+                        const panes = clonedMap.querySelectorAll('.leaflet-pane, .leaflet-map-pane, .leaflet-tile-pane, .leaflet-zoom-animated, .leaflet-tile-container');
+                        panes.forEach(fixPaneTransforms);
+
+                        const svg = clonedMap.querySelector('svg');
+                        if (svg) fixPaneTransforms(svg);
+                      }
+                  });
+              })
+              .then((canvas) => {
+                  snapshotImage.src = canvas.toDataURL('image/png');
+                  document.body.classList.add('snapshot-ready');
+                  status.textContent = 'Snapshot ready. Use Print or Download.';
+              })
+              .catch((err) => {
+                  console.error('Snapshot generation failed:', err);
+                  status.textContent = 'Snapshot failed. Please try again or use browser Print.';
+              });
+      }
+
+      function generateSnapshotPromise() {
+          const capture = document.getElementById('CaptureArea');
+          if (!capture) return Promise.reject(new Error('Missing capture area'));
+
+          // Sync map view before capture
+          printMap.stop();
+          printMap.setView(printMap.getCenter(), printMap.getZoom(), { animate: false });
+
+          return waitForTilesReady(5000)
+              .then(() => waitForMapReady(1500))
+              .then(() => html2canvas(capture, {
+                  useCORS: true,
+                  scale: 2,
+                  backgroundColor: '#ffffff'
+              }))
+              .then((canvas) => {
+                  const dataUrl = canvas.toDataURL('image/png');
+                  snapshotImage.src = dataUrl;
+                  document.body.classList.add('snapshot-ready');
+                  status.textContent = 'Snapshot ready. Use Print or Download.';
+                  return dataUrl;
+              })
+              .catch((err) => {
+                  console.error('Snapshot generation failed:', err);
+                  status.textContent = 'Snapshot failed. Please try again or use browser Print.';
+                  throw err;
+              });
+      }
+    setTimeout(function () {
+      printMap.invalidateSize();
+      if (printBounds && !useExactView && printBounds.length === 2) {
+        try {
+          printMap.fitBounds(printBounds, {
+            padding: [40, 40],
+            maxZoom: 16,
+            animate: false
+          });
+        } catch (e) {
+          printMap.setView([center.lat, center.lng], zoom, { animate: false });
+        }
+      } else {
+        printMap.setView([center.lat, center.lng], zoom, { animate: false });
+      }
+      printMap.invalidateSize(true);
+
+      if (incomingMainMapSnapshot) {
+        snapshotImage.src = incomingMainMapSnapshot;
+        document.body.classList.add('snapshot-ready');
+        status.textContent = 'Preparing final snapshot...';
+        generateSnapshot();
+      } else {
+        generateSnapshot();
+      }
+    }, 600);
+
+    function downloadImage(format) {
+      // Always regenerate so the download reflects the latest zoom/center.
+      generateSnapshotPromise().then((src) => {
+        if (format === 'png') {
+          const link = document.createElement('a');
+          link.href = src;
+          link.download = 'map-print.png';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          return;
+        }
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+          const link = document.createElement('a');
+          link.href = canvas.toDataURL('image/jpeg', 0.92);
+          link.download = 'map-print.jpg';
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        };
+        img.onerror = function () {
+          alert('Download failed. Please use Print and save from browser.');
+        };
+        img.src = src;
+      }).catch(() => {
+        alert('Snapshot is not ready yet.');
+      });
+    }
+
+    document.getElementById('downloadPngBtn').addEventListener('click', function () { downloadImage('png'); });
+    document.getElementById('downloadJpgBtn').addEventListener('click', function () { downloadImage('jpg'); });
+    document.getElementById('printPageBtn').addEventListener('click', function () { window.print(); });
+  </script>
+
+</body>
+</html>
