@@ -1,164 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMW Watershed Management Plan</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+	    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.pm/dist/leaflet.pm.min.js"></script>
 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-    <!-- Include the dropdown.js file-->
-    <script src="scripts.js" defer></script>
-    <script src="dropdown.js" defer></script>
+    <!-- Include the dropdown.js file-->	
+	<script src="scripts.js" defer></script>
+    <script src="dropdown.js" defer></script>	 
 
 
     <script src="https://unpkg.com/papaparse/papaparse.min.js"></script> <!-- PapaParse Library -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script> <!-- Leaflet Library -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /> <!-- Leaflet CSS -->
-    <script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
-    <link rel="stylesheet" href="readmetext.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	<script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
+	<link rel="stylesheet" href="readmetext.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+	
+	
+
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-
-        html,
-        body {
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-
         body {
             margin: 0;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
-            background: #ffffff;
-            overflow-x: hidden;
+            height: 100vh;
+            background: linear-gradient(to bottom, #e0f7e5, #c8e6c9);
         }
-
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: nowrap;
-            width: 100%;
-            padding: 1vh 1vw;
+            padding: 10px;
             background-color: #4caf50;
             color: white;
-            font-size: clamp(0.72rem, 0.85vw, 0.9rem);
-            /* Keep the controls in one horizontal strip like the previous layout */
-            gap: 0.75vw;
-            overflow-x: auto;
-            white-space: nowrap;
+            font-size: 12px; /* Small header */
         }
-
-        header>div {
-            display: flex;
-            align-items: center;
-            flex-wrap: nowrap;
-            gap: 0.35vw;
-            white-space: nowrap;
-        }
-
-        header>div:last-child {
-            justify-content: flex-end;
-        }
-
         footer {
             background-color: #388e3c;
-            width: 100%;
-            padding: 1vh 1vw;
-            display: grid;
-            grid-template-columns: minmax(16rem, 1fr) auto minmax(16rem, 1fr);
-            align-items: center;
-            gap: 0.75vw;
+            padding: 10px;
         }
-
-        .top-bar {
-            background-color: #e8f5e9;
-            /* Light green background */
-            color: #333;
-            font-size: 9px;
-            /*padding: 5px 10px;*/
-            display: flex;
-            /*justify-content: flex-end;*/
-            /* Align translate element to right */
-            align-items: center;
-            border-bottom: 1px solid #c8e6c9;
-            height: 1px;
-        }
-
+	.top-bar {
+  background-color: #e8f5e9; /* Light green background */
+  color: #333;
+  font-size: 9px;
+  /*padding: 5px 10px;*/
+  display: flex;
+  /*justify-content: flex-end;*/ /* Align translate element to right */
+  align-items: center;
+  border-bottom: 1px solid #c8e6c9;
+  height: 1px;
+}
+    
         .map {
             flex: 1;
             position: relative;
-            width: 100%;
-            min-height: calc(100vh - 18vh);
-            background: #ffffff;
-            overflow: hidden;
         }
-
-        .leaflet-top.leaflet-left {
-            top: 25px;
-        }
-
         .button {
             background-color: #4caf50;
             border: none;
             color: white;
-            padding: 0.8vh 0.9vw;
+            padding: 10px 15px;
             cursor: pointer;
-            margin: 0 1px;
+            margin: 0 5px;
             border-radius: 4px;
             transition: background-color 0.3s;
-            font-size: clamp(0.68rem, 0.8vw, 0.85rem);
-            white-space: nowrap;
+			font-size: 10px; /* Adjust the size to your preference */
         }
-
-        header select {
-            white-space: nowrap;
-            flex: 0 0 auto;
-        }
-
         .button.active {
-            background-color: #66bb6a;
-            /* Lighter green for active buttons */
+            background-color: #66bb6a; /* Lighter green for active buttons */
         }
-
         .button.disabled {
-            background-color: #a5d6a7;
-            /* Shade green for deactivated buttons */
-            /*cursor: not-allowed;*/
+            background-color: #a5d6a7; /* Shade green for deactivated buttons */
+            cursor: not-allowed;
         }
-
         .panel {
-            display: none;
-            /* Start hidden */
+            display: none; /* Start hidden */
             position: absolute;
             background: white;
             border: 1px solid #ccc;
-            padding: 1vh 0.8vw;
+            padding: 10px;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
             z-index: 1000;
-            max-width: min(72vw, 62rem);
+            max-width: 1000px;
             overflow: auto;
-            font-size: clamp(0.6rem, 0.72vw, 0.8rem);
-            /* Smaller font for panels */
-            box-sizing: border-box;
+            font-size: 9px; /* Smaller font for panels */
         }
-
         .hide-btn {
             background: #f44336;
             border: none;
@@ -168,189 +104,114 @@
             float: right;
             border-radius: 3px;
         }
-
         /* Positioning panels */
         #basePanel {
-            top: 10vh;
-            /* Below the header */
-            left: 0;
-            /* From the left edge */
-            width: min(18vw, 92vw);
-            height: calc(100vh - 19vh);
-            /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 19vh);
-            overflow-y: auto;
-            position: absolute;
-            /* To ensure it stays positioned correctly */
+            top: 70px; /* Below the header */
+            left: 0; /* From the left edge */
+			width: 200px;
+			height: calc(100vh - 100px); /* Full page height minus the space for the header */
+            position: absolute; /* To ensure it stays positioned correctly */
         }
-
         #proposalPanel {
-            top: 10vh;
-            /* Below the header */
-            left: 0;
-            /* From the left edge */
-            width: min(18vw, 92vw);
-            height: calc(100vh - 19vh);
-            /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 19vh);
-            overflow-y: auto;
-            position: absolute;
-            /* To ensure it stays positioned correctly */
+            top: 70px; /* Below the header */
+            left: 0; /* From the left edge */
+			width: 200px;
+			height: calc(100vh - 100px); /* Full page height minus the space for the header */
+            position: absolute; /* To ensure it stays positioned correctly */
         }
-
         #infoPanel {
-            top: 8vh;
-            /* Below the header */
-            right: 0;
-            /* From the left edge */
-            width: min(34vw, 94vw);
+            top: 70px; /* Below the header */
+            right: 0; /* From the left edge */
+			width: 500px;
         }
-
         #climPanel {
-            top: 10vh;
-            /* Below the header */
-            left: 0;
-            /* From the left edge */
-            width: min(18vw, 92vw);
-            height: calc(100vh - 19vh);
-            /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 19vh);
-            overflow-y: auto;
-            position: absolute;
-            /* To ensure it stays positioned correctly */
+            top: 70px; /* Below the header */
+            left: 0; /* From the left edge */
+			width: 200px;
+			height: calc(100vh - 100px); /* Full page height minus the space for the header */
+            position: absolute; /* To ensure it stays positioned correctly */
         }
+		
+#infoPopupPanel {
+    position: relative;
+    right: 10px; /* Position 10px from the right edge of the footer */
+    top: 00%; /* Center vertically */
+    transform: translateY(-50%); /* Adjust for perfect vertical centering */
+    font-size: 10px;
+    color: #333; /* Text color */
+    background-color: #f9f9f9; /* Background color */
+    padding: 0px;
+    border: 1px solid #ccc; /* Optional: border */
+    border-radius: 4px; /* Rounded corners */
+    display: none; /* Initially hidden */
+	width:20%
 
-        #waterPanel {
-            top: 10vh;
-            /* Below the header */
-            left: 0;
-            /* From the left edge */
-            width: min(18vw, 92vw);
-            height: calc(100vh - 19vh);
-            /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 19vh);
-            overflow-y: auto;
-            position: absolute;
-            /* To ensure it stays positioned correctly */
-        }
-
-        #infoPopupPanel {
-            position: static;
-            font-size: 10px;
-            color: #333;
-            background-color: #f9f9f9;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            display: none;
-            min-width: 220px;
-            margin-right: auto;
-            white-space: nowrap;
-        }
-
+}
+	
         #catalogPanel {
-            position: absolute;
-            /* Ensure it is positioned absolutely on the page */
-            top: 8vh;
-            /* 70px below the header */
-            left: 50%;
-            /* Center horizontally */
-            transform: translateX(-50%);
-            /* Shift the element to the left by 50% of its width */
-            width: min(100%, 96vw);
-            /* Set the width of the table panel */
-            max-height: 48vh;
-            /* Limit the height to fit within the page */
-            overflow-y: auto;
-            /* Enable scrolling if content exceeds the max height */
-            overflow-x: auto;
-            /* Enable scrolling if content exceeds the max height */
+   position: absolute;  /* Ensure it is positioned absolutely on the page */
+    top: 70px;           /* 70px below the header */
+    left: 50%;           /* Center horizontally */
+    transform: translateX(-50%); /* Shift the element to the left by 50% of its width */
+    width: 100%;        /* Set the width of the table panel */
+    max-height: 400px;   /* Limit the height to fit within the page */
+    overflow-y: auto;    /* Enable scrolling if content exceeds the max height */
+	overflow-x: auto;    /* Enable scrolling if content exceeds the max height */
         }
-
+		
         #statPanel {
-            top: 8vh;
-            /* Below the header */
-            right: 0;
-            /* From the left edge */
-            width: min(24vw, 92vw);
+            top: 70px; /* Below the header */
+            right: 0; /* From the left edge */
+			width: 300px; 
         }
+#catalogPanel table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-        #catalogPanel table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: auto;
-        }
-
-        #catalogPanel th,
-        #catalogPanel td {
-            padding: 4px 8px;
-            /* Reduce padding to decrease row height */
-            text-align: left;
-            border: 1px solid #ddd;
-            font-size: 10px;
-            /* Adjust font size to make rows more compact */
-            line-height: 1.2;
-            /* Set line height to control row height */
-            white-space: normal;
-            word-break: break-word;
-        }
-
-        #catalogPanel th:nth-child(2),
-        #catalogPanel td:nth-child(2) {
-            min-width: 140px;
-        }
-
-        #catalogPanel th:nth-child(3),
-        #catalogPanel td:nth-child(3) {
-            min-width: 160px;
-        }
-
-        #catalogPanel th:nth-child(2) select,
-        #catalogPanel th:nth-child(3) select {
-            width: 100%;
-        }
-
-        #catalogPanel th:nth-child(5),
-        #catalogPanel td:nth-child(5) {
-            white-space: nowrap;
-            width: 120px;
-        }
+#catalogPanel th, #catalogPanel td {
+    padding: 4px 8px;    /* Reduce padding to decrease row height */
+    text-align: left;
+    border: 1px solid #ddd;
+    font-size: 10px;      /* Adjust font size to make rows more compact */
+    line-height: 0.5;     /* Set line height to control row height */
+}
 
 
-        #catalogPanel th {
-            background-color: #f2f2f2;
-        }
+#catalogPanel th {
+    background-color: #f2f2f2;
+}		
+#tablePanel {
+    position: absolute;  /* Ensure it is positioned absolutely on the page */
+    top: 70px;           /* 70px below the header */
+    left: 50%;           /* Center horizontally */
+    transform: translateX(-50%); /* Shift the element to the left by 50% of its width */
+    width: 100%;        /* Set the width of the table panel */
+    max-height: 400px;   /* Limit the height to fit within the page */
+    overflow-y: auto;    /* Enable scrolling if content exceeds the max height */
+	overflow-x: auto;    /* Enable scrolling if content exceeds the max height */
+}
 
-        #tablePanel {
-            position: absolute;
-            top: 8vh;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100%;
-            max-height: 48vh;
-            overflow-y: auto;
-            overflow-x: auto;
-        }
+		
+
+		#attributePanel {
+    position: fixed;             /* Makes it float above the map */
+    top: 90px;                   /* Push down from the top (e.g., below header) */
+    right: 200px;                    /* Align to the right edge */
+    width: 200px;                /* Set width */
+    /*max-height: 80vh;            /* Prevent it from taking full screen height */
+    max-height: 300px;
+    overflow-y: auto;            /* Scroll if content is long */
+    background-color: white;     /* Background so it's readable */
+    border: 1px solid #ccc;      /* Optional: subtle border */
+    padding: 10px;               /* Padding inside the panel */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2); /* Drop shadow for visibility */
+    z-index: 1000;               /* Make sure it's on top of map elements */
+    display: none;               /* Initially hidden (until feature is clicked) */
+}
 
 
-
-        #attributePanel {
-            position: fixed;
-            top: 10vh;
-            right: 18vw;
-            width: min(18vw, 92vw);
-            max-height: 36vh;
-            overflow-y: auto;
-            background-color: white;
-            border: 1px solid #ccc;
-            padding: 10px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            display: none;
-        }
-
-
-
+		
         .tab {
             display: inline-block;
             background-color: #f0f0f0;
@@ -359,13 +220,12 @@
             margin-right: 5px;
             cursor: pointer;
         }
-
         .tab.active {
             background-color: #4caf50;
             color: white;
         }
-
-        #sidePanel {
+		
+	        #sidePanel {
             width: 30%;
             padding: 20px;
             background-color: #f7f7f7;
@@ -375,20 +235,20 @@
             right: 0;
             top: 0;
             height: 100%;
-            transform: translateX(100%);
+            transform: translateX(100%); /* Hidden by default */
             transition: transform 0.3s ease;
-            z-index: 999;
+            z-index: 999; /* Ensure it's above the map */
         }
 
         #sidePanel.open {
-            transform: translateX(0);
+            transform: translateX(0); /* Slide in when open */
         }
 
         #toggleButton {
             position: absolute;
             top: 20px;
             left: 20px;
-            z-index: 1000;
+            z-index: 1000; /* Make sure it's above the map */
             padding: 10px 15px;
             background-color: #007bff;
             color: white;
@@ -406,390 +266,111 @@
             cursor: pointer;
             border-radius: 5px;
         }
-
         .tab.active {
             background-color: #4caf50;
             color: white;
         }
 
-        #google_translate_element {
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-            z-index: -1;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .language-switcher {
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid #c8e6c9;
-            border-radius: 6px;
-            padding: 4px 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: #333;
-        }
-
-        .language-switcher select {
-            font-size: 11px;
-            padding: 3px 5px;
-            border: 1px solid #a5d6a7;
-            border-radius: 4px;
-            background: #fff;
-        }
-
+#google_translate_element {
+  position: fixed;
+  top: 1px;
+  right: 1px;
+  z-index: 9999;
+}		
         #areaPieChart {
             width: 100%;
-            height: 42vh;
+            height: 400px;
         }
 
         h3 {
             margin-top: 0;
         }
+.show-all-btn {
+    margin: 10px;
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.rainfall-icon div, .temperature-icon div, .evaporation-icon div, .water-quality-icon div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-        .show-all-btn {
-            margin: 10px;
-            padding: 0.8vh 1vw;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+.show-all-btn:hover {
+    background-color: #45a049;
+}		
 
-        .rainfall-icon div,
-        .temperature-icon div,
-        .evaporation-icon div,
-        .water-quality-icon div {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
 
-        .show-all-btn:hover {
+
+
+
+.button-container {
+  display: block;
+  position: absolute; /* Positioned within the right panel */
+  bottom: 0px;
+  right: 10px;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 9px;
+}
+        .button-container button:hover {
             background-color: #45a049;
         }
 
-        .leaflet-tooltip.proposal-no-label {
-            background: transparent;
-            border: 1px solid #4caf50;
-            color: #0c0c0c;
-            font-size: 8px;
-            padding: 1px 3px;
-            box-shadow: none;
-        }
-
-        .footer-btn,
-        footer select {
-            background-color: #f5fff5;
-            color: #1b5e20;
-            border: 1px solid #a5d6a7;
-            padding: 0.8vh 0.9vw;
-            border-radius: 4px;
-            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
-            line-height: 1.2;
-        }
-
-        .footer-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-
-        .footer-btn svg {
-            width: 14px;
-            height: 14px;
-            flex: 0 0 auto;
-            fill: currentColor;
-        }
-
-        .footer-btn:hover,
-        footer select:hover {
-            background-color: #e8f5e9;
-        }
-
-        .footer-btn.active {
-            background-color: #00bcd4;
-            border-color: #00bcd4;
-            color: #fff;
-        }
-
-        .footer-left {
-            justify-self: start;
-        }
-
-        .footer-center {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .footer-right {
-            justify-self: end;
-        }
 
 
-
-        /* Style for mobile responsiveness */
-        @media (max-width: 900px) {
-            header>div:last-child {
-                justify-content: flex-end;
-            }
-
-            footer {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-left,
-            .footer-center,
-            .footer-right {
-                justify-self: stretch;
-            }
-
-            .footer-center,
-            .footer-right {
-                justify-content: flex-start;
-            }
-        }
-
+		/* Style for mobile responsiveness */
         @media (max-width: 600px) {
-            .panel {
-                width: auto;
-                max-width: calc(100vw - 1rem);
-                height: auto;
-                max-height: calc(100vh - 22vh);
+			.panel {
+             width: 100%;
+			 height: 100%;
             }
         }
+	@media (max-width: 768px) {
+  header, footer {
+    font-size: 10px;
+    padding: 8px;
+  }
 
-        @media (max-width: 1100px) {
-            footer {
-                grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
-            }
+  .button, .show-all-btn {
+    padding: 8px;
+    font-size: 11px;
+  }
 
-            #infoPopupPanel {
-                min-width: 180px;
-            }
-        }
-
-        @media (max-width: 768px) {
-
-            header,
-            footer {
-                font-size: 0.75rem;
-                padding: 1vh 2vw;
-            }
-
-
-            .button,
-            .show-all-btn {
-                padding: 0.9vh 2vw;
-                font-size: 0.75rem;
-            }
-
-            footer {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-
-            .footer-left,
-            .footer-center,
-            .footer-right {
-                justify-self: auto;
-            }
-
-            .footer-center {
-                justify-content: flex-start;
-            }
-
-            .footer-right {
-                display: flex;
-                justify-content: flex-end;
-            }
-
-            #infoPopupPanel {
-                min-width: 0;
-                width: fit-content;
-                max-width: 100%;
-                white-space: normal;
-            }
-
-            #catalogPanel,
-            #tablePanel {
-                max-height: calc(100vh - 210px);
-            }
-
-            #sidePanel {
-                padding: 10px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                height: 100vh;
-            }
-
-            header {
-                padding: 8px 10px;
-            }
-
-            .button {
-                padding: 1vh 2.4vw;
-                font-size: 0.72rem;
-            }
-
-            .footer-center {
-                gap: 10px;
-            }
-
-            .footer-btn,
-            footer select,
-            .language-switcher select {
-                width: auto;
-                box-sizing: border-box;
-            }
-
-            .language-switcher {
-                width: auto;
-                justify-content: space-between;
-            }
-
-            .footer-right button {
-                width: 100%;
-            }
-
-            #infoPanel,
-            #statPanel,
-            #attributePanel {
-                width: calc(100vw - 16px);
-                right: 8px;
-            }
-        }
+  #sidePanel {
+    padding: 10px;
+  }
+}
+	
     </style>
-
-
+	
+	
 </head>
-
 <body>
-    <div class="top-bar">
-        <div id="google_translate_element"></div>
-    </div>
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',         // original language
-                includedLanguages: 'si,ta,en',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
+<div class="top-bar">
+  <div id="google_translate_element"></div>
+</div>
+<script type="text/javascript">
 
-            window.__gtInitialized = true;
-            const savedLang = localStorage.getItem('dashboard_lang') || getCurrentLanguageFromCookie() || 'en';
-            if (savedLang && savedLang !== 'en') {
-                let tries = 0;
-                const timer = setInterval(() => {
-                    tries += 1;
-                    if (applyLanguage(savedLang) || tries > 25) clearInterval(timer);
-                }, 250);
-            }
-        }
+ function googleTranslateElementInit() {
+  new google.translate.TranslateElement({
+    pageLanguage: 'en',         // original language
+    includedLanguages: 'si,ta,en', // Sinhala (si) and English (en) only
+    layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+  }, 'google_translate_element');
+} 
+</script>
 
-        function setGoogTransCookie(lang) {
-            const normalizedLang = (lang || 'en').toLowerCase();
-            const value = `/en/${normalizedLang}`;
-            const maxAge = 60 * 60 * 24 * 365;
-            document.cookie = `googtrans=${value};path=/;max-age=${maxAge}`;
-            const hostParts = window.location.hostname.split('.');
-            if (hostParts.length >= 2) {
-                const domain = hostParts.slice(-2).join('.');
-                document.cookie = `googtrans=${value};path=/;domain=.${domain};max-age=${maxAge}`;
-            }
-        }
-
-        function getCurrentLanguageFromCookie() {
-            const m = document.cookie.match(/(?:^|; )googtrans=([^;]+)/);
-            if (!m) return 'en';
-            const raw = decodeURIComponent(m[1] || '');
-            const parts = raw.split('/');
-            const lang = parts[parts.length - 1];
-            return lang || 'en';
-        }
-
-        function applyLanguage(lang) {
-            setGoogTransCookie(lang);
-            localStorage.setItem('dashboard_lang', lang);
-            const hashValue = `#googtrans(en|${lang})`;
-            if (window.location.hash !== hashValue) {
-                window.location.hash = hashValue;
-            }
-            const combo = document.querySelector('#google_translate_element select.goog-te-combo');
-            if (!combo) return false;
-            combo.value = lang;
-            combo.dispatchEvent(new Event('change'));
-            return true;
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const languageSelect = document.getElementById('languageSelect');
-            if (!languageSelect) return;
-            const initialLang = localStorage.getItem('dashboard_lang') || getCurrentLanguageFromCookie() || 'en';
-            languageSelect.value = initialLang;
-            languageSelect.addEventListener('change', function () {
-                const selectedLang = languageSelect.value;
-                const applied = applyLanguage(selectedLang);
-                if (!applied) {
-                    sessionStorage.setItem('lang_reload_once', '1');
-                    window.location.reload();
-                }
-            });
-
-            // Ensure saved language always applies on first load.
-            const cookieLang = getCurrentLanguageFromCookie();
-            if (initialLang !== cookieLang) {
-                setGoogTransCookie(initialLang);
-            }
-
-            // Run translate combo once DOM is ready so Google applies translated UI.
-            if (initialLang !== 'en') {
-                let tries = 0;
-                const timer = setInterval(() => {
-                    tries += 1;
-                    if (applyLanguage(initialLang) || tries > 20) clearInterval(timer);
-                }, 250);
-            }
-
-            // Prevent accidental reload loops from previous versions.
-            if (sessionStorage.getItem('lang_reload_once') === '1') {
-                sessionStorage.removeItem('lang_reload_once');
-            }
-        });
-
-        function syncMeasureFooterButton() {
-            const measureButton = document.getElementById('measureFooterBtn');
-            if (!measureButton || typeof window.isMeasureModeActive !== 'function') return;
-            measureButton.classList.toggle('active', window.isMeasureModeActive());
-        }
-
-        function toggleFooterMeasure() {
-            if (typeof window.isMeasureModeActive !== 'function' || typeof window.setMeasureModeActive !== 'function') {
-                return;
-            }
-            window.setMeasureModeActive(!window.isMeasureModeActive());
-            syncMeasureFooterButton();
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            syncMeasureFooterButton();
-        });
-    </script>
-
-    <script type="text/javascript"
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-        </script>
+<script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+</script>
 
 
     <!-- Legend items will be dynamically added here -->
@@ -798,91 +379,49 @@
     <div id="readme-modal" class="modal">
         <div class="modal-content">
             <h2>Welcome to UMW Watershed Management Plan</h2>
-            <div class="flowchart">
-                <div class="flow-node">
-                    <div class="flow-title">Step 1</div>
-                    <div class="flow-body">
-                        <div>Select your District & Divisional Secretariat Division name.</div>
-                        <div>If you know the Mini Watershed (MWS) ID, select it. If not, click a location on the map to
-                            see its MWS ID in the popup.</div>
-                        <div>Click "GO".</div>
-                    </div>
-                </div>
-
-                <div class="flow-node">
-                    <div class="flow-title">Step 2</div>
-                    <div class="flow-body">Use the footer menu to switch background map (e.g., Satellite, OSM).</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 3</div>
-                    <div class="flow-body">Select "Base Layers" to explore GIS data layers. Select "Attribute" to view
-                        detailed information by clicking features on the map.</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 4</div>
-                    <div class="flow-body">Select "Proposal" to explore proposal locations.</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 5</div>
-                    <div class="flow-body">Select "Climate Layer" for weather data and use "Attribute" for time-series
-                        exploration.</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 6</div>
-                    <div class="flow-body">To see the water quality station information click on "Water Quality Data".
-                        Click on the each Station point to see more information</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 7</div>
-                    <div class="flow-body">Select "MWS Info" for watershed committee details.</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 8</div>
-                    <div class="flow-body">Select "Data Catalog" to access metadata and downloads. You can go to the
-                        "Open MWS Data Catalog" to access and downloads.</div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 9</div>
-                    <div class="flow-body">Select "Statistics" for MWS-level statistics (e.g., land cover, population).
-                    </div>
-                </div>
-                <div class="flow-node">
-                    <div class="flow-title">Step 10</div>
-                    <div class="flow-body">To explore another MWS, close panels, change the MWS ID, and click "GO".
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <label class="modal-checkbox">
-                    <input id="dont-show-help-again" type="checkbox">
-                    <span>Don't show again</span>
-                </label>
-                <button id="close-readme" class="close-btn">Close</button>
-                <div class="step-nav-buttons">
-                    <button id="prev-step-btn" class="close-btn step-next-btn" type="button">&lt;</button>
-                    <button id="next-step-btn" class="close-btn step-next-btn" type="button">&gt;</button>
-                </div>
-            </div>
+            <ul>
+                <li><strong>Step 1:</strong> Select your District and Divisional Secretariat Division name.</li>
+                <li><strong>Step 2:</strong> 
+                    <ul>
+                        <li>If you know the Mini Watershed (MWS) ID, select it.</li>
+                        <li>If not, click a location on the map to see its MWS ID in the popup.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 3:</strong> Click "GO".</li>
+                <li><strong>Step 4:</strong> Use the footer menu to switch background map (e.g., Satellite, OSM).</li>
+                <li><strong>Step 5:</strong> 
+                    <ul>
+                        <li>Select "Base Layers" to explore GIS data layers.</li>
+                        <li>Select "Attribute" to view detailed information by clicking features on the map.</li>
+                    </ul>
+                </li>
+                <li><strong>Step 6:</strong> Select "Proposal" to explore proposal locations.</li>
+                <li><strong>Step 7:</strong> Select "Climate Layer" for weather data and use "Attribute" for time-series exploration.</li>
+                <li><strong>Step 8:</strong> Select "MWS Info" for watershed committee details.</li>
+                <li><strong>Step 9:</strong> Select "Data Catalog" to access metadata and downloads.</li>
+                <li><strong>Step 10:</strong> Select "Statistics" for MWS-level statistics (e.g., land cover, population).</li>
+                <li><strong>Step 11:</strong> To explore another MWS, close panels, change the MWS ID, and click "GO".</li>
+            </ul>
+            <button id="close-readme">Close</button>
         </div>
     </div>
 
 
-
+	
     <header>
 
         <div>Watershed Management Plan</div>
-
+		
         <div>
 
             <select id="selectDist">
                 <option value="">--Select Dist--</option>
             </select>
-
+			
             <select id="selectDSD">
                 <option value="">--Select DSD--</option>
             </select>
-
+	
             <select id="selectMWSID">
                 <option value="">--Select MWS_ID--</option>
             </select>
@@ -892,159 +431,119 @@
 
 
         <div>
-            <button id="baseLayersBtn" class="button" onclick="handleButtonClick('baseLayersBtn', 'basePanel')">Base
-                Layers</button>
-            <button id="proposalBtn" class="button"
-                onclick="handleButtonClick('proposalBtn', 'proposalPanel')">Proposal</button>
-            <button id="mwsInfoBtn" class="button" onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS
-                Info</button>
-            <button id="climateLayerBtn" class="button"
-                onclick="handleButtonClick('climateLayerBtn', 'climPanel')">Climate Layer</button>
-            <button id="waterQualityBtn" class="button"
-                onclick="handleButtonClick('waterQualityBtn', 'waterPanel')">Station Data</button>
-            <button id="dataCatalogBtn" class="button"
-                onclick="handleButtonClick('dataCatalogBtn', 'catalogPanel')">Data Catalog</button>
-            <button id="tableBtn" class="button" onclick="handleButtonClick('tableBtn', 'tablePanel')">Data
-                Table</button>
-            <button id="statisticBtn" class="button"
-                onclick="handleButtonClick('statisticBtn', 'statPanel')">Statistics</button>
-            <button id="help-button" class="button" onclick="openWorkthrough()">Help</button>
-            <button id="info-button" class="button" onclick="openWorkthrough()">User Guide</button>
-            <button id="userInputBtn" class="button" onclick="openUserInput()">Log in</button>
+            <button id="baseLayersBtn" class="button" onclick="handleButtonClick('baseLayersBtn', 'basePanel')">Base Layers</button>
+            <button id="proposalBtn" class="button" onclick="handleButtonClick('proposalBtn', 'proposalPanel')">Proposal</button>
+            <button id="mwsInfoBtn" class="button" onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS Info</button>
+            <button id="climateLayerBtn" class="button" onclick="handleButtonClick('climateLayerBtn', 'climPanel')">Climate Layer</button>
+            <button id="dataCatalogBtn" class="button" onclick="handleButtonClick('dataCatalogBtn', 'catalogPanel')">Data Catalog</button>
+			<button id="tableBtn" class="button" onclick="handleButtonClick('tableBtn', 'tablePanel')">Data Table</button>
+            <button id="statisticBtn" class="button" onclick="handleButtonClick('statisticBtn', 'statPanel')">Statistics</button>
+			<button id="attributeBtn" class="button" onclick="handleButtonClick('attributeBtn', 'attributePanel')">Attribute</button>
+			<button id="help-button" class="button">Help</button>
         </div>
 
 
 
-
+		
     </header>
+	
+
 
     <div id="map" class="map"></div>
+	
 
+    <div class="button-container">
+        <button onclick="openNewTab()">Open MWS Data Catalog</button>
+    </div>	
+	
     <footer>
-        <div class="footer-left">
-            <div id="infoPopupPanel" style="display:none;"></div>
-        </div>
-        <div class="footer-center">
-            <select id="baseLayerSelect" onchange="changeBaseLayer()">
-                <option value="osm">OpenStreetMap</option>
-                <option value="esri">ESRI Satellite View</option>
-                <option value="opentopo">OpenTopoMap</option>
-                <option value="custom">Custom URL</option>
-            </select>
-            <button id="measureFooterBtn" class="footer-btn" type="button" onclick="toggleFooterMeasure()">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M3 17.25V21h3.75l11-11-3.75-3.75-11 11Zm2.92 2.33H5v-.92l8.06-8.06.92.92-8.06 8.06ZM20.71 7.04a1.003 1.003 0 0 0 0-1.42L18.37 3.29a1.003 1.003 0 0 0-1.42 0l-1.79 1.79 3.75 3.75 1.8-1.79Z" />
-                </svg>
-                <span>Measure</span>
-            </button>
-            <button id="printMapBtn" class="footer-btn" type="button" onclick="openPrintMapWindow()">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path
-                        d="M6 9V3h12v6H6Zm10-2V5H8v2h8Zm2 3c1.66 0 3 1.34 3 3v5h-3v3H6v-3H3v-5c0-1.66 1.34-3 3-3h12Zm-2 9v-4H8v4h8Zm2-3h1v-3c0-.55-.45-1-1-1H6c-.55 0-1 .45-1 1v3h1v-3h12v3Z" />
-                </svg>
-                <span>Print</span>
-            </button>
-            <div class="language-switcher">
-                <label for="languageSelect">Language</label>
-                <select id="languageSelect" aria-label="Select language">
-                    <option value="en">English</option>
-                    <option value="si">Sinhala</option>
-                    <option value="ta">Tamil</option>
-                </select>
-            </div>
-        </div>
-        <div class="footer-right">
-            <button class="footer-btn" type="button" onclick="openNewTab()">Open MWS Data Catalog</button>
-        </div>
+        <select id="baseLayerSelect" onchange="changeBaseLayer()">
+            <option value="osm">OpenStreetMap</option>
+            <option value="esri">ESRI Satellite View</option>
+            <option value="opentopo">OpenTopoMap</option>
+            <option value="custom">Custom URL</option>
+        </select>
+		<!-- Popup panel for coordinates 
+	
+		<div id="infoPopupPanel" style="position:absolute; display:none;"></div>-->
+			<div id="infoPopupPanel" style="display:none;"></div> 
     </footer>
 
-    <div id="basePanel" class="panel">Base Layers Content <button class="hide-btn"
-            onclick="hidePanel('basePanel')">Close</button></div>
-    <div id="proposalPanel" class="panel">
-        Proposal Content
-        <div id="proposalNoLabel" style="margin-top:8px; font-weight:bold; display:none;">No.</div>
-        <button class="hide-btn" onclick="hidePanel('proposalPanel')">Close</button>
-        <button id="showAllButton" class="show-all-btn">Show All</button>
-    </div>
+    <!-- Side Panels 
+	<div>
+    <input type="text" id="metadataSearch" placeholder="Search metadata..." />
+    <button id="searchBtn" onclick="searchMetadata()">Search</button>
+</div>
+-->
 
-    <div id="infoPanel" class="panel">MWS Info Content <button class="hide-btn"
-            onclick="hidePanel('infoPanel')">Close</button></div>
-    <div id="climPanel" class="panel">Climate Layer Content <button class="hide-btn"
-            onclick="hidePanel('climPanel')">Close</button></div>
-    <div id="waterPanel" class="panel">Station Data</div>
-    <div id="attributePanel" class="panel"><span style="font-size:12px; font-weight:bold;">Attribute Layer
-            Content</span> <button class="hide-btn" onclick="hidePanel('attributePanel')">Close</button></div>
-    <div id="tablePanel" class="panel">Data Table <button class="hide-btn"
-            onclick="hidePanel('tablePanel')">Close</button>
+    <div id="basePanel" class="panel">Base Layers Content <button class="hide-btn" onclick="hidePanel('basePanel')">Close</button></div>
+ <div id="proposalPanel" class="panel">
+    Proposal Content
+    <button class="hide-btn" onclick="hidePanel('proposalPanel')">Close</button>
+    <button id="showAllButton" class="show-all-btn">Show All</button>
+</div>
 
-    </div>
-    <div id="waterQualityStationPanel" class="panel"></div>
-    <div id="catalogPanel" class="panel"><span style="font-size:12px; font-weight:bold;">Data Catalog Content</span>
-        <button class="hide-btn" onclick="hidePanel('catalogPanel')">Close</button>
+    <div id="infoPanel" class="panel">MWS Info Content <button class="hide-btn" onclick="hidePanel('infoPanel')">Close</button></div>
+    <div id="climPanel" class="panel">Climate Layer Content <button class="hide-btn" onclick="hidePanel('climPanel')">Close</button></div>
+    <div id="attributePanel" class="panel">Attribute Layer Content <button class="hide-btn" onclick="hidePanel('attributePanel')">Close</button></div>
+	<div id="tablePanel" class="panel">Data Table <button class="hide-btn" onclick="hidePanel('tablePanel')">Close</button>		
+
+</div>	
+    <div id="catalogPanel" class="panel">Data Catalog Content <button class="hide-btn" onclick="hidePanel('catalogPanel')">Close</button>
 
 
 
-        <table id="csvTable">
-            <thead>
-                <tr>
-                    <th><select id="filterID">
-                            <option value="">All IDs</option>
-                        </select></th>
-                    <th><select id="filterDatabase">
-                            <option value="">All Databases</option>
-                        </select></th>
-                    <th><select id="filterLayer">
-                            <option value="">All Layers</option>
-                        </select></th>
-                    <th><select id="filterProvider">
-                            <option value="">All Data Providers</option>
-                        </select></th>
+	<table id="csvTable">
+    <thead>
+        <tr>
+            <th><select id="filterID"><option value="">All IDs</option></select></th>
+            <th><select id="filterDatabase"><option value="">All Databases</option></select></th>
+            <th><select id="filterLayer"><option value="">All Layers</option></select></th>
+            <th><select id="filterProvider"><option value="">All Data Providers</option></select></th>
 
-                </tr>
-                <tr>
-                    <th>ID</th>
-                    <th>Database</th>
-                    <th>Layer</th>
-                    <th>Data provider</th>
-                    <th>Download</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    <div id="statPanel" class="panel">
+        </tr>
+        <tr>
+            <th>ID</th>
+            <th>Database</th>
+            <th>Layer</th>
+            <th>Data provider</th>
+            <th>Download</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+	</div>
+    <div id="statPanel" class="panel"> 
         <div>
-            <div id="lulcstatPanel" class="tab" onclick="selectTab('lulc')">LULC</div>
-            <div id="hazardstatPanel" class="tab" onclick="selectTab('hazard')">Hazard</div>
+            <div id="lulcstatPanel"  class="tab" onclick="selectTab('lulc')">LULC</div>
+            <div id="hazardstatPanel"class="tab" onclick="selectTab('hazard')">Hazard</div>
             <div id="demostatPanel" class="tab" onclick="selectTab('demography')">Demography</div>
             <div id="adminstatPanel" class="tab" onclick="selectTab('admin')">Admin</div>
-            <div id="soilstatPanel" class="tab" onclick="selectTab('soil')">Soil</div>
-            <button class="hide-btn" onclick="hidePanel('statPanel')">Close</button>
-
-            <canvas id="areaPieChart"></canvas>
-            <button id="downloadButton">Download CSV</button>
-            <button id="downloadChartButton">Download Chart as Image</button>
-
-
+            <div id="soilstatPanel"class="tab" onclick="selectTab('soil')">Soil</div>
+			<button class="hide-btn" onclick="hidePanel('statPanel')">Close</button>
+		
+		<canvas id="areaPieChart"></canvas>
+        <button id="downloadButton">Download CSV</button>
+        <button id="downloadChartButton">Download Chart as Image</button>
+		
+		
         </div>
 
 
 
-        <div id="tablePanel" class="panel">Data Table <button class="hide-btn"
-                onclick="hidePanel('tablePanel')">Close</button>
+		<div id="tablePanel" class="panel">Data Table <button class="hide-btn" onclick="hidePanel('tablePanel')">Close</button>		
 
-            <div id="statContent"></div>
+<div id="statContent"></div>
 
-            <!-- <div id="infoPopupPanel" class="panel"></div> -->
-
-
+    <!-- <div id="infoPopupPanel" class="panel"></div> -->
+    
 
 
 
-            <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-            <!-- 
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+	<!-- 
     <div class="layer-control">
         <h4>Toggle Layers</h4>
         <label><input type="checkbox" id="toggleAgroeco" checked> Agroeco Layer</label><br>
@@ -1054,1564 +553,135 @@
     </div>	
 	-->
 
-            <script>
-                const map = L.map('map').setView([7.8731, 80.7718], 8); // Centered on Sri Lanka
-                window.addEventListener('resize', () => {
-                    setTimeout(() => map.invalidateSize(), 50);
-                });
-                setTimeout(() => map.invalidateSize(), 250);
-                let waterQualityLayer = null; // holds current water-quality GeoJSON layer
-                let cachedClimateStationMws = '';
-                let cachedClimateStationUrls = {};
-                let monthlyRangeBySource = {};
-                const staticWaterSourceUrls = {
-                    'CEA': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/12_WQ/CEA_pH.geojson',
-                    'MASL': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/12_WQ/MASL_pH.geojson',
-                    'NWSDB': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/12_WQ/NWSDB_pH.geojson',
-                    'Evaporation': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/10_MET/EV_St/MET_EV_St.geojson',
-                    'Rainfall': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/10_MET/RF_St/MET_RF_St.geojson',
-                    'Temperature': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/10_MET/Temp/MET_Temp_St.geojson'
-                };
+    <script>
+        const map = L.map('map').setView([7.8731, 80.7718], 8); // Centered on Sri Lanka
 
-                function renderWaterPanel() {
-                    const waterPanel = document.getElementById('waterPanel');
-                    if (!waterPanel) return;
+        // Base layers
+        const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        const esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 });
+        const openTopoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 });
+        const customLayer = L.tileLayer('https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Farming/MapServer', { maxZoom: 19 });
 
-                    waterPanel.innerHTML = '';
+        let activePanel = null;
 
-                    const closeButton = document.createElement('button');
-                    closeButton.classList.add('hide-btn');
-                    closeButton.textContent = 'Close';
-                    closeButton.onclick = function () {
-                        hidePanel('waterPanel');
-                    };
-                    waterPanel.appendChild(closeButton);
+        // Activate buttons on 'Go' click
+document.addEventListener("DOMContentLoaded", function () {
+    const distSelect = document.getElementById('selectDist');
+    const dsdSelect = document.getElementById('selectDSD');
+    const mwsIdSelect = document.getElementById('selectMWSID');
+    const goButton = document.getElementById('goBtn');
+    const otherButtons = document.querySelectorAll('header .button:not(#goBtn)');
 
-                    const primaryGroup = document.createElement('div');
-                    const primaryTitle = document.createElement('h3');
-                    primaryTitle.textContent = 'Water Quality Stations';
-                    primaryGroup.appendChild(primaryTitle);
+    // Function to check if all three dropdowns are selected
+    function checkDropdowns() {
+        if (distSelect.value && dsdSelect.value && mwsIdSelect.value) {
+            goButton.classList.remove('disabled');  // Enable "Go" button
+        } else {
+            goButton.classList.add('disabled');  // Keep "Go" button disabled
+        }
+    }
 
-                    const primarySources = ['CEA', 'MASL', 'NWSDB'];
-                    primarySources.forEach((source, index) => {
-                        const row = document.createElement('div');
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.name = 'waterSource';
-                        checkbox.value = source;
-                        checkbox.id = `water_source_primary_${index}`;
-                        checkbox.addEventListener('change', handleWaterSourceChange);
+    // Function to activate other buttons when "Go" is clicked
+    function activateButtons() {
+        otherButtons.forEach(button => button.classList.remove('disabled'));  // Enable all buttons
+    }
 
-                        const label = document.createElement('label');
-                        label.htmlFor = checkbox.id;
-                        label.textContent = source;
+    // Function to reset everything when any dropdown is changed
+    function resetSystem() {
+        goButton.classList.add('disabled');  // Disable "Go" button
+        otherButtons.forEach(button => button.classList.add('disabled'));  // Disable all other buttons
+    }
 
-                        row.appendChild(checkbox);
-                        row.appendChild(label);
-                        primaryGroup.appendChild(row);
-                    });
-                    waterPanel.appendChild(primaryGroup);
+    // Attach event listeners to dropdowns
+    [distSelect, dsdSelect, mwsIdSelect].forEach(select => {
+        select.addEventListener("change", () => {
+            checkDropdowns();  // Check if all dropdowns are filled
+            resetSystem();  // Reset system when dropdown changes
+        });
+    });
 
-                    const otherGroup = document.createElement('div');
-                    const otherTitle = document.createElement('h3');
-                    otherTitle.textContent = 'Other Stations';
-                    otherGroup.appendChild(otherTitle);
+    // Event listener for "Go" button click
+    goButton.addEventListener("click", activateButtons);
+});
 
-                    const otherSources = ['Evaporation', 'Rainfall', 'Temperature'];
-                    otherSources.forEach((source, index) => {
-                        const row = document.createElement('div');
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.name = 'waterSource';
-                        checkbox.value = source;
-                        checkbox.id = `water_source_other_${index}`;
-                        checkbox.addEventListener('change', handleWaterSourceChange);
 
-                        const label = document.createElement('label');
-                        label.htmlFor = checkbox.id;
-                        label.textContent = source;
 
-                        row.appendChild(checkbox);
-                        row.appendChild(label);
-                        otherGroup.appendChild(row);
-                    });
-                    waterPanel.appendChild(otherGroup);
+
+
+        // Handle button click
+        function handleButtonClick(buttonId, panelId) {
+            if (activePanel) {
+                hidePanel(activePanel.id);
+            }
+
+            const panel = document.getElementById(panelId);
+            panel.style.display = 'block';
+            activePanel = panel;
+            document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
+            document.getElementById(buttonId).classList.add('active');
+        }
+
+        // Hide panel function
+        function hidePanel(panelId) {
+            const panel = document.getElementById(panelId);
+            panel.style.display = 'none';
+            activePanel = null; // Clear the active panel
+            document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
+        }
+        // Tab selection in statistics panel
+        function selectTab(tabName) {
+            const statContent = document.getElementById('statContent');
+            statContent.innerHTML = `<p>Data for ${tabName}</p>`;
+            document.querySelectorAll('#statPanel .tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+		
+        // Map click event to show popup with coordinates
+        map.on('click', function (e) {
+            const infoPopup = document.getElementById('infoPopupPanel');
+            infoPopup.style.left = `${e.layerX}px`;
+            infoPopup.style.top = `${e.layerY}px`;
+            infoPopup.style.display = 'block';
+            infoPopup.innerHTML = `Coordinates: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)} `;
+ 
+
+ });
+
+
+
+        // Change base layer function
+        function changeBaseLayer() {
+            const baseLayerSelect = document.getElementById('baseLayerSelect');
+            const selectedLayer = baseLayerSelect.value;
+
+            // Remove all layers
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.TileLayer) {
+                    map.removeLayer(layer);
                 }
-
-                async function getClimateStationUrls() {
-                    const mwsSelect = document.getElementById('selectMWSID');
-                    const mwsID = (mwsSelect && mwsSelect.value ? mwsSelect.value : '').replace(/-/g, '_');
-                    if (!mwsID) return {};
-
-                    if (cachedClimateStationMws === mwsID && Object.keys(cachedClimateStationUrls).length) {
-                        return cachedClimateStationUrls;
-                    }
-
-                    const climateCsvCandidates = [
-                        `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${mwsID}/ClimLayer.csv`,
-                        'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_003/ClimLayer.csv'
-                    ];
-
-                    let csvText = '';
-                    for (const url of climateCsvCandidates) {
-                        try {
-                            const resp = await fetch(url);
-                            if (!resp.ok) continue;
-                            csvText = await resp.text();
-                            if (csvText) break;
-                        } catch (err) {
-                            console.warn('Climate layer CSV fetch failed:', url, err);
-                        }
-                    }
-                    if (!csvText) return {};
-
-                    const parsed = Papa.parse(csvText, { header: true });
-                    const rows = Array.isArray(parsed.data) ? parsed.data : [];
-                    const nextUrls = {};
-
-                    rows.forEach((row) => {
-                        if (!row) return;
-                        const layerName = String(row.Layer || '').trim();
-                        const geojsonUrl = String(row.geojson || '').trim();
-                        if (!geojsonUrl) return;
-
-                        if (layerName === 'Rainfall') nextUrls.Rainfall = geojsonUrl;
-                        if (layerName === 'Temperature') nextUrls.Temperature = geojsonUrl;
-                        if (layerName === 'Evaporation' || layerName === 'Evoporation') nextUrls.Evaporation = geojsonUrl;
-                    });
-
-                    cachedClimateStationMws = mwsID;
-                    cachedClimateStationUrls = nextUrls;
-                    return nextUrls;
-                }
-
-                async function showCSVForStation(stationName, options = {}) {
-                    const suppressError = !!options.suppressError;
-                    const encodedName = encodeURIComponent(stationName.trim());
-                    const baseCSVPath = 'https://raw.githubusercontent.com/Dilshi-1997/WMS-test/main/';
-                    const csvUrl = `${baseCSVPath}${encodedName}.csv`;
-
-                    try {
-                        const response = await fetch(csvUrl);
-                        if (!response.ok) throw new Error('CSV not found');
-                        const text = await response.text();
-                        const normalizeCell = (cell) => String(cell ?? '')
-                            .replace(/^\uFEFF/, '') // strip BOM
-                            .trim()
-                            .replace(/^"+|"+$/g, ''); // strip wrapping quotes
-                        const normalizeKey = (cell) => normalizeCell(cell).toLowerCase();
-
-                        const rows = text
-                            .split(/\r?\n/)
-                            .map(line => line.trim())
-                            .filter(line => line.length > 0)
-                            .map(line => line.split(',').map(normalizeCell));
-
-                        // First column = parameter names
-                        const paramNames = rows.map(r => r[0]);
-                        const paramKeys = paramNames.map(normalizeKey);
-
-                        // Find the date row
-                        const dateRowIndex = paramKeys.indexOf("date");
-                        if (dateRowIndex === -1) {
-                            alert(`No 'Date' row found in CSV. Found parameters: ${paramNames.join(", ")}`);
-                            return;
-                        }
-                        const labels = rows[dateRowIndex].slice(1).map(normalizeCell);
-
-                        // Parse labels as dates
-                        const monthNames = {
-                            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
-                            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
-                        };
-                        const parsedLabels = labels.map(label => {
-                            // Try MM/YYYY
-                            let parts = label.split('/');
-                            if (parts.length === 2) {
-                                const month = parseInt(parts[0], 10) - 1;
-                                const year = parseInt(parts[1], 10);
-                                if (!isNaN(month) && !isNaN(year)) {
-                                    return new Date(year, month, 1);
-                                }
-                            }
-                            // Try YYYY-MMM-DD or YYYY-MM-DD
-                            parts = label.split('-');
-                            if (parts.length === 3) {
-                                const year = parseInt(parts[0], 10);
-                                const monthPart = parts[1];
-                                const day = parseInt(parts[2], 10);
-                                let month;
-                                const monthNum = parseInt(monthPart, 10);
-                                if (!isNaN(monthNum)) {
-                                    month = monthNum - 1; // 0-based
-                                } else {
-                                    month = monthNames[monthPart];
-                                }
-                                if (!isNaN(year) && month !== undefined && !isNaN(day)) {
-                                    return new Date(year, month, day);
-                                }
-                            }
-                            // Try MMM-YYYY
-                            parts = label.split('-');
-                            if (parts.length === 2) {
-                                const monthStr = parts[0];
-                                const year = parseInt(parts[1], 10);
-                                const month = monthNames[monthStr];
-                                if (month !== undefined && !isNaN(year)) {
-                                    return new Date(year, month, 1);
-                                }
-                            }
-                            // Fallback
-                            return new Date(label);
-                        });
-
-                        // Parameters from other rows
-                        const paramRows = rows.filter((_, i) => i !== dateRowIndex);
-                        const finalParamNames = paramRows.map(r => r[0]);
-                        const finalParamKeys = finalParamNames.map(normalizeKey);
-
-                        // Parameters to plot
-                        const nwsdbStations = new Set([
-                            "Balagolla", "Dail Watta", "Datry watta", "Delta Estate", "Elpitiya", "Great Western", "Marassana", "Meewathura", "Pundalu oya", "Rikillagaskada", "Riverina watta", "Meewathura_University", "Arattana", "Haragama", "Hynford", "Nillambe", "Ragala", "Rangala", "Shakthi Janapadaya", "Walapane"
-                        ]);
-                        const isCEA = stationName.toUpperCase().startsWith('MR ');
-                        const isNWSDB = nwsdbStations.has(stationName);
-                        const params = isCEA ? [
-                            "BOD",
-                            "Chlorine",
-                            "COD",
-                            "Dissolved O2",
-                            "Electrical Conductivity",
-                            "Hardness",
-                            "Nitrate (mg/l)",
-                            "pH",
-                            "Phosphate",
-                            "Temperature (Celsius)",
-                            "Turbidity (NTU)"
-                        ] : isNWSDB ? [
-                            "Alkalinity (mg/l)",
-                            "Color (Hazen)",
-                            "E Coli",
-                            "Hardness (mg/l)",
-                            "Iron (mg/l)",
-                            "Nitrate (mg/l)",
-                            "pH",
-                            "Total Coliform",
-                            "Turbidity (NTU)"
-                        ] : [
-                            "Dissolved O2 (mg/l)",
-                            "Electircal Conductivity (?s)",
-                            "Total dissolved solids (mg/l)",
-                            "pH",
-                            "Temperature (oC)",
-                            "Turbidity (NTU)"
-                        ];
-
-                        // Show panel (no CSV table, only chart + buttons)
-                        const panel = document.getElementById('waterQualityStationPanel');
-                        setStationPanelSize(panel, true);
-                        panel.innerHTML = `
-                            <strong>Station:</strong> ${stationName}<br><br>
-                            <div id="paramButtons"></div>
-                            <canvas id="csvChart" style="width:800px; height:200px;"></canvas>
-                            <br>
-                            <button id="downloadCsvChartBtn" class="button" type="button">Download Chart</button>
-                            <br><br>
-                            <button class="hide-btn" onclick="hidePanel('waterQualityStationPanel')">Close</button>
-                        `;
-                        const downloadCsvBtn = document.getElementById('downloadCsvChartBtn');
-                        if (downloadCsvBtn) {
-                            downloadCsvBtn.onclick = () => downloadCanvasChart('csvChart', `${stationName}_water_quality_chart`);
-                        }
-
-                        // Create parameter buttons
-                        const btnContainer = document.getElementById("paramButtons");
-                        params.forEach(param => {
-                            const btn = document.createElement("button");
-                            btn.textContent = param;
-                            btn.style.margin = "5px";
-                            btn.style.padding = "6px 10px";
-                            btn.style.cursor = "pointer";
-                            btn.onclick = () => drawChart(param);
-                            btnContainer.appendChild(btn);
-                        });
-
-                        // Draw chart for selected parameter
-                        function drawChart(param) {
-                            const rowIndex = finalParamKeys.indexOf(normalizeKey(param));
-                            if (rowIndex === -1) {
-                                alert(`Row '${param}' not found in CSV. Found rows: ${finalParamNames.join(", ")}`);
-                                return;
-                            }
-
-                            const actualRowIndex = rowIndex < dateRowIndex ? rowIndex : rowIndex + 1;
-                            const values = rows[actualRowIndex].slice(1).map(v =>
-                                v === "n/a" || v === "*" || v === "" ? null : parseFloat(v)
-                            );
-
-                            const ctx = document.getElementById('csvChart').getContext('2d');
-
-                            // ✅ Clear previous chart before drawing new one
-                            if (window.csvChartInstance) {
-                                window.csvChartInstance.destroy();
-                            }
-
-                            const formattedLabels = parsedLabels.map(d => {
-                                if (d instanceof Date && !isNaN(d)) {
-                                    return d.toISOString().slice(0, 10);
-                                }
-                                return String(d);
-                            });
-
-                            window.csvChartInstance = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: formattedLabels,
-                                    datasets: [{
-                                        label: param,
-                                        data: values,
-                                        borderColor: 'rgba(75, 192, 192, 1)',
-                                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                                        fill: true,
-                                        spanGaps: true,
-                                        tension: 0.3
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    plugins: {
-                                        title: {
-                                            display: true,
-                                            text: `${param} over time for ${stationName}`
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            title: { display: true, text: "Date" },
-                                            ticks: { maxRotation: 45, minRotation: 45 }
-                                        },
-                                        y: { title: { display: true, text: param } }
-                                    }
-                                }
-                            });
-                        }
-
-                        return true;
-                    } catch (err) {
-                        if (!suppressError) alert(`CSV file not found for station: ${stationName}`);
-                        console.error(err);
-                        return false;
-                    }
-                }
-
-                function normalizeMonthKey(value) {
-                    return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-                }
-
-                function parseNumericValue(value) {
-                    if (value === null || value === undefined) return null;
-                    const cleaned = String(value).trim().replace(/,/g, '');
-                    if (!cleaned || cleaned === '*' || cleaned.toLowerCase() === 'n/a') return null;
-                    const num = Number(cleaned);
-                    return Number.isFinite(num) ? num : null;
-                }
-
-                function extractMonthlyValuesFromProperties(properties) {
-                    const props = properties || {};
-                    const monthDefs = [
-                        { label: 'January', aliases: ['january', 'jan'] },
-                        { label: 'February', aliases: ['february', 'feb'] },
-                        { label: 'March', aliases: ['march', 'mar'] },
-                        { label: 'April', aliases: ['april', 'apr'] },
-                        { label: 'May', aliases: ['may'] },
-                        { label: 'June', aliases: ['june', 'jun'] },
-                        { label: 'July', aliases: ['july', 'jul'] },
-                        { label: 'August', aliases: ['august', 'aug'] },
-                        { label: 'September', aliases: ['september', 'sep', 'sept'] },
-                        { label: 'October', aliases: ['october', 'oct'] },
-                        { label: 'November', aliases: ['november', 'nov'] },
-                        { label: 'December', aliases: ['december', 'dec'] }
-                    ];
-
-                    const entries = Object.entries(props).map(([key, value]) => ({
-                        normalizedKey: normalizeMonthKey(key),
-                        value: parseNumericValue(value)
-                    }));
-
-                    const labels = monthDefs.map((m) => m.label);
-                    const values = monthDefs.map((month) => {
-                        const aliases = month.aliases.map(normalizeMonthKey);
-                        const matched = entries.find((entry) => {
-                            if (entry.value === null) return false;
-                            return aliases.some((alias) =>
-                                entry.normalizedKey === alias ||
-                                entry.normalizedKey.startsWith(alias) ||
-                                entry.normalizedKey.endsWith(alias)
-                            );
-                        });
-                        return matched ? matched.value : null;
-                    });
-
-                    const hasAnyValue = values.some((v) => v !== null);
-                    return hasAnyValue ? { labels, values } : null;
-                }
-
-                function sanitizeFileName(value) {
-                    return String(value || 'chart')
-                        .replace(/[\\/:*?"<>|]+/g, '_')
-                        .replace(/\s+/g, '_')
-                        .replace(/_+/g, '_')
-                        .replace(/^_+|_+$/g, '');
-                }
-
-                function downloadCanvasChart(canvasId, fileNamePrefix) {
-                    const canvas = document.getElementById(canvasId);
-                    if (!canvas) {
-                        alert('Chart is not available for download.');
-                        return;
-                    }
-                    const link = document.createElement('a');
-                    const stamp = new Date().toISOString().slice(0, 10);
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = `${sanitizeFileName(fileNamePrefix)}_${stamp}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-
-                function downloadStatisticsChart() {
-                    const chartCanvas = document.getElementById('areaPieChart');
-                    if (!chartCanvas || chartCanvas.width === 0 || chartCanvas.height === 0) {
-                        alert('No chart to download.');
-                        return;
-                    }
-
-                    const link = document.createElement('a');
-                    const stamp = new Date().toISOString().slice(0, 10);
-                    link.href = chartCanvas.toDataURL('image/png');
-                    link.download = `statistics_chart_${stamp}.png`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-
-                function downloadStatisticsCsv() {
-                    const activeChart = window.Chart && typeof Chart.getChart === 'function'
-                        ? Chart.getChart('areaPieChart')
-                        : null;
-
-                    if (!activeChart
-                        || !activeChart.data
-                        || !Array.isArray(activeChart.data.labels)
-                        || !activeChart.data.datasets
-                        || !activeChart.data.datasets[0]
-                        || !Array.isArray(activeChart.data.datasets[0].data)
-                        || activeChart.data.labels.length === 0
-                        || activeChart.data.datasets[0].data.length === 0) {
-                        alert('No data available to download.');
-                        return;
-                    }
-
-                    const labels = activeChart.data.labels;
-                    const values = activeChart.data.datasets[0].data;
-                    let csvContent = 'data:text/csv;charset=utf-8,Category,Value\n';
-
-                    labels.forEach((label, index) => {
-                        const safeLabel = String(label ?? '').replace(/"/g, '""');
-                        const value = values[index] ?? '';
-                        csvContent += `"${safeLabel}",${value}\n`;
-                    });
-
-                    const link = document.createElement('a');
-                    const stamp = new Date().toISOString().slice(0, 10);
-                    link.href = encodeURI(csvContent);
-                    link.download = `statistics_data_${stamp}.csv`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                }
-
-                function setStationPanelSize(panel, maximize) {
-                    if (!panel) return;
-                    panel.dataset.maximized = maximize ? '1' : '0';
-                    panel.style.display = 'block';
-                    panel.style.left = 'auto';
-                    panel.style.top = '70px';
-                    panel.style.right = '10px';
-                    panel.style.transform = 'none';
-                    panel.style.position = 'absolute';
-                    panel.style.overflowY = 'auto';
-                    panel.style.maxWidth = maximize ? '96vw' : '90vw';
-                    panel.style.width = maximize ? '760px' : '520px';
-                    panel.style.maxHeight = maximize ? '82vh' : '70vh';
-                }
-
-                function wireStationPanelSizeToggle(panel, canvasId) {
-                    if (!panel) return;
-                    const btn = panel.querySelector('.panel-size-toggle');
-                    if (!btn) return;
-                    btn.addEventListener('click', function () {
-                        const nextMaximized = panel.dataset.maximized !== '1';
-                        setStationPanelSize(panel, nextMaximized);
-                        btn.textContent = nextMaximized ? 'Restore' : 'Maximize';
-                        const canvas = document.getElementById(canvasId);
-                        if (canvas) {
-                            canvas.style.height = nextMaximized ? '360px' : '220px';
-                        }
-                    });
-                }
-
-                function showMonthlyStationChart(properties, sourceName, stationName) {
-                    const monthly = extractMonthlyValuesFromProperties(properties);
-                    if (!monthly) return false;
-
-                    const panel = document.getElementById('waterQualityStationPanel');
-                    if (!panel) return false;
-
-                    const sourceUnits = {
-                        Evaporation: 'mm',
-                        Rainfall: 'mm',
-                        Temperature: '°C'
-                    };
-                    const unit = sourceUnits[sourceName] || '';
-                    const titleName = stationName || 'Station';
-                    const stationNumericValues = monthly.values.filter((v) => typeof v === 'number' && Number.isFinite(v));
-                    if (!stationNumericValues.length) return false;
-                    const fixedYAxisBySource = {
-                        Rainfall: { min: 0, max: 780, step: 60, decimals: 0 },
-                        Evaporation: { min: 0, max: 8, step: 0.5, decimals: 2 },
-                        Temperature: { min: 0, max: 35, step: 1, decimals: 1 }
-                    };
-
-                    const selectedRange = fixedYAxisBySource[sourceName] || null;
-                    let yMin;
-                    let yMax;
-                    let tickStep;
-                    let tickDecimals;
-
-                    if (selectedRange) {
-                        yMin = selectedRange.min;
-                        yMax = selectedRange.max;
-                        tickStep = selectedRange.step;
-                        tickDecimals = selectedRange.decimals;
-                    } else {
-                        let rawMin = Math.min(...stationNumericValues);
-                        let rawMax = Math.max(...stationNumericValues);
-                        if (!Number.isFinite(rawMin) || !Number.isFinite(rawMax)) return false;
-                        if (rawMin === rawMax) {
-                            rawMin -= 0.05;
-                            rawMax += 0.05;
-                        }
-                        const rangePadding = Math.max(0.05, (rawMax - rawMin) * 0.03);
-                        yMin = rawMin - rangePadding;
-                        yMax = rawMax + rangePadding;
-                        const yRange = yMax - yMin;
-                        tickStep = yRange <= 1 ? 0.1 : (yRange <= 3 ? 0.2 : (yRange <= 8 ? 0.5 : 1));
-                        tickDecimals = yRange <= 3 ? 2 : 1;
-                    }
-
-                    setStationPanelSize(panel, true);
-                    panel.innerHTML = `
-                        <strong>Station:</strong> ${titleName}<br>
-                        <strong>Type:</strong> ${sourceName}<br><br>
-                        <canvas id="monthlyStationChart" style="width:800px; height:220px;"></canvas>
-                        <div id="monthlyPointValue" style="margin-top:8px;font-size:12px;color:#1d1d1d;">Click a point to view the value.</div>
-                        <br>
-                        <button id="downloadMonthlyChartBtn" class="button" type="button">Download Chart</button>
-                        <br><br>
-                        <button class="hide-btn" onclick="hidePanel('waterQualityStationPanel')">Close</button>
-                    `;
-                    const downloadMonthlyBtn = document.getElementById('downloadMonthlyChartBtn');
-                    if (downloadMonthlyBtn) {
-                        downloadMonthlyBtn.onclick = () => downloadCanvasChart('monthlyStationChart', `${titleName}_${sourceName}_chart`);
-                    }
-
-                    const canvas = document.getElementById('monthlyStationChart');
-                    if (!canvas) return false;
-                    const ctx = canvas.getContext('2d');
-                    const pointValue = document.getElementById('monthlyPointValue');
-
-                    if (window.monthlyStationChartInstance) {
-                        window.monthlyStationChartInstance.destroy();
-                    }
-
-                    window.monthlyStationChartInstance = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: monthly.labels,
-                            datasets: [{
-                                label: `${sourceName} (${unit || 'value'})`,
-                                data: monthly.values,
-                                borderColor: 'rgba(33, 150, 243, 1)',
-                                backgroundColor: 'rgba(33, 150, 243, 0.18)',
-                                borderWidth: 2,
-                                pointRadius: 5,
-                                pointHoverRadius: 7,
-                                spanGaps: true,
-                                tension: 0.2,
-                                fill: false
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            interaction: {
-                                mode: 'nearest',
-                                intersect: true
-                            },
-                            onClick: function (event, elements) {
-                                if (!elements || !elements.length || !pointValue) return;
-                                const first = elements[0];
-                                const month = monthly.labels[first.index];
-                                const value = monthly.values[first.index];
-                                const displayValue = value === null ? 'No data' : Number(value).toFixed(tickDecimals);
-                                pointValue.textContent = `${month}: ${displayValue}${value === null ? '' : (unit ? ' ' + unit : '')}`;
-                            },
-                            plugins: {
-                                title: {
-                                    display: true,
-                                    text: `${sourceName} by month (January to December) - ${titleName}`
-                                }
-                            },
-                            scales: {
-                                x: { title: { display: true, text: 'Month' } },
-                                y: {
-                                    min: yMin,
-                                    max: yMax,
-                                    title: { display: true, text: unit ? `${sourceName} (${unit})` : sourceName },
-                                    ticks: {
-                                        stepSize: tickStep,
-                                        callback: function (value) {
-                                            return Number(value).toFixed(tickDecimals);
-                                        }
-                                    },
-                                    grid: {
-                                        color: 'rgba(0,0,0,0.08)',
-                                        borderDash: [3, 3]
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    return true;
-                }
-
-
-                // Base layers
-                const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, crossOrigin: true }).addTo(map);
-                const esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, crossOrigin: true });
-                const openTopoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17, crossOrigin: true });
-                const customLayer = L.tileLayer('https://gisapps.nsdi.gov.lk/server/rest/services/SLNSDI/Farming/MapServer', { maxZoom: 19, crossOrigin: true });
-                let lastSelectedLayerName = '';
-
-                document.addEventListener('change', (event) => {
-                    const target = event.target;
-                    if (!target || !target.matches('#basePanel input[type="checkbox"], #proposalPanel input[type="checkbox"], #climPanel input[type="checkbox"], #waterPanel input[type="checkbox"], input[name="waterSource"]')) {
-                        return;
-                    }
-                    const label = target.id ? document.querySelector(`label[for="${target.id}"]`) : null;
-                    const layerName = ((label && label.textContent) || target.value || '').trim();
-                    if (target.checked && layerName) {
-                        lastSelectedLayerName = layerName;
-                        return;
-                    }
-                    if (!target.checked && layerName === lastSelectedLayerName) {
-                        lastSelectedLayerName = '';
-                    }
-                });
-
-                function pickSerializableOptions(options) {
-                    if (!options) return {};
-                    return {
-                        maxZoom: options.maxZoom,
-                        minZoom: options.minZoom,
-                        opacity: options.opacity,
-                        zIndex: options.zIndex,
-                        subdomains: options.subdomains,
-                        tms: options.tms,
-                        attribution: options.attribution,
-                        crossOrigin: true
-                    };
-                }
-
-                function pickVectorStyleOptions(options) {
-                    if (!options) return null;
-                    return {
-                        color: options.color,
-                        weight: options.weight,
-                        opacity: options.opacity,
-                        fillColor: options.fillColor,
-                        fillOpacity: options.fillOpacity,
-                        dashArray: options.dashArray,
-                        radius: options.radius
-                    };
-                }
-
-                function normalizeLayerName(value) {
-                    return String(value || '')
-                        .trim()
-                        .toLowerCase()
-                        .replace(/[_-]+/g, ' ')
-                        .replace(/\s+/g, ' ');
-                }
-
-                function getCurrentSelectedLayerName() {
-                    if (lastSelectedLayerName) return lastSelectedLayerName;
-                    const checked = Array.from(document.querySelectorAll('#basePanel input[type="checkbox"]:checked, #proposalPanel input[type="checkbox"]:checked, #climPanel input[type="checkbox"]:checked, #waterPanel input[type="checkbox"]:checked, input[name="waterSource"]:checked'));
-                    if (!checked.length) return '';
-                    const lastChecked = checked[checked.length - 1];
-                    const label = lastChecked.id ? document.querySelector(`label[for="${lastChecked.id}"]`) : null;
-                    return ((label && label.textContent) || lastChecked.value || '').trim();
-                }
-
-                function getOverlayLayerByName(layerName) {
-                    const normalizedTarget = normalizeLayerName(layerName);
-                    if (!normalizedTarget) return null;
-
-                    const registries = [];
-                    if (typeof geoJsonLayers !== 'undefined' && geoJsonLayers) registries.push(geoJsonLayers);
-                    if (typeof pngOverlays !== 'undefined' && pngOverlays) registries.push(pngOverlays);
-                    if (typeof waterQualityLayers !== 'undefined' && waterQualityLayers) registries.push(waterQualityLayers);
-
-                    for (const registry of registries) {
-                        const names = Object.keys(registry || {});
-                        for (const name of names) {
-                            const normalizedName = normalizeLayerName(name);
-                            if (normalizedName !== normalizedTarget) continue;
-                            const layer = registry[name];
-                            if (layer && map.hasLayer(layer)) return layer;
-                        }
-                    }
-                    // Fallback: try partial match (helps with minor label differences).
-                    for (const registry of registries) {
-                        const names = Object.keys(registry || {});
-                        for (const name of names) {
-                            const normalizedName = normalizeLayerName(name);
-                            if (!normalizedName) continue;
-                            if (!normalizedTarget.includes(normalizedName) && !normalizedName.includes(normalizedTarget)) {
-                                continue;
-                            }
-                            const layer = registry[name];
-                            if (layer && map.hasLayer(layer)) return layer;
-                        }
-                    }
-                    return null;
-                }
-
-                function serializeOverlayLayer(layer) {
-                    if (!layer) return null;
-
-                    if (layer instanceof L.ImageOverlay && layer._url && typeof layer.getBounds === 'function') {
-                        const bounds = layer.getBounds();
-                        if (!bounds) return null;
-                        const sw = bounds.getSouthWest();
-                        const ne = bounds.getNorthEast();
-                        const overlayUrl = layer._originalUrl || layer._url;
-                        return {
-                            type: 'imageOverlay',
-                            url: overlayUrl,
-                            bounds: [[sw.lat, sw.lng], [ne.lat, ne.lng]],
-                            options: {
-                                opacity: typeof layer.options?.opacity === 'number' ? layer.options.opacity : 1,
-                                crossOrigin: true
-                            }
-                        };
-                    }
-
-                    if (layer instanceof L.GeoJSON && typeof layer.eachLayer === 'function') {
-                        const features = [];
-                        const pushFeatureFromLayer = (featureLayer) => {
-                            if (!featureLayer || typeof featureLayer.toGeoJSON !== 'function') return;
-                            const feature = featureLayer.toGeoJSON();
-                            if (!feature || !feature.geometry) return;
-                            let markerMeta = null;
-
-                            if (featureLayer instanceof L.Marker) {
-                                const icon = featureLayer.options ? featureLayer.options.icon : null;
-                                if (icon && icon.options) {
-                                    if (icon.options.html) {
-                                        markerMeta = {
-                                            kind: 'divIcon',
-                                            className: icon.options.className || '',
-                                            html: icon.options.html || '',
-                                            iconSize: icon.options.iconSize || null,
-                                            iconAnchor: icon.options.iconAnchor || null,
-                                            popupAnchor: icon.options.popupAnchor || null
-                                        };
-                                    } else if (icon.options.iconUrl) {
-                                        markerMeta = {
-                                            kind: 'icon',
-                                            iconUrl: icon.options.iconUrl,
-                                            iconRetinaUrl: icon.options.iconRetinaUrl || null,
-                                            shadowUrl: icon.options.shadowUrl || null,
-                                            iconSize: icon.options.iconSize || null,
-                                            iconAnchor: icon.options.iconAnchor || null,
-                                            popupAnchor: icon.options.popupAnchor || null,
-                                            shadowSize: icon.options.shadowSize || null
-                                        };
-                                    }
-                                }
-                            }
-
-                            const style = featureLayer.options ? {
-                                color: featureLayer.options.color,
-                                weight: featureLayer.options.weight,
-                                opacity: featureLayer.options.opacity,
-                                fillColor: featureLayer.options.fillColor,
-                                fillOpacity: featureLayer.options.fillOpacity,
-                                dashArray: featureLayer.options.dashArray,
-                                radius: featureLayer.options.radius
-                            } : {};
-                            feature.properties = feature.properties || {};
-                            feature.properties.__printStyle = style;
-                            if (markerMeta) feature.properties.__printMarker = markerMeta;
-                            features.push(feature);
-                        };
-
-                        layer.eachLayer((featureLayer) => {
-                            if (!featureLayer) return;
-                            if (typeof featureLayer.toGeoJSON === 'function') {
-                                pushFeatureFromLayer(featureLayer);
-                                return;
-                            }
-                            if (featureLayer instanceof L.LayerGroup && typeof featureLayer.eachLayer === 'function') {
-                                let preferredChild = null;
-                                featureLayer.eachLayer((child) => {
-                                    if (!child || typeof child.toGeoJSON !== 'function') return;
-                                    if (!preferredChild && child instanceof L.Marker) preferredChild = child;
-                                    if (!preferredChild) preferredChild = child;
-                                });
-                                if (preferredChild) {
-                                    pushFeatureFromLayer(preferredChild);
-                                } else {
-                                    featureLayer.eachLayer((child) => pushFeatureFromLayer(child));
-                                }
-                            }
-                        });
-
-                        if (!features.length) return null;
-                        return {
-                            type: 'geojson',
-                            data: {
-                                type: 'FeatureCollection',
-                                features: features
-                            },
-                            styleOptions: pickVectorStyleOptions(layer.options)
-                        };
-                    }
-
-                    if (typeof layer.toGeoJSON === 'function') {
-                        try {
-                            const geojson = layer.toGeoJSON();
-                            if (!geojson) return null;
-                            return {
-                                type: 'geojson',
-                                data: geojson,
-                                styleOptions: pickVectorStyleOptions(layer.options)
-                            };
-                        } catch (err) {
-                            console.warn('Layer cannot be serialized for print:', err);
-                        }
-                    }
-
-                    return null;
-                }
-                function collectPrintableLayers(selectedLayerName) {
-                    const printableLayers = [];
-
-                    map.eachLayer((layer) => {
-                        if (layer instanceof L.TileLayer && layer._url) {
-                            printableLayers.push({
-                                type: 'tile',
-                                url: layer._url,
-                                options: pickSerializableOptions(layer.options),
-                                opacity: typeof layer.options?.opacity === 'number' ? layer.options.opacity : 1
-                            });
-                            return;
-                        }
-
-                    });
-
-                    let selectedOverlayLayer = getOverlayLayerByName(selectedLayerName);
-                    if (!selectedOverlayLayer) {
-                        const fallbackOverlays = [];
-                        map.eachLayer((layer) => {
-                            if (layer instanceof L.TileLayer) return;
-                            if (layer instanceof L.ImageOverlay || typeof layer.toGeoJSON === 'function') {
-                                fallbackOverlays.push(layer);
-                            }
-                        });
-                        if (fallbackOverlays.length) {
-                            selectedOverlayLayer = fallbackOverlays[fallbackOverlays.length - 1];
-                        }
-                    }
-
-                    const serializedOverlay = serializeOverlayLayer(selectedOverlayLayer);
-                    if (serializedOverlay) printableLayers.push(serializedOverlay);
-
-                    // Keep at least one base layer if none serialized for any reason.
-                    const hasTile = printableLayers.some((cfg) => cfg.type === 'tile');
-                    if (!hasTile) {
-                        printableLayers.unshift({
-                            type: 'tile',
-                            url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            options: { maxZoom: 19, crossOrigin: true },
-                            opacity: 1
-                        });
-                    }
-
-                    return printableLayers;
-                }
-
-                function collectLegendHtmlForLayer(layerName) {
-                    const visibleLegends = [];
-                    const normalizedLayerName = normalizeLayerName(layerName);
-
-                    // 1) Prefer legend controls tracked in JS (if available).
-                    try {
-                        const legends = (typeof layerLegends !== 'undefined' && layerLegends) ? layerLegends : (window.layerLegends || null);
-                        if (legends && normalizedLayerName) {
-                            Object.keys(legends).forEach((key) => {
-                                if (normalizeLayerName(key) !== normalizedLayerName) return;
-                                const control = legends[key];
-                                if (!control || typeof control.getContainer !== 'function') return;
-                                const container = control.getContainer();
-                                const html = container && container.innerHTML ? container.innerHTML.trim() : '';
-                                if (html) visibleLegends.push({ html, text: (container.textContent || '').toLowerCase() });
-                            });
-                        }
-                    } catch (e) {
-                        // ignore and fall back to DOM search
-                    }
-
-                    // 2) Fallback: scan the DOM for visible legends.
-                    const legendSelectors = [
-                        '.leaflet-control .info.legend',
-                        '.leaflet-control .legend'
-                    ];
-                    const nodes = Array.from(document.querySelectorAll(legendSelectors.join(',')));
-
-                    nodes.forEach((node) => {
-                        if (!node) return;
-                        const style = window.getComputedStyle(node);
-                        if (style.display === 'none' || style.visibility === 'hidden') return;
-                        const html = (node.innerHTML || '').trim();
-                        if (!html) return;
-                        visibleLegends.push({ html, text: (node.textContent || '').toLowerCase() });
-                    });
-
-                    if (!visibleLegends.length) return '';
-
-                    if (normalizedLayerName) {
-                        const matchedLegends = visibleLegends.filter((legend) => legend.text.includes(normalizedLayerName));
-                        if (matchedLegends.length) {
-                            return matchedLegends.map((legend) => `<div class="legend-block">${legend.html}</div>`).join('');
-                        }
-                    }
-
-                    // Fallback: include every visible legend block to avoid dropping parts of multi-block legends.
-                    return visibleLegends.map((legend) => `<div class="legend-block">${legend.html}</div>`).join('');
-                }
-
-                function ensureHtml2CanvasLoaded() {
-                    if (window.html2canvas) return Promise.resolve(window.html2canvas);
-                    return new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-                        script.onload = () => resolve(window.html2canvas);
-                        script.onerror = () => reject(new Error('Failed to load html2canvas.'));
-                        document.head.appendChild(script);
-                    });
-                }
-
-                function getVisibleLegendBlocks() {
-                    const selectors = [
-                        '.leaflet-control .info.legend',
-                        '.leaflet-control .legend'
-                    ];
-                    const nodes = Array.from(document.querySelectorAll(selectors.join(',')));
-                    const blocks = [];
-
-                    nodes.forEach((node) => {
-                        const style = window.getComputedStyle(node);
-                        if (style.display === 'none' || style.visibility === 'hidden') return;
-                        const html = (node.innerHTML || '').trim();
-                        if (!html) return;
-                        if (!blocks.includes(html)) blocks.push(html);
-                    });
-
-                    return blocks;
-                }
-
-                function getPrintCaptureRect() {
-                    const mapElement = document.getElementById('map');
-                    if (!mapElement) return null;
-
-                    const mapRect = mapElement.getBoundingClientRect();
-                    const header = document.querySelector('header');
-                    const footer = document.querySelector('footer');
-                    const headerRect = header ? header.getBoundingClientRect() : null;
-                    const footerRect = footer ? footer.getBoundingClientRect() : null;
-
-                    const captureTop = Math.max(mapRect.top, headerRect ? headerRect.bottom : mapRect.top);
-                    const captureBottom = Math.min(mapRect.bottom, footerRect ? footerRect.top : mapRect.bottom);
-                    const captureLeft = mapRect.left;
-                    const captureRight = mapRect.right;
-                    const captureHeight = Math.max(50, captureBottom - captureTop);
-
-                    return {
-                        x: Math.round(captureLeft + window.scrollX),
-                        y: Math.round(captureTop + window.scrollY),
-                        width: Math.round(captureRight - captureLeft),
-                        height: Math.round(captureHeight)
-                    };
-                }
-
-                function getSelectedMwsBoundsFromVisibleLayers() {
-                    const mwsSelect = document.getElementById('selectMWSID');
-                    const selectedMws = (mwsSelect && mwsSelect.value ? mwsSelect.value : '').trim();
-                    if (!selectedMws) return null;
-
-                    let mergedBounds = null;
-                    const normalizeId = (v) => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-                    const normalizedSelected = normalizeId(selectedMws);
-
-                    map.eachLayer((layer) => {
-                        if (!(layer instanceof L.GeoJSON)) return;
-                        if (typeof layer.eachLayer !== 'function') return;
-
-                        layer.eachLayer((featureLayer) => {
-                            const props = featureLayer && featureLayer.feature ? featureLayer.feature.properties || {} : {};
-                            const candidate = (
-                                props.MWS_ID ??
-                                props.MWSID ??
-                                props.MWS_Id ??
-                                props.MWS ??
-                                props.mws_id ??
-                                props.mwsid
-                            );
-                            if (candidate === undefined || candidate === null) return;
-
-                            const normalizedCandidate = normalizeId(candidate);
-                            const isMatch =
-                                normalizedCandidate === normalizedSelected ||
-                                normalizedCandidate.endsWith(normalizedSelected) ||
-                                normalizedSelected.endsWith(normalizedCandidate);
-                            if (!isMatch) return;
-                            if (typeof featureLayer.getBounds !== 'function') return;
-                            const bounds = featureLayer.getBounds();
-                            if (!bounds || (bounds.isValid && !bounds.isValid())) return;
-                            if (!mergedBounds) mergedBounds = bounds;
-                            else mergedBounds.extend(bounds);
-                        });
-                    });
-
-                    return mergedBounds;
-                }
-
-                function getPreferredPrintBounds() {
-                    const mwsBounds = getSelectedMwsBoundsFromVisibleLayers();
-                    if (mwsBounds) return mwsBounds;
-
-                    const selectedLayerName = getCurrentSelectedLayerName();
-                    const selectedLayer = getOverlayLayerByName(selectedLayerName);
-
-                    if (selectedLayer && selectedLayer instanceof L.GeoJSON && typeof selectedLayer.getBounds === 'function') {
-                        const selectedBounds = selectedLayer.getBounds();
-                        if (selectedBounds && (!selectedBounds.isValid || selectedBounds.isValid())) {
-                            return selectedBounds;
-                        }
-                    }
-
-                    if (selectedLayer && selectedLayer instanceof L.ImageOverlay && typeof selectedLayer.getBounds === 'function') {
-                        const selectedBounds = selectedLayer.getBounds();
-                        if (selectedBounds && (!selectedBounds.isValid || selectedBounds.isValid())) {
-                            return selectedBounds;
-                        }
-                    }
-
-                    return null;
-                }
-
-                async function openPrintMapWindow() {
-
-                    const center = map.getCenter();
-                    const zoom = map.getZoom();
-
-                    const preferredBounds = getPreferredPrintBounds();
-                    const activeBounds = preferredBounds || map.getBounds();
-
-                    const selectedLayerName = getCurrentSelectedLayerName();
-
-                    const dsdSelect = document.getElementById('selectDSD');
-                    const mwsSelect = document.getElementById('selectMWSID');
-                    const selectedDsdText = dsdSelect && dsdSelect.selectedIndex >= 0
-                        ? dsdSelect.options[dsdSelect.selectedIndex].text.trim()
-                        : '';
-                    const selectedMwsText = mwsSelect && mwsSelect.selectedIndex >= 0
-                        ? mwsSelect.options[mwsSelect.selectedIndex].text.trim()
-                        : '';
-
-                    const normalizedDsdText = selectedDsdText || 'Not selected';
-                    const normalizedLayerText = selectedLayerName || 'Not selected';
-                    const normalizedMwsText = selectedMwsText || 'Not selected';
-
-                    const printTopicText = 'MWS_ID: ' + normalizedMwsText + ' | DSD: ' + normalizedDsdText + ' | Layer: ' + normalizedLayerText;
-
-                    const printableLayers = collectPrintableLayers(selectedLayerName);
-                    const selectedLegendHtml = collectLegendHtmlForLayer(selectedLayerName);
-
-                    const popup = window.open('', '_blank', 'width=1200,height=900');
-
-                    if (!popup) {
-                        alert('Please allow pop-ups to open the print map page.');
-                        return;
-                    }
-
-                    const printPayload = {
-                        center: { lat: center.lat, lng: center.lng },
-                        zoom: zoom,
-                        printBounds: [
-                            [activeBounds.getSouthWest().lat, activeBounds.getSouthWest().lng],
-                            [activeBounds.getNorthEast().lat, activeBounds.getNorthEast().lng]
-                        ],
-                        layerConfigs: printableLayers,
-                        printTopic: printTopicText,
-                        selectedLegendHtml: selectedLegendHtml || '',
-                        mapDimensions: {
-                            width: map.getSize().x,
-                            height: map.getSize().y
-                        }
-                    };
-
-                    localStorage.setItem('printMapPayload', JSON.stringify(printPayload));
-
-                    popup.location.href = 'print-map.html';
-
-                }
-                let activePanel = null;
-
-                // Ensure declaration for waterQualityLayers exists
-                let waterQualityLayers = {}; // holds current water-quality GeoJSON layers keyed by source
-                let waterSourceRequestVersion = 0;
-
-                // Activate buttons on 'Go' click
-                document.addEventListener("DOMContentLoaded", function () {
-                    renderWaterPanel();
-                    const distSelect = document.getElementById('selectDist');
-                    const dsdSelect = document.getElementById('selectDSD');
-                    const mwsIdSelect = document.getElementById('selectMWSID');
-                    const goButton = document.getElementById('goBtn');
-                    // Only disable/enable other buttons except Base Layers
-                    const otherButtons = Array.from(document.querySelectorAll('header .button:not(#goBtn):not(#baseLayersBtn)'));
-
-                    // Function to check if all three dropdowns are selected
-                    function checkDropdowns() {
-                        if (distSelect.value && dsdSelect.value && mwsIdSelect.value) {
-                            goButton.classList.remove('disabled');  // Enable "Go" button
-                        } else {
-                            goButton.classList.add('disabled');  // Keep "Go" button disabled
-                        }
-                    }
-
-                    // Function to activate other buttons when "Go" is clicked
-                    function activateButtons() {
-                        otherButtons.forEach(button => button.classList.remove('disabled'));  // Enable all buttons except Base Layers
-                    }
-
-                    // Function to reset everything when any dropdown is changed
-                    function resetSystem() {
-                        goButton.classList.add('disabled');  // Disable "Go" button
-                        otherButtons.forEach(button => button.classList.add('disabled'));  // Disable all other buttons except Base Layers
-                        // Always enable Base Layers button
-                        document.getElementById('baseLayersBtn').classList.remove('disabled');
-                    }
-
-                    // Clear active layer selections so a newly selected MWS starts clean
-                    function clearLayerSelections() {
-                        const selectors = [
-                            '#basePanel input[type="checkbox"]',
-                            '#proposalPanel input[type="checkbox"]',
-                            '#climPanel input[type="checkbox"]',
-                            'input[name="waterSource"]'
-                        ];
-                        document.querySelectorAll(selectors.join(',')).forEach((checkbox) => {
-                            if (!checkbox.checked) return;
-                            checkbox.checked = false;
-                            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-                        });
-                        if (typeof window.clearFeatureSelection === 'function') {
-                            window.clearFeatureSelection();
-                        }
-                    }
-
-                    // Hide open panels/popups when location context changes
-                    function refreshForLocationChange() {
-                        clearLayerSelections();
-                        const panelIds = ['basePanel', 'proposalPanel', 'infoPanel', 'climPanel', 'waterPanel', 'attributePanel', 'tablePanel', 'catalogPanel', 'statPanel', 'waterQualityStationPanel'];
-                        panelIds.forEach((id) => {
-                            const panel = document.getElementById(id);
-                            if (panel) panel.style.display = 'none';
-                        });
-                        const infoPopup = document.getElementById('infoPopupPanel');
-                        if (infoPopup) {
-                            infoPopup.style.display = 'none';
-                            infoPopup.innerHTML = '';
-                        }
-                        activePanel = null;
-                        document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
-                    }
-
-                    // Attach event listeners to dropdowns
-                    [distSelect, dsdSelect, mwsIdSelect].forEach(select => {
-                        select.addEventListener("change", () => {
-                            checkDropdowns();  // Check if all dropdowns are filled
-                            resetSystem();  // Reset system when dropdown changes
-                            refreshForLocationChange(); // Refresh current map/panel state without browser reload
-                        });
-                    });
-
-                    // Event listener for "Go" button click
-                    goButton.addEventListener("click", activateButtons);
-                    // Always enable Base Layers button
-                    document.getElementById('baseLayersBtn').classList.remove('disabled');
-                });
-
-
-
-
-
-                // Handle button click
-                function clearPanelSelections(panelId) {
-                    const panel = document.getElementById(panelId);
-                    if (!panel) return;
-
-                    const checkboxes = panel.querySelectorAll('input[type="checkbox"]');
-                    checkboxes.forEach((checkbox) => {
-                        if (!checkbox.checked) return;
-                        checkbox.checked = false;
-                        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
-                    });
-                }
-
-                function handleButtonClick(buttonId, panelId) {
-                    if (panelId === 'tablePanel') {
-                        hidePanel('waterQualityStationPanel');
-                    }
-                    if (typeof window.setMeasureModeActive === 'function') {
-                        window.setMeasureModeActive(false);
-                    }
-                    if (typeof window.clearFeatureSelection === 'function') {
-                        window.clearFeatureSelection();
-                    }
-
-                    if (activePanel && activePanel.id !== panelId) {
-                        // Keep water station selections/layers when switching to another panel.
-
-                        if (activePanel.id !== 'waterPanel') {
-                            clearPanelSelections(activePanel.id);
-                        }
-                        hidePanel(activePanel.id);
-                    }
-
-                    const panel = document.getElementById(panelId);
-                    const distSelect = document.getElementById('selectDist');
-                    const dsdSelect = document.getElementById('selectDSD');
-                    const mwsIdSelect = document.getElementById('selectMWSID');
-
-                    // Show the panel first so we can measure it if needed
-                    panel.style.display = 'block';
-
-                    // Use default positioning (CSS) for panels
-                    panel.style.left = '';
-                    panel.style.top = '';
-                    panel.style.position = 'absolute';
-
-                    if (panelId === 'proposalPanel') {
-                        const label = document.getElementById('proposalNoLabel');
-                        if (label) {
-                            const ready = distSelect.value && dsdSelect.value && mwsIdSelect.value;
-                            label.style.display = ready ? 'block' : 'none';
-                        }
-                    }
-
-                    activePanel = panel;
-                    document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
-                    document.getElementById(buttonId).classList.add('active');
-                }
-
-                // Hide panel function
-                function hidePanel(panelId) {
-                    const panel = document.getElementById(panelId);
-                    if (!panel) return;
-                    panel.style.display = 'none';
-                    if (typeof window.clearFeatureSelection === 'function') {
-                        window.clearFeatureSelection();
-                    }
-                    activePanel = null; // Clear the active panel
-                    document.querySelectorAll('header .button').forEach(button => button.classList.remove('active'));
-                }
-                // Tab selection in statistics panel
-                function selectTab(tabName) {
-                    if (typeof window.clearFeatureSelection === 'function') {
-                        window.clearFeatureSelection();
-                    }
-                    const statContent = document.getElementById('statContent');
-                    statContent.innerHTML = `<p>Data for ${tabName}</p>`;
-                    document.querySelectorAll('#statPanel .tab').forEach(tab => tab.classList.remove('active'));
-                    event.target.classList.add('active');
-                }
-
-                // Map click event to show popup with coordinates (disabled as per user request)
-                map.on('click', function (e) {
-                    if (typeof window.isMeasureModeActive === 'function' && window.isMeasureModeActive()) {
-                        return;
-                    }
-                    const infoPopup = document.getElementById('infoPopupPanel');
-                    if (!infoPopup) return;
-                    infoPopup.style.display = 'block';
-                    infoPopup.textContent = `Coordinates: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-                });
-
-
-                // Change base layer function
-                function changeBaseLayer() {
-                    const baseLayerSelect = document.getElementById('baseLayerSelect');
-                    const selectedLayer = baseLayerSelect.value;
-
-                    // Remove all layers
-                    map.eachLayer(function (layer) {
-                        if (layer instanceof L.TileLayer) {
-                            map.removeLayer(layer);
-                        }
-
-                    });
-
-                    // Add selected layer
-                    switch (selectedLayer) {
-                        case 'osm':
-                            osmLayer.addTo(map);
-                            break;
-                        case 'esri':
-                            esriLayer.addTo(map);
-                            break;
-                        case 'opentopo':
-                            openTopoLayer.addTo(map);
-                            break;
-                        case 'custom':
-                            customLayer.addTo(map);
-                            break;
-                        default:
-                            osmLayer.addTo(map);
-                            break;
-                    }
-                }
-
-                // Handle water source checkbox changes: load/unload multiple GeoJSON layers
-                async function handleWaterSourceChange() {
-                    const requestVersion = ++waterSourceRequestVersion;
-                    const checkboxes = Array.from(document.querySelectorAll('input[name="waterSource"]'));
-                    if (!checkboxes.length) return;
-                    const climateStationUrls = await getClimateStationUrls();
-                    if (requestVersion !== waterSourceRequestVersion) return;
-                    // Keep fixed station URLs authoritative; climate CSV URLs are only a fallback.
-                    const urls = { ...climateStationUrls, ...staticWaterSourceUrls };
-
-                    // Define custom icons for each source
-                    const icons = {
-                        'CEA': L.divIcon({
-                            className: 'water-quality-cea-icon',
-                            html: `
-                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M50 10 C30 30, 30 55, 50 75 C70 55, 70 30, 50 10 Z" fill="#1E90FF"/>
-                                    <circle cx="50" cy="90" r="8" fill="#1E90FF"/>
-                                </svg>
-                            `,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        }),
-                        'MASL': L.divIcon({
-                            className: 'water-quality-masl-icon',
-                            html: `
-                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M50 10 C30 30, 30 55, 50 75 C70 55, 70 30, 50 10 Z" fill="#7B1FA2"/>
-                                    <circle cx="50" cy="90" r="8" fill="#7B1FA2"/>
-                                </svg>
-                            `,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        }),
-                        'NWSDB': L.divIcon({
-                            className: 'water-quality-nwsdb-icon',
-                            html: `
-                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M50 10 C30 30, 30 55, 50 75 C70 55, 70 30, 50 10 Z" fill="#C62828"/>
-                                    <circle cx="50" cy="90" r="8" fill="#C62828"/>
-                                </svg>
-                            `,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        }),
-                        'Rainfall': L.divIcon({
-                            className: 'rainfall-icon',
-                            html: `
-                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="50" cy="30" r="20" fill="#1E90FF" />
-                                    <path d="M50,55 C40,70, 50,85, 60,70 C50,85, 50,95, 50,85" fill="#1E90FF" />
-                                </svg>
-                            `,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        }),
-                        'Temperature': L.divIcon({
-                            className: 'temperature-icon',
-                            html: `
-                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <rect x="45" y="20" width="10" height="60" fill="#FF4500"/>
-                                    <circle cx="50" cy="85" r="10" fill="#FF4500"/>
-                                </svg>
-                            `,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        }),
-                        'Evaporation': L.divIcon({
-                            className: 'evaporation-icon',
-                            html: `
-                                <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M50 20 C30 30, 30 60, 50 80 C70 60, 70 30, 50 20 Z" fill="#32CD32"/>
-                                    <path d="M40 20 Q45 10, 50 20 T60 20" stroke="#228B22" stroke-width="2" fill="transparent"/>
-                                    <path d="M40 15 Q45 5, 50 15 T60 15" stroke="#228B22" stroke-width="2" fill="transparent"/>
-                                </svg>
-                            `,
-                            iconSize: [40, 40],
-                            iconAnchor: [20, 20]
-                        })
-                    };
-
-                    // Determine checked sources
-                    const selected = checkboxes.filter(cb => cb.checked).map(cb => cb.value);
-                    const selectedSet = new Set(selected);
-
-                    // Add newly checked layers
-                    for (const src of selected) {
-                        if (requestVersion !== waterSourceRequestVersion) return;
-                        if (waterQualityLayers[src]) continue; // already loaded
-                        const url = urls[src];
-                        if (!url) {
-                            console.warn(`No GeoJSON URL configured for ${src}`);
-                            continue;
-                        }
-                        try {
-                            const resp = await fetch(url);
-                            if (!resp.ok) throw new Error(`Network response was not ok (${resp.status})`);
-                            const geojsonData = await resp.json();
-                            if (requestVersion !== waterSourceRequestVersion || !selectedSet.has(src)) {
-                                continue;
-                            }
-                            const numericValues = [];
-                            if (geojsonData && Array.isArray(geojsonData.features)) {
-                                geojsonData.features.forEach((feature) => {
-                                    const monthly = extractMonthlyValuesFromProperties(feature && feature.properties ? feature.properties : {});
-                                    if (!monthly || !Array.isArray(monthly.values)) return;
-                                    monthly.values.forEach((v) => {
-                                        if (typeof v === 'number' && Number.isFinite(v)) numericValues.push(v);
-                                    });
-                                });
-                            }
-                            if (numericValues.length) {
-                                monthlyRangeBySource[src] = {
-                                    min: Math.min(...numericValues),
-                                    max: Math.max(...numericValues)
-                                };
-                            }
-                            const layer = L.geoJSON(geojsonData, {
-                                pointToLayer: function (feature, latlng) {
-                                    return L.marker(latlng, { icon: icons[src] });
-                                },
-                                onEachFeature: function (feature, layer) {
-                                    if (!feature || !feature.properties) return;
-                                    const props = feature.properties || {};
-                                    const stationName = src === 'NWSDB' ? (props['Location o'] || '') : (
-                                        props.station_na ||
-                                        props.station_NA ||
-                                        props.STATION_NA ||
-                                        props.Station_Na ||
-                                        props.Name ||
-                                        props.NAME ||
-                                        props.station ||
-                                        props.STATION ||
-                                        props.Station ||
-                                        props.St_Name ||
-                                        props.st_name ||
-                                        ''
-                                    );
-                                    layer.on('click', async function () {
-                                        const clickLatLng = (layer && layer.getLatLng) ? layer.getLatLng() : null;
-                                        if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
-                                            return;
-                                        }
-                                        if (src === 'CEA' || src === 'MASL' || src === 'NWSDB') {
-                                            if (stationName) showCSVForStation(stationName);
-                                            else alert("No station name found in attributes.");
-                                            return;
-                                        }
-                                        if (src === 'Evaporation' || src === 'Rainfall' || src === 'Temperature') {
-                                            const rendered = showMonthlyStationChart(props, src, stationName);
-                                            if (!rendered) {
-                                                if (typeof updateInfoPanel === 'function') updateInfoPanel(props, src, layer);
-                                                else alert("No monthly data found in station attributes.");
-                                            }
-                                            return;
-                                        }
-                                        if (typeof updateInfoPanel === 'function') {
-                                            updateInfoPanel(props, src, layer);
-                                        } else if (stationName) {
-                                            showCSVForStation(stationName);
-                                        } else {
-                                            alert("No station data found in attributes.");
-                                        }
-                                    });
-                                }
-
-                            }).addTo(map);
-                            if (requestVersion === waterSourceRequestVersion && selectedSet.has(src)) {
-                                waterQualityLayers[src] = layer;
-                            } else {
-                                try { map.removeLayer(layer); } catch (e) { /* ignore */ }
-                            }
-                        } catch (err) {
-                            console.error('Failed to load water quality GeoJSON for', src, err);
-                        }
-                    }
-
-                    // Remove unchecked layers
-                    for (const src of Object.keys(waterQualityLayers)) {
-                        if (!selectedSet.has(src)) {
-                            try {
-                                map.removeLayer(waterQualityLayers[src]);
-                            } catch (e) { /* ignore */ }
-                            delete waterQualityLayers[src];
-                        }
-                    }
-
-                    // Fit bounds to all loaded layers, if any
-                    const loadedLayers = Object.values(waterQualityLayers);
-                    if (loadedLayers.length) {
-                        try {
-                            const group = L.featureGroup(loadedLayers);
-                            const bounds = group.getBounds();
-                            if (bounds && bounds.isValid && bounds.isValid()) map.fitBounds(bounds);
-                            else if (bounds && !bounds.isValid && Object.keys(bounds).length) map.fitBounds(bounds);
-                        } catch (err) {
-                            console.warn('Could not fit bounds to water quality layers:', err);
-                        }
-                    }
-                }
-
-            </script>
-
-
-            <!-- 
+            });
+
+            // Add selected layer
+            switch (selectedLayer) {
+                case 'osm':
+                    osmLayer.addTo(map);f
+                    break;
+                case 'esri':
+                    esriLayer.addTo(map);
+                    break;
+                case 'opentopo':
+                    openTopoLayer.addTo(map);
+                    break;
+                case 'custom':
+                    customLayer.addTo(map);
+                    break;
+            }
+        }
+		
+    </script>
+	
+
+			<!-- 
 						<script src="baselayerPop.js" > </script>
 
 			<script src="baselayer.js"></script>		
@@ -2621,95 +691,59 @@
 
 
 			<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>		
-			-->
+			-->	
+	
 
 
 
+	
+			<script src="all5m1_v3_photo_legend_highlight.js" defer> </script>
+			<script src="proposal_all7a_dbtree.js"></script>	
+			<script src="table4.js" ></script>	
+			
 
-
-            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-epa9" defer> </script>
-            <script src="proposal_all7a_dbtree.js"></script>
-            <script src="table4.js"></script>
-
-
-            <!-- Panel to display the table -->
-            <!-- 
+			<!-- Panel to display the table -->
+<!-- 
 			<script src="all4m2.js" > </script>
 			<script src="all3m2.js" > </script>
 			<script src="infoPanel.js"></script>			
- -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-            <script src="infoPanelxlsx4.js"></script>
-            <!-- Include Chart.js -->
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <!-- Include Turf.js for area calculation -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/turf/6.5.0/turf.min.js"></script>
+ -->			
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script> 
+			<script src="infoPanelxlsx4.js"></script>				
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include Turf.js for area calculation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/turf/6.5.0/turf.min.js"></script>
 
-            <script src="paichart13.js"></script>
-            <script src="paichart_gnd13.js"></script>
-            <script src="paichart_pop13.js"></script>
-            <script src="paichart_soil13.js"></script>
-            <script src="paichart_risk13.js"></script>
-            <script>
-                const originalDownloadCsvButton = document.getElementById('downloadButton');
-                const cleanDownloadCsvButton = originalDownloadCsvButton.cloneNode(true);
-                originalDownloadCsvButton.replaceWith(cleanDownloadCsvButton);
-                cleanDownloadCsvButton.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    downloadStatisticsCsv();
-                });
-
-                const originalDownloadChartButton = document.getElementById('downloadChartButton');
-                const cleanDownloadChartButton = originalDownloadChartButton.cloneNode(true);
-                originalDownloadChartButton.replaceWith(cleanDownloadChartButton);
-                cleanDownloadChartButton.addEventListener('click', function (event) {
-                    event.preventDefault();
-                    event.stopImmediatePropagation();
-                    downloadStatisticsChart();
-                });
-            </script>
+			<script src="paichart13.js"></script>
+			<script src="paichart_gnd13.js"></script>					
+			<script src="paichart_pop13.js"></script>	
+			<script src="paichart_soil13.js"></script>				
+			<script src="paichart_risk13.js"></script>	
 
 
 
-            <!-- 
+						<!-- 
 			<script src="luppd.js"></script>			
-			-->
-            <script src="scale.js"></script>
-            <!-- 					<div id="scale-bar">Scale: 0 m</div> Scale bar container -->
-            <!-- Help Button -->
+			-->	
+						<script src="scale.js"></script>
+<!-- 					<div id="scale-bar">Scale: 0 m</div> Scale bar container -->
+    <!-- Help Button -->
 
 
-            <script src="readmetext.js"></script>
-            <script src="navigate.js"></script>
+	    <script src="readmetext.js"></script>
+		<script src="navigate.js"></script>
 
+    <div class="button-container">
+        <button onclick="openNewTab()">Open MWS Data Catalog</button>
+    </div>
 
-            <script>
-                function openUserInput() {
-                    window.open('UserInput.html', '_blank');
-                }
+    <script>
+        function openNewTab() {
+            window.open("https://umw-dbms.github.io/MWSDataCatalog.html", "_blank");
+        }
+    </script>
 
-                function openWorkthrough() {
-                    window.open('workthrough.html', '_blank');
-                }
-
-                function openNewTab() {
-                    // Prefer opening the local catalog page (relative path) so downloads run in a normal tab/context.
-                    try {
-                        const w = window.open('MWSDataCatalog.html', '_blank');
-                        if (!w) {
-                            // popup blocked or failed — fall back to remote URL
-                            const fallback = confirm('Could not open local catalog tab. Open the hosted catalog instead?');
-                            if (fallback) window.open('https://umw-dbms.github.io/MWSDataCatalog.html', '_blank');
-                        }
-                    } catch (e) {
-                        // As a last resort, open the hosted catalog
-                        window.open('https://umw-dbms.github.io/MWSDataCatalog.html', '_blank');
-                    }
-                }
-            </script>
-
-
+	
 </body>
-
 </html>
