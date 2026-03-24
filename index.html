@@ -53,25 +53,24 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             width: 100%;
             padding: 1vh 1vw;
             background-color: #4caf50;
             color: white;
             font-size: clamp(0.72rem, 0.85vw, 0.9rem);
-            /* Small header */
+            /* Keep the controls in one horizontal strip like the previous layout */
             gap: 0.75vw;
-            overflow-x: visible;
+            overflow-x: auto;
+            white-space: nowrap;
         }
 
         header>div {
             display: flex;
             align-items: center;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 0.35vw;
-            flex: 1 1 24rem;
-            min-width: 0;
-
+            white-space: nowrap;
         }
 
         header>div:last-child {
@@ -125,7 +124,12 @@
             border-radius: 4px;
             transition: background-color 0.3s;
             font-size: clamp(0.68rem, 0.8vw, 0.85rem);
+            white-space: nowrap;
+        }
 
+        header select {
+            white-space: nowrap;
+            flex: 0 0 auto;
         }
 
         .button.active {
@@ -535,7 +539,7 @@
         /* Style for mobile responsiveness */
         @media (max-width: 900px) {
             header>div:last-child {
-                justify-content: flex-start;
+                justify-content: flex-end;
             }
 
             footer {
@@ -2384,7 +2388,6 @@
                     });
 
                     // Add selected layer
-                    // Add selected layer
                     switch (selectedLayer) {
                         case 'osm':
                             osmLayer.addTo(map);
@@ -2624,7 +2627,7 @@
 
 
 
-            <script src="all5m1_v3_photo_legend_highlight.js" defer> </script>
+            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-epa9" defer> </script>
             <script src="proposal_all7a_dbtree.js"></script>
             <script src="table4.js"></script>
 
