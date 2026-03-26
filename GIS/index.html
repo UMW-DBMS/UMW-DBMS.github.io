@@ -35,8 +35,8 @@
         html,
         body {
             width: 100%;
-            max-width: none;
-            overflow-x: auto;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         body {
@@ -45,9 +45,8 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            min-width: 1366px;
             background: #ffffff;
-            overflow-x: auto;
+            overflow-x: hidden;
         }
 
         header {
@@ -56,31 +55,36 @@
             align-items: center;
             flex-wrap: nowrap;
             width: 100%;
-            padding: 10px;
+            padding: 1vh 1vw;
             background-color: #4caf50;
             color: white;
-            font-size: 12px;
-            /* Small header */
-            gap: 8px;
+            font-size: clamp(0.72rem, 0.85vw, 0.9rem);
+            /* Keep the controls in one horizontal strip like the previous layout */
+            gap: 0.75vw;
             overflow-x: auto;
+            white-space: nowrap;
         }
 
         header>div {
             display: flex;
             align-items: center;
             flex-wrap: nowrap;
-            gap: 4px;
-            flex: 0 0 auto;
+            gap: 0.35vw;
+            white-space: nowrap;
+        }
+
+        header>div:last-child {
+            justify-content: flex-end;
         }
 
         footer {
             background-color: #388e3c;
             width: 100%;
-            padding: 10px 12px;
+            padding: 1vh 1vw;
             display: grid;
-            grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr);
+            grid-template-columns: minmax(16rem, 1fr) auto minmax(16rem, 1fr);
             align-items: center;
-            gap: 10px;
+            gap: 0.75vw;
         }
 
         .top-bar {
@@ -101,8 +105,7 @@
             flex: 1;
             position: relative;
             width: 100%;
-            min-width: 1366px;
-            min-height: 0;
+            min-height: calc(100vh - 18vh);
             background: #ffffff;
             overflow: hidden;
         }
@@ -115,13 +118,18 @@
             background-color: #4caf50;
             border: none;
             color: white;
-            padding: 10px 15px;
+            padding: 0.8vh 0.9vw;
             cursor: pointer;
             margin: 0 1px;
             border-radius: 4px;
             transition: background-color 0.3s;
-            font-size: 12px;
+            font-size: clamp(0.68rem, 0.8vw, 0.85rem);
+            white-space: nowrap;
+        }
 
+        header select {
+            white-space: nowrap;
+            flex: 0 0 auto;
         }
 
         .button.active {
@@ -141,12 +149,12 @@
             position: absolute;
             background: white;
             border: 1px solid #ccc;
-            padding: 10px;
+            padding: 1vh 0.8vw;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
             z-index: 1000;
-            max-width: 1000px;
+            max-width: calc(min(72vw, 62rem) - 10px);
             overflow: auto;
-            font-size: 9px;
+            font-size: clamp(0.6rem, 0.72vw, 0.8rem);
             /* Smaller font for panels */
             box-sizing: border-box;
         }
@@ -163,67 +171,71 @@
 
         /* Positioning panels */
         #basePanel {
-            top: 90px;
+            top: 10vh;
             /* Below the header */
             left: 0;
             /* From the left edge */
-            width: min(200px, 92vw);
-            height: calc(100vh - 170px);
+            width: calc(min(16vw, 90vw) - 10px);
+            height: calc(100vh - 19vh);
             /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 170px);
+            max-height: calc(100vh - 19vh);
             overflow-y: auto;
             position: absolute;
             /* To ensure it stays positioned correctly */
+            font-size: calc(clamp(0.6rem, 0.72vw, 0.8rem) - 2px);
         }
 
         #proposalPanel {
-            top: 90px;
+            top: 10vh;
             /* Below the header */
             left: 0;
             /* From the left edge */
-            width: min(200px, 92vw);
-            height: calc(100vh - 170px);
+            width: calc(min(16vw, 90vw) - 10px);
+            height: calc(100vh - 19vh);
             /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 170px);
+            max-height: calc(100vh - 19vh);
             overflow-y: auto;
             position: absolute;
             /* To ensure it stays positioned correctly */
+            font-size: calc(clamp(0.6rem, 0.72vw, 0.8rem) - 2px);
         }
 
         #infoPanel {
-            top: 70px;
+            top: 8vh;
             /* Below the header */
             right: 0;
             /* From the left edge */
-            width: min(500px, 94vw);
+            width: calc(min(34vw, 94vw) - 10px);
         }
 
         #climPanel {
-            top: 90px;
+            top: 10vh;
             /* Below the header */
             left: 0;
             /* From the left edge */
-            width: min(200px, 92vw);
-            height: calc(100vh - 170px);
+            width: calc(min(16vw, 90vw) - 10px);
+            height: calc(100vh - 19vh);
             /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 170px);
+            max-height: calc(100vh - 19vh);
             overflow-y: auto;
             position: absolute;
             /* To ensure it stays positioned correctly */
+            font-size: calc(clamp(0.6rem, 0.72vw, 0.8rem) - 2px);
         }
 
         #waterPanel {
-            top: 90px;
+            top: 10vh;
             /* Below the header */
             left: 0;
             /* From the left edge */
-            width: min(200px, 92vw);
-            height: calc(100vh - 170px);
+            width: calc(min(16vw, 90vw) - 10px);
+            height: calc(100vh - 19vh);
             /* Leave space at the bottom so footer ribbon stays visible */
-            max-height: calc(100vh - 170px);
+            max-height: calc(100vh - 19vh);
             overflow-y: auto;
             position: absolute;
             /* To ensure it stays positioned correctly */
+            font-size: calc(clamp(0.6rem, 0.72vw, 0.8rem) - 2px);
         }
 
         #infoPopupPanel {
@@ -243,15 +255,15 @@
         #catalogPanel {
             position: absolute;
             /* Ensure it is positioned absolutely on the page */
-            top: 70px;
+            top: 8vh;
             /* 70px below the header */
             left: 50%;
             /* Center horizontally */
             transform: translateX(-50%);
             /* Shift the element to the left by 50% of its width */
-            width: min(100%, 96vw);
+            width: calc(min(100%, 96vw) - 10px);
             /* Set the width of the table panel */
-            max-height: 400px;
+            max-height: 48vh;
             /* Limit the height to fit within the page */
             overflow-y: auto;
             /* Enable scrolling if content exceeds the max height */
@@ -260,11 +272,9 @@
         }
 
         #statPanel {
-            top: 70px;
-            /* Below the header */
-            right: 0;
-            /* From the left edge */
-            width: min(300px, 92vw);
+            top: 70px; /* Below the header */
+            right: 0; /* From the left edge */
+			width: 350px; 
         }
 
         #catalogPanel table {
@@ -315,11 +325,11 @@
 
         #tablePanel {
             position: absolute;
-            top: 70px;
+            top: 8vh;
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-height: 400px;
+            max-height: 48vh;
             overflow-y: auto;
             overflow-x: auto;
         }
@@ -328,10 +338,10 @@
 
         #attributePanel {
             position: fixed;
-            top: 90px;
-            right: 200px;
-            width: min(200px, 92vw);
-            max-height: 300px;
+            top: 10vh;
+            right: 18vw;
+            width: calc(min(18vw, 92vw) - 10px);
+            max-height: 36vh;
             overflow-y: auto;
             background-color: white;
             border: 1px solid #ccc;
@@ -435,7 +445,7 @@
 
         #areaPieChart {
             width: 100%;
-            height: 400px;
+            height: 42vh;
         }
 
         h3 {
@@ -444,7 +454,7 @@
 
         .show-all-btn {
             margin: 10px;
-            padding: 8px 15px;
+            padding: 0.8vh 1vw;
             background-color: #4CAF50;
             color: white;
             border: none;
@@ -479,9 +489,9 @@
             background-color: #f5fff5;
             color: #1b5e20;
             border: 1px solid #a5d6a7;
-            padding: 8px 12px;
+            padding: 0.8vh 0.9vw;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: clamp(0.7rem, 0.8vw, 0.85rem);
             line-height: 1.2;
         }
 
@@ -529,12 +539,33 @@
 
 
         /* Style for mobile responsiveness */
+        @media (max-width: 900px) {
+            header>div:last-child {
+                justify-content: flex-end;
+            }
+
+            footer {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-left,
+            .footer-center,
+            .footer-right {
+                justify-self: stretch;
+            }
+
+            .footer-center,
+            .footer-right {
+                justify-content: flex-start;
+            }
+        }
+
         @media (max-width: 600px) {
             .panel {
                 width: auto;
-                max-width: 1000px;
+                max-width: calc(100vw - 1rem);
                 height: auto;
-                max-height: calc(100vh - 170px);
+                max-height: calc(100vh - 22vh);
             }
         }
 
@@ -552,18 +583,19 @@
 
             header,
             footer {
-                font-size: 12px;
-                padding: 8px;
+                font-size: 0.75rem;
+                padding: 1vh 2vw;
             }
+
 
             .button,
             .show-all-btn {
-                padding: 10px 15px;
-                font-size: 12px;
+                padding: 0.9vh 2vw;
+                font-size: 0.75rem;
             }
 
             footer {
-                grid-template-columns: minmax(180px, 1fr) auto minmax(180px, 1fr);
+                grid-template-columns: 1fr;
                 gap: 8px;
             }
 
@@ -574,7 +606,7 @@
             }
 
             .footer-center {
-                justify-content: center;
+                justify-content: flex-start;
             }
 
             .footer-right {
@@ -609,8 +641,8 @@
             }
 
             .button {
-                padding: 10px 15px;
-                font-size: 12px;
+                padding: 1vh 2.4vw;
+                font-size: 0.72rem;
             }
 
             .footer-center {
@@ -866,8 +898,9 @@
                 Layers</button>
             <button id="proposalBtn" class="button"
                 onclick="handleButtonClick('proposalBtn', 'proposalPanel')">Proposal</button>
-            <button id="mwsInfoBtn" class="button" onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS
-                Info</button>
+            <!--Disable MWSInfo button//-->
+            <!--<button id="mwsInfoBtn" class="button" onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS
+                Info</button>-->
             <button id="climateLayerBtn" class="button"
                 onclick="handleButtonClick('climateLayerBtn', 'climPanel')">Climate Layer</button>
             <button id="waterQualityBtn" class="button"
@@ -1158,7 +1191,7 @@
                 async function showCSVForStation(stationName, options = {}) {
                     const suppressError = !!options.suppressError;
                     const encodedName = encodeURIComponent(stationName.trim());
-                    const baseCSVPath = 'https://raw.githubusercontent.com/Dilshi-1997/WMS-test/main/';
+                    const baseCSVPath = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/12_WQ/';//https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/tree/main/IWWRMP/Data/EXD/12_WQ
                     const csvUrl = `${baseCSVPath}${encodedName}.csv`;
 
                     try {
@@ -1283,7 +1316,7 @@
                         panel.innerHTML = `
                             <strong>Station:</strong> ${stationName}<br><br>
                             <div id="paramButtons"></div>
-                            <canvas id="csvChart" style="width:800px; height:200px;"></canvas>
+                            <canvas id="csvChart" style="width:800px; height:100px;"></canvas>
                             <br>
                             <button id="downloadCsvChartBtn" class="button" type="button">Download Chart</button>
                             <br><br>
@@ -1511,8 +1544,8 @@
                     panel.style.transform = 'none';
                     panel.style.position = 'absolute';
                     panel.style.overflowY = 'auto';
-                    panel.style.maxWidth = maximize ? '96vw' : '90vw';
-                    panel.style.width = maximize ? '760px' : '520px';
+                    panel.style.maxWidth = maximize ? 'calc(96vw - 10px)' : 'calc(90vw - 10px)';
+                    panel.style.width = maximize ? '750px' : '510px';
                     panel.style.maxHeight = maximize ? '82vh' : '70vh';
                 }
 
@@ -1526,7 +1559,7 @@
                         btn.textContent = nextMaximized ? 'Restore' : 'Maximize';
                         const canvas = document.getElementById(canvasId);
                         if (canvas) {
-                            canvas.style.height = nextMaximized ? '360px' : '220px';
+                            canvas.style.height = nextMaximized ? '110px' : '110px';
                         }
                     });
                 }
@@ -1584,7 +1617,7 @@
                     panel.innerHTML = `
                         <strong>Station:</strong> ${titleName}<br>
                         <strong>Type:</strong> ${sourceName}<br><br>
-                        <canvas id="monthlyStationChart" style="width:800px; height:220px;"></canvas>
+                        <canvas id="monthlyStationChart" style="width:800px; height:110px;"></canvas>
                         <div id="monthlyPointValue" style="margin-top:8px;font-size:12px;color:#1d1d1d;">Click a point to view the value.</div>
                         <br>
                         <button id="downloadMonthlyChartBtn" class="button" type="button">Download Chart</button>
@@ -1886,9 +1919,12 @@
 
                     return null;
                 }
-                function collectPrintableLayers(selectedLayerName) {
+                function collectPrintableLayers(selectedLayerNames) {
                     const printableLayers = [];
+                    const seenOverlays = new Set();
+                    const layerNames = Array.isArray(selectedLayerNames) ? selectedLayerNames : [];
 
+                    // First, collect all active base layers.
                     map.eachLayer((layer) => {
                         if (layer instanceof L.TileLayer && layer._url) {
                             printableLayers.push({
@@ -1897,27 +1933,26 @@
                                 options: pickSerializableOptions(layer.options),
                                 opacity: typeof layer.options?.opacity === 'number' ? layer.options.opacity : 1
                             });
-                            return;
                         }
-
                     });
 
-                    let selectedOverlayLayer = getOverlayLayerByName(selectedLayerName);
-                    if (!selectedOverlayLayer) {
-                        const fallbackOverlays = [];
-                        map.eachLayer((layer) => {
-                            if (layer instanceof L.TileLayer) return;
-                            if (layer instanceof L.ImageOverlay || typeof layer.toGeoJSON === 'function') {
-                                fallbackOverlays.push(layer);
-                            }
-                        });
-                        if (fallbackOverlays.length) {
-                            selectedOverlayLayer = fallbackOverlays[fallbackOverlays.length - 1];
-                        }
-                    }
+                    // Then collect only overlays that correspond to actively selected layer names.
+                    layerNames.forEach((layerName) => {
+                        const layer = getOverlayLayerByName(layerName);
+                        if (!layer || seenOverlays.has(layer)) return;
+                        seenOverlays.add(layer);
+                        const serializedOverlay = serializeOverlayLayer(layer);
+                        if (serializedOverlay) printableLayers.push(serializedOverlay);
+                    });
 
-                    const serializedOverlay = serializeOverlayLayer(selectedOverlayLayer);
-                    if (serializedOverlay) printableLayers.push(serializedOverlay);
+                    // Include any additional active station layers that may not resolve through label matching.
+                    Object.keys(waterQualityLayers || {}).forEach((layerName) => {
+                        const layer = waterQualityLayers[layerName];
+                        if (!layer || !map.hasLayer(layer) || seenOverlays.has(layer)) return;
+                        seenOverlays.add(layer);
+                        const serializedOverlay = serializeOverlayLayer(layer);
+                        if (serializedOverlay) printableLayers.push(serializedOverlay);
+                    });
 
                     // Keep at least one base layer if none serialized for any reason.
                     const hasTile = printableLayers.some((cfg) => cfg.type === 'tile');
@@ -1981,6 +2016,25 @@
 
                     // Fallback: include every visible legend block to avoid dropping parts of multi-block legends.
                     return visibleLegends.map((legend) => `<div class="legend-block">${legend.html}</div>`).join('');
+                }
+
+                function collectLegendHtmlForSelectedLayers(selectedLayers) {
+                    const allLegendBlocks = [];
+                    const seenLegendHtml = new Set();
+                    const layerNames = Array.isArray(selectedLayers) ? selectedLayers : [];
+
+                    layerNames.forEach((layerName) => {
+                        const legendHtml = collectLegendHtmlForLayer(layerName);
+                        if (!legendHtml || seenLegendHtml.has(legendHtml)) return;
+                        seenLegendHtml.add(legendHtml);
+                        allLegendBlocks.push(legendHtml);
+                    });
+
+                    if (!allLegendBlocks.length) {
+                        return collectLegendHtmlForLayer(null);
+                    }
+
+                    return allLegendBlocks.join('');
                 }
 
                 function ensureHtml2CanvasLoaded() {
@@ -2110,8 +2164,9 @@
 
                     const preferredBounds = getPreferredPrintBounds();
                     const activeBounds = preferredBounds || map.getBounds();
-
-                    const selectedLayerName = getCurrentSelectedLayerName();
+                    const selectedLayers = Object.keys(layerState || {}).filter((layerName) => layerState[layerName]);
+                    const waterSourceLayers = Object.keys(waterQualityLayers || {}).filter((layerName) => waterQualityLayers[layerName]);
+                    const allSelectedLayers = Array.from(new Set([...selectedLayers, ...waterSourceLayers]));
 
                     const dsdSelect = document.getElementById('selectDSD');
                     const mwsSelect = document.getElementById('selectMWSID');
@@ -2123,13 +2178,15 @@
                         : '';
 
                     const normalizedDsdText = selectedDsdText || 'Not selected';
-                    const normalizedLayerText = selectedLayerName || 'Not selected';
+                    const normalizedLayerText = allSelectedLayers.length
+                        ? allSelectedLayers.join(', ')
+                        : 'Not selected';
                     const normalizedMwsText = selectedMwsText || 'Not selected';
 
-                    const printTopicText = 'MWS_ID: ' + normalizedMwsText + ' | DSD: ' + normalizedDsdText + ' | Layer: ' + normalizedLayerText;
+                    const printTopicText = 'MWS_ID: ' + normalizedMwsText + ' | DSD: ' + normalizedDsdText + ' | Layers: ' + normalizedLayerText;
 
-                    const printableLayers = collectPrintableLayers(selectedLayerName);
-                    const selectedLegendHtml = collectLegendHtmlForLayer(selectedLayerName);
+                    const printableLayers = collectPrintableLayers(allSelectedLayers);
+                    const selectedLegendHtml = collectLegendHtmlForSelectedLayers(allSelectedLayers);
 
                     const popup = window.open('', '_blank', 'width=1200,height=900');
 
@@ -2172,9 +2229,8 @@
                     const dsdSelect = document.getElementById('selectDSD');
                     const mwsIdSelect = document.getElementById('selectMWSID');
                     const goButton = document.getElementById('goBtn');
-                    // Only disable/enable other buttons except Base Layers
-                    const otherButtons = Array.from(document.querySelectorAll('header .button:not(#goBtn):not(#baseLayersBtn)'));
-
+                    // Only disable MWSInfo button 
+                    /*const otherButtons = Array.from(document.querySelectorAll('header .button:not(#goBtn):not(#baseLayersBtn)'))*/
                     // Function to check if all three dropdowns are selected
                     function checkDropdowns() {
                         if (distSelect.value && dsdSelect.value && mwsIdSelect.value) {
@@ -2358,13 +2414,21 @@
                     });
 
                     // Add selected layer
-                    // Add selected layer
                     switch (selectedLayer) {
                         case 'osm':
-                            osmLayer.addTo(map); f
+                            osmLayer.addTo(map);
                             break;
                         case 'esri':
                             esriLayer.addTo(map);
+                            break;
+                        case 'opentopo':
+                            openTopoLayer.addTo(map);
+                            break;
+                        case 'custom':
+                            customLayer.addTo(map);
+                            break;
+                        default:
+                            osmLayer.addTo(map);
                             break;
                     }
                 }
@@ -2589,7 +2653,7 @@
 
 
 
-            <script src="all5m1_v3_photo_legend_highlight.js" defer> </script>
+            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-epa9" defer> </script>
             <script src="proposal_all7a_dbtree.js"></script>
             <script src="table4.js"></script>
 

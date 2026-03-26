@@ -1,316 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Input</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7f9;
-      color: #1a1a1a;
-    }
-
-    header {
-      background: #388e3c;
-      color: #fff;
-      padding: 16px;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .header-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .header-help-btn {
-      background: #2e7d32;
-      color: #fff;
-      border: 1px solid #c8e6c9;
-      padding: 6px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
-    main {
-      padding: 20px;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: #fff;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-    }
-
-    .hint {
-      color: #5b5b5b;
-      font-size: 13px;
-    }
-
-    .form-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin: 12px 0;
-      align-items: center;
-    }
-
-    label {
-      font-size: 13px;
-      color: #333;
-      min-width: 110px;
-    }
-
-    select {
-      padding: 6px 8px;
-      font-size: 13px;
-      min-width: 220px;
-    }
-
-    .btn {
-      background: #4caf50;
-      border: none;
-      color: #fff;
-      padding: 8px 12px;
-      font-size: 13px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn:disabled {
-      background: #a5d6a7;
-      cursor: not-allowed;
-    }
-
-    .proposal-list {
-      display: none;
-      margin-top: 10px;
-      padding: 10px;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      background: #fafafa;
-    }
-
-    .proposal-item {
-      display: inline-block;
-      margin: 6px 6px 0 0;
-      padding: 6px 10px;
-      border: 1px solid #c8e6c9;
-      border-radius: 4px;
-      background: #e8f5e9;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .proposal-item.active {
-      background: #c8e6c9;
-      border-color: #81c784;
-    }
-
-    .form-panel {
-      display: none;
-      margin-top: 12px;
-      padding: 12px;
-      border: 1px solid #e0e0e0;
-      border-radius: 6px;
-      background: #fff;
-    }
-
-    .form-panel h3 {
-      margin: 0 0 10px 0;
-      font-size: 15px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px 12px;
-    }
-
-    .form-grid .full {
-      grid-column: 1 / -1;
-    }
-
-    .form-grid input,
-    .form-grid textarea {
-      width: 100%;
-      padding: 6px 8px;
-      font-size: 13px;
-      border: 1px solid #d0d0d0;
-      border-radius: 4px;
-    }
-
-    .form-actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .note {
-      font-size: 12px;
-      color: #666;
-    }
-    .auth-status {
-      min-height: 18px;
-      display: inline-block;
-    }
-    .help-modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      z-index: 2000;
-      align-items: center;
-      justify-content: center;
-      padding: 12px;
-    }
-    .help-modal.open {
-      display: flex;
-    }
-    .help-card {
-      width: 100%;
-      max-width: 680px;
-      max-height: 80vh;
-      overflow-y: auto;
-      background: #fff;
-      border-radius: 8px;
-      border: 1px solid #dcdcdc;
-      padding: 14px;
-    }
-    .help-card h3 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-    }
-    .help-list {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .help-video {
-      width: 100%;
-      max-height: 260px;
-      border-radius: 6px;
-      background: #000;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-
-<body>
-  <header>
-    <div class="header-title">
-      <span>User Input</span>
-      <button id="waterQualityTopBtn" class="header-help-btn" type="button" onclick="window.location.href='WaterQuality.html'">Water Quality</button>
-      <button id="LULCTopBtn" class="header-help-btn" type="button" onclick="window.location.href='LULC.html'">LULC</button>
-    </div>
-    
-    <div class="header-actions">
-      <button id="helpBtn" class="header-help-btn" type="button">Help</button>
-    </div>
-  </header>
-  <main>
-    <div class="card">
-      <h2>Select Location</h2>
-      <p class="hint">Select District and DSD, sign in with Supabase email/password, verify login, and choose MWS_ID.</p>
-
-      <div class="form-row">
-        <label for="selectDist">Select District</label>
-        <select id="selectDist">
-          <option value="">--Select District--</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label for="selectDSD">Select DSD</label>
-        <select id="selectDSD" disabled>
-          <option value="">--Select DSD--</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <label for="userName">Email</label>
-        <input id="userName" type="email" placeholder="Supabase user email" />
-      </div>
-
-      <div class="form-row">
-        <label for="userPassword">Password</label>
-        <input id="userPassword" type="password" placeholder="Password for selected DSD" />
-      </div>
-
-      <div class="form-row">
-        <button id="verifyTokenBtn" class="btn" type="button">Verify Login</button>
-      </div>
-
-      <div class="form-row">
-        <label for="githubToken">GitHub Token</label>
-        <input id="githubToken" type="password" placeholder="PAT with repo scope" />
-      </div>
-
-      <div class="form-row">
-        <span id="authStatus" class="note auth-status"></span>
-      </div>
-
-      <div class="form-row">
-        <label for="selectMWSID">Select MWS_ID</label>
-        <select id="selectMWSID" disabled>
-          <option value="">--Select MWS_ID--</option>
-        </select>
-      </div>
-
-      <div class="form-row">
-        <button id="proposalBtn" class="btn" disabled>Select Proposal</button>
-      </div>
-      <div id="proposalList" class="proposal-list"></div>
-      <div id="formPanel" class="form-panel"></div>
-    </div>
-  </main>
-  <div id="helpModal" class="help-modal" aria-hidden="true">
-    <div class="help-card" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
-      <h3 id="helpTitle">User Input Help</h3>
-      <ol class="help-list">
-        <li>Select District and DSD.</li>
-        <li>Enter Supabase email and password.</li>
-        <li>Click Verify Login.</li>
-        <li>Enter GitHub token (PAT with repo write access).</li>
-        <li>Select MWS_ID.</li>
-        <li>Click Select Proposal, choose proposal type, fill form, then submit.</li>
-      </ol>
-      <video id="helpVideo" class="help-video" controls preload="metadata">
-        <source src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/documentary.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      <div class="form-row" style="margin-top: 10px;">
-        <button id="closeHelpBtn" class="btn" type="button">Close</button>
-      </div>
-    </div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
     const geojsonURL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/UMW/MWS_Boundary_Updated_UMC_Names.geojson';
+    const geojsonFallbackURLs = [
+      geojsonURL,
+      'https://cdn.jsdelivr.net/gh/MWS003-GIS/MWS003-GIS.github.io@main/IWWRMP/Data/EXD/UMW/MWS_Boundary_Updated_UMC_Names.geojson'
+    ];
     const GITHUB_OWNER = 'MWS003-GIS';
     const GITHUB_REPO = 'MWS003-GIS.github.io';
     const GEOJSON_BASE = 'IWWRMP/Data/EXD/100_PRP';
     const PHOTO_BASE = 'IWWRMP/Data/EXD/200_photo';
+    const FALLBACK_DISTRICTS = ['Badulla', 'Kandy', 'Nuwara Eliya'];
     const selectDist = document.getElementById('selectDist');
     const selectDSD = document.getElementById('selectDSD');
     const selectMWSID = document.getElementById('selectMWSID');
@@ -436,13 +134,25 @@
     }
 
     function populateDistricts(data) {
+      resetSelect(selectDist, '--Select District--');
       const districts = new Set();
-      data.features.forEach((feature) => {
+      const features = Array.isArray(data && data.features) ? data.features : [];
+      features.forEach((feature) => {
         if (feature.properties && feature.properties.District) {
           districts.add(feature.properties.District);
         }
       });
       districts.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        selectDist.appendChild(option);
+      });
+    }
+
+    function populateFallbackDistricts() {
+      resetSelect(selectDist, '--Select District--');
+      FALLBACK_DISTRICTS.forEach((value) => {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value;
@@ -511,14 +221,24 @@
     }
 
     async function initDropdowns() {
-      try {
-        const response = await fetch(geojsonURL);
-        if (!response.ok) throw new Error('Failed to fetch GeoJSON');
-        originalData = await response.json();
-        populateDistricts(originalData);
-      } catch (error) {
-        console.error('Error loading GeoJSON for dropdowns:', error);
+      let lastError = null;
+
+      for (const url of geojsonFallbackURLs) {
+        try {
+          const response = await fetch(url, { cache: 'no-store' });
+          if (!response.ok) throw new Error(`Failed to fetch GeoJSON (${response.status})`);
+          originalData = await response.json();
+          populateDistricts(originalData);
+          authStatus.textContent = '';
+          return;
+        } catch (error) {
+          lastError = error;
+          console.error('Error loading GeoJSON for dropdowns from', url, error);
+        }
       }
+
+      populateFallbackDistricts();
+      authStatus.textContent = `District list loaded from fallback only. Full DSD/MWS loading failed: ${lastError ? lastError.message : 'Unknown error'}`;
     }
 
     selectDist.addEventListener('change', () => {
@@ -701,79 +421,79 @@
       }
 
       let properties;
-      if (payload.proposal_type === 'DWS') {
-        properties = {
-          'No': payload.no || '',
-          'GND No.': payload.gnd_no || '',
-          'Scheme': payload.scheme || '',
-          'N': payload.n,
-          'E': payload.e,
-          'Observation': payload.observation || payload.problem || '',
-          'Description': payload.description || payload.recommendation || '',
-          'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
-          'photopath': payload.photopath || ''
-        };
-      } else if (payload.proposal_type === 'Landslides') {
-        properties = {
-          'No.': payload.no || '',
-          'GN Division No.': payload.gn_div_no || '',
-          'GN Division': payload.gn_div || '',
-          'Land Slides': payload.land_slides || '',
+        if (payload.proposal_type === 'DWS') {
+          properties = {
+            'No': payload.no || '',
+            'GND No.': payload.gnd_no || '',
+            'Scheme': payload.scheme || '',
+            'N': payload.n,
+            'E': payload.e,
+            'Observation': payload.observation || payload.problem || '',
+            'Description': payload.description || payload.recommendation || '',
+            'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
+            'photopath': payload.photopath || ''
+          };
+        } else if (payload.proposal_type === 'Landslides') {
+          properties = {
+            'No.': payload.no || '',
+            'GN Division No.': payload.gn_div_no || '',
+            'GN Division': payload.gn_div || '',
+            'Land Slides': payload.land_slides || '',
           'N': payload.n,
           'E': payload.e,
           'NBRO Recommendation N/A': payload.nbro_rec || '',
           'Proposed Measures': payload.measures || '',
           'photopath': payload.photopath || ''
         };
-      } else if (payload.proposal_type === 'MI') {
-        properties = {
-          'No': payload.no || '',
-          'GND No.': payload.gnd_no || '',
-          'Scheme': payload.scheme || '',
-          'N': payload.n,
-          'E': payload.e,
-          'Observation': payload.observation || payload.problem || '',
-          'Description': payload.description || '',
-          'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
-          'photopath': payload.photopath || ''
-        };
-      } else if (payload.proposal_type === 'MT') {
-        properties = {
-          'Name_of_Custodian': payload.name_of_custodian || '',
-          'N': payload.n,
-          'E': payload.e,
-          'Remarks': payload.remarks || payload.problem || '',
-          'photopath': payload.photopath || ''
-        };
-      } else if (payload.proposal_type === 'SR') {
-        properties = {
-          'No': payload.no || '',
-          'GND No.': payload.gnd_no || '',
-          'Scheme': payload.scheme || '',
-          'N': payload.n,
-          'E': payload.e,
-          'Observation': payload.observation || payload.problem || '',
-          'Description': payload.description || '',
-          'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
-          'photopath': payload.photopath || ''
-        };
-      } else if (payload.proposal_type === 'SWC_ON') {
-        properties = {
-          'No.': payload.no || '',
-          'GND No.': payload.gnd_no || '',
-          'GND Name': payload.gnd_name || '',
-          'Key Activities proposed for Soil and Water conservation': payload.key_activities || '',
-          'Priority based on Soil Erosion Hazard': payload.priority || '',
-          'N': payload.n,
-          'E': payload.e,
-          'Quantity': payload.quantity || '',
-          'Proposed': payload.measures || '',
-          'Unit Cost (Rs.)': payload.unit_cost || '',
-          'Total_Cost': payload.total_cost || payload.total_cost_rs || '',
-          'Contribution (Local Community, LA, and the project)': payload.contribution || '',
-          'Time frame for the implementation': payload.time_frame || '',
-          'photopath': payload.photopath || ''
-        };
+        } else if (payload.proposal_type === 'MI') {
+          properties = {
+            'No': payload.no || '',
+            'GND No.': payload.gnd_no || '',
+            'Scheme': payload.scheme || '',
+            'N': payload.n,
+            'E': payload.e,
+            'Observation': payload.observation || payload.problem || '',
+            'Description': payload.description || '',
+            'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
+            'photopath': payload.photopath || ''
+          };
+        } else if (payload.proposal_type === 'MT') {
+          properties = {
+            'Name_of_Custodian': payload.name_of_custodian || '',
+            'N': payload.n,
+            'E': payload.e,
+            'Remarks': payload.remarks || payload.problem || '',
+            'photopath': payload.photopath || ''
+          };
+        } else if (payload.proposal_type === 'SR') {
+          properties = {
+            'No': payload.no || '',
+            'GND No.': payload.gnd_no || '',
+            'Scheme': payload.scheme || '',
+            'N': payload.n,
+            'E': payload.e,
+            'Observation': payload.observation || payload.problem || '',
+            'Description': payload.description || '',
+            'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
+            'photopath': payload.photopath || ''
+          };
+        } else if (payload.proposal_type === 'SWC_ON') {
+          properties = {
+            'No.': payload.no || '',
+            'GND No.': payload.gnd_no || '',
+            'GND Name': payload.gnd_name || '',
+            'Key Activities proposed for Soil and Water conservation': payload.key_activities || '',
+            'Priority based on Soil Erosion Hazard': payload.priority || '',
+            'N': payload.n,
+            'E': payload.e,
+            'Quantity': payload.quantity || '',
+            'Proposed measure/s': payload.measures || '',
+            'Unit Cost (Rs.)': payload.unit_cost || '',
+            'Total_Cost': payload.total_cost || payload.total_cost_rs || '',
+            'Contribution (Local Community, LA, and the project)': payload.contribution || '',
+            'Time frame for the implementation': payload.time_frame || '',
+            'photopath': payload.photopath || ''
+          };
       } else if (payload.proposal_type === 'SWC_OFF') {
         properties = {
           'No.': payload.no || '',
@@ -808,31 +528,31 @@
           'Time frame to implement': payload.time_frame || '',
           'photopath': payload.photopath || ''
         };
-      } else if (payload.proposal_type === 'WSP') {
-        properties = {
-          'No': payload.no || '',
-          'GND No.': payload.gnd_no || '',
-          'Name of the Tank': payload.tank_name || '',
-          'N': payload.n,
-          'E': payload.e,
-          'Observation': payload.observation || payload.problem || '',
-          'Description': payload.description || payload.recommendation || '',
-          'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
-          'photopath': payload.photopath || ''
-        };
-      } else {
-        properties = {
-          'No': payload.no || '',
-          'GND No.': payload.gnd_no || '',
-          Scheme: payload.scheme || '',
-          'Observation': payload.observation || payload.problem || '',
-          N: payload.n,
-          E: payload.e,
-          'Description': payload.description || '',
-          'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
-          photopath: payload.photopath || ''
-        };
-      }
+        } else if (payload.proposal_type === 'WSP') {
+          properties = {
+            'No': payload.no || '',
+            'GND No.': payload.gnd_no || '',
+            'Name of the Tank': payload.tank_name || '',
+            'N': payload.n,
+            'E': payload.e,
+            'Observation': payload.observation || payload.problem || '',
+            'Description': payload.description || payload.recommendation || '',
+            'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
+            'photopath': payload.photopath || ''
+          };
+        } else {
+          properties = {
+            'No': payload.no || '',
+            'GND No.': payload.gnd_no || '',
+            Scheme: payload.scheme || '',
+            'Observation': payload.observation || payload.problem || '',
+            N: payload.n,
+            E: payload.e,
+            'Description': payload.description || '',
+            'Amount (Rs.)': payload.amount || payload.estimated_cost || '',
+            photopath: payload.photopath || ''
+          };
+        }
 
       const feature = {
         type: 'Feature',
@@ -1091,7 +811,7 @@
             'N': payload.n,
             'E': payload.e,
             'Quantity': payload.quantity || '',
-            'Proposed': payload.measures || '',
+            'Proposed measure/s': payload.measures || '',
             'Unit Cost (Rs.)': payload.unit_cost || '',
             'Total_Cost': payload.total_cost || payload.total_cost_rs || '',
             'Contribution (Local Community, LA, and the project)': payload.contribution || '',
@@ -1615,9 +1335,9 @@
             <label for="swcQty">Quantity</label>
             <input id="swcQty" type="text" />
           </div>
-          <div>
-            <label for="swcMeasures">Proposed</label>
-            <input id="swcMeasures" type="text" />
+          <div class="full">
+            <label for="swcMeasures">Proposed measure/s</label>
+            <textarea id="swcMeasures" rows="2"></textarea>
           </div>
           <div>
             <label for="swcUnitCost">Unit Cost (Rs.)</label>
@@ -2058,7 +1778,4 @@
     });
 
     initDropdowns();
-  </script>
-</body>
-
-</html>
+  

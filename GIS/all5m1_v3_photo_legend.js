@@ -3,6 +3,29 @@
 const pngOverlays = {};
 const geoJsonLayers = {};
 const layerState = {};  // Object to track the state of each layer
+const ENVIRONMENTAL_PROTECTION_LAYER_NAME = 'Environmental protection area';
+const ENVIRONMENTAL_PROTECTION_LAYER_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/03_RSV/RSV_FRC_TF/RSV_FRC_TF_MWS_003.geojson';
+
+function ensureSharedBaseLayers(databaseLayers) {
+    const reservationGroup = 'Reservation';
+    if (!databaseLayers[reservationGroup]) {
+        databaseLayers[reservationGroup] = [];
+    }
+
+    const hasEnvironmentalProtection = databaseLayers[reservationGroup].some((layerInfo) =>
+        String((layerInfo && layerInfo.Layer) || '').trim().toLowerCase() === ENVIRONMENTAL_PROTECTION_LAYER_NAME.toLowerCase()
+    );
+
+    if (!hasEnvironmentalProtection) {
+        databaseLayers[reservationGroup].push({
+            Layer: ENVIRONMENTAL_PROTECTION_LAYER_NAME,
+            geojson: ENVIRONMENTAL_PROTECTION_LAYER_URL,
+            Group: 'Base'
+        });
+    }
+
+    return databaseLayers;
+}
 
 // Function to activate buttons and fetch CSV for Base Layers
 function activateBaseLayers() {
@@ -37,6 +60,7 @@ function activateBaseLayers() {
                             databaseLayers[Database].push({ Layer, geojson, Group });
                         });
 
+                        ensureSharedBaseLayers(databaseLayers);
                         updateBasePanel(databaseLayers);
                     }
                 });
@@ -899,6 +923,7 @@ const styleOptions = {
 	"Conservation forest": { color: "DarkGreen", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
   "Reserved forest": { color: "Green", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
   "Wild life boundary": { color: "Brown", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
+  "Environmental protection area": { color: "#6b8e23", fillColor: "#dceda4", weight: 2, dashArray: "1, 1", fillOpacity: 0.35 },
   "To be forest": { color: "LightGreen", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
 
     
@@ -1192,6 +1217,9 @@ else if (layerName === 'Land cover') {
     } else if (layerName === 'Wild life boundary') {
         categories = ['Wild life boundary'];
         colors = ['Brown'];
+    } else if (layerName === ENVIRONMENTAL_PROTECTION_LAYER_NAME) {
+        categories = [ENVIRONMENTAL_PROTECTION_LAYER_NAME];
+        colors = ['#dceda4'];
     } else if (layerName === 'District Boundary') {
         categories = ['District Boundary'];
         colors = ['Black']; // Simplified for display

@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Water Quality</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7f9;
+      color: #1a1a1a;
+    }
+
+    header {
+      background: #388e3c;
+      color: #fff;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header-btn {
+      background: #2e7d32;
+      color: #fff;
+      border: 1px solid #c8e6c9;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .hint {
+      color: #5b5b5b;
+      font-size: 13px;
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 13px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #4caf50;
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .status {
+      min-height: 18px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">Water Quality</div>
+    <button class="header-btn" type="button" onclick="window.location.href='UserInput.html'">Back To User Input</button>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>Water Quality Data Update</h2>
+      <p class="hint">Only approved agency users can sign in and upload CSV files.</p>
+
+      <div class="form-grid">
+        <div>
+          <label for="agency">Agency</label>
+          <select id="agency">
+            <option value="">--Select Agency--</option>
+            <option value="CEA">CEA</option>
+            <option value="MASL">MASL</option>
+            <option value="NWSDB">NWSDB</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="Agency email" />
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Password" />
+        </div>
+
+        <div>
+          <label for="githubToken">GitHub Token</label>
+          <input id="githubToken" type="password" placeholder="PAT with repo scope" />
+        </div>
+
+        <div class="full">
+          <label for="csvFile">CSV File</label>
+          <input id="csvFile" type="file" accept=".csv,text/csv" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="uploadBtn" class="btn" type="button">Upload CSV</button>
+        <span id="status" class="note status"></span>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://inhfpjdmjjuzawchzejw.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_znt8pCMbjQc8Bqr2Zu5dqg_9AzpRiWG';
+    const WQ_ACCESS_TABLE = 'user_water_quality_access';
+    const GITHUB_OWNER = 'MWS003-GIS';
+    const GITHUB_REPO = 'MWS003-GIS.github.io';
+    const WATER_QUALITY_BASE = 'IWWRMP/Data/EXD/12_WQ';
+
+    const supabaseClient = (
+      window.supabase &&
+      SUPABASE_URL &&
+      SUPABASE_ANON_KEY
+    ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    const agencyInput = document.getElementById('agency');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const githubTokenInput = document.getElementById('githubToken');
+    const csvFileInput = document.getElementById('csvFile');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const statusEl = document.getElementById('status');
+
+    function normalizeEmail(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    async function hasWaterQualityAccess(userId, agency) {
+      const { data, error } = await supabaseClient
+        .from(WQ_ACCESS_TABLE)
+        .select('user_id')
+        .eq('user_id', userId)
+        .eq('agency', agency)
+        .eq('can_upload', true)
+        .limit(1);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return Array.isArray(data) && data.length > 0;
+    }
+
+    async function getFileSha(path, token) {
+      const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
+        headers: { 'Authorization': `token ${token}` }
+      });
+      if (resp.status === 404) return null;
+      if (!resp.ok) throw new Error(`Failed to get SHA (${resp.status})`);
+      const data = await resp.json();
+      return data.sha || null;
+    }
+
+    async function uploadCsvToGitHub(token, agency, file) {
+      const safeAgency = String(agency || '').trim().toUpperCase();
+      const originalName = String(file.name || '').trim();
+      const filePath = `${WATER_QUALITY_BASE}/${originalName}`;
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
+      const contentBuffer = await file.arrayBuffer();
+      const base64Content = btoa(String.fromCharCode(...new Uint8Array(contentBuffer)));
+      const sha = await getFileSha(filePath, token);
+
+      const resp = await fetch(apiUrl, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Upload Water Quality CSV for ${safeAgency}: ${originalName}`,
+          content: base64Content,
+          sha: sha || undefined
+        })
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(`GitHub upload failed (${resp.status}): ${text}`);
+      }
+
+      return filePath;
+    }
+
+    async function verifyAgencyLogin(agency, email, password) {
+      if (!supabaseClient) {
+        throw new Error('Supabase client failed to initialize.');
+      }
+      if (!agency) {
+        throw new Error('Select CEA, MASL, or NWSDB.');
+      }
+      if (!email || !password) {
+        throw new Error('Email and password are required.');
+      }
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      });
+      if (error) {
+        throw new Error(`Sign-in failed: ${error.message}`);
+      }
+      if (!data.user || !data.session) {
+        throw new Error('Sign-in failed: session not returned.');
+      }
+
+      const signedInEmail = normalizeEmail(data.user.email);
+      if (signedInEmail !== normalizeEmail(email)) {
+        await supabaseClient.auth.signOut();
+        throw new Error('Signed-in user does not match the entered email.');
+      }
+
+      const allowed = await hasWaterQualityAccess(data.user.id, agency);
+      if (!allowed) {
+        await supabaseClient.auth.signOut();
+        throw new Error(`Access denied for ${agency}.`);
+      }
+    }
+
+    uploadBtn.addEventListener('click', async () => {
+      const agency = agencyInput.value;
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      const githubToken = githubTokenInput.value.trim();
+      const csvFile = csvFileInput.files[0] || null;
+
+      if (!githubToken) {
+        statusEl.textContent = 'Error: GitHub token required.';
+        return;
+      }
+      if (!csvFile) {
+        statusEl.textContent = 'Error: Select a CSV file.';
+        return;
+      }
+      if (!csvFile.name.toLowerCase().endsWith('.csv')) {
+        statusEl.textContent = 'Error: Only CSV files are allowed.';
+        return;
+      }
+
+      statusEl.textContent = 'Verifying access...';
+
+      try {
+        await verifyAgencyLogin(agency, email, password);
+        statusEl.textContent = 'Uploading CSV to GitHub...';
+        const uploadedPath = await uploadCsvToGitHub(githubToken, agency, csvFile);
+        statusEl.textContent = `Upload complete: ${uploadedPath}`;
+      } catch (error) {
+        statusEl.textContent = `Error: ${error.message}`;
+      } finally {
+        if (supabaseClient) {
+          try {
+            await supabaseClient.auth.signOut();
+          } catch (signOutError) {
+            console.warn('Sign-out failed:', signOutError);
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>

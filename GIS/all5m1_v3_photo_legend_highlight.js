@@ -1,4 +1,3 @@
-
 // Initialize layers storage
 const pngOverlays = {};
 const geoJsonLayers = {};
@@ -30,6 +29,10 @@ const hiddenBaseLayers = new Set([
     'building dencity',
     'forest fire'
 ]);
+const ENVIRONMENTAL_PROTECTION_LAYER_NAME = 'Environmental protection area';
+const ENVIRONMENTAL_PROTECTION_LAYER_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/03_RSV/RSV_FRC_TF/RSV_FRC_TF_UMW.geojson';
+const ENVIRONMENTAL_PROTECTION_LAYER_BASE_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/03_RSV';
+let miniWatershedLinkedEnvironmentalArea = false;
 // Temporarily hidden from the Base Layers panel.
 // Remove entries above to show these layers again later.
 
@@ -84,37 +87,44 @@ function getSoilErosionClass(props) {
 }
 
 const ROAD_CATEGORY_CONFIG = {
+    // Footpath → ash (#999999) dotted line
     'Footpath': {
         codes: new Set(['FTPHL', 'FPTHL', 'FPTOL', 'FPBNL', 'FPBRL']),
-        color: '#808080',
-        weight: 2,
-        opacity: 1,
-        dashArray: '2, 8',
+        color: '#999999',
+        weight: 1.5,
+        opacity: 0.9,
+        dashArray: '2, 7',
         lineCap: 'round'
     },
+    // Major Roads → red solid line
     'Major Roads': {
         codes: new Set(['MNRDL', 'MRBNL', 'MRBRL', 'MROPL', 'MRTNL', 'MRUPL']),
-        color: '#ff0000',
-        weight: 5,
-        opacity: 1
-    },
-    'Railways': {
-        codes: new Set(['RAILL', 'RLBRL', 'RLTNL', 'RLUPL', 'RLOPL']),
-        color: '#808080',
-        weight: 3,
-        opacity: 1
-    },
-    'Secondary Roads': {
-        codes: new Set(['SDRDL', 'SDROL', 'SRBNL', 'SRBRL', 'SRTNL', 'SUBRL']),
-        color: '#ffd700',
+        color: '#CC0000',
         weight: 4,
         opacity: 1
     },
+    // Railways → ash solid line (cross-tick markers added by addRailwayDecorations)
+    'Railways': {
+        codes: new Set(['RAILL', 'RLBRL', 'RLTNL', 'RLUPL', 'RLOPL']),
+        color: '#888888',
+        weight: 2.5,
+        opacity: 1
+    },
+    // Secondary Roads → yellow solid line
+    'Secondary Roads': {
+        codes: new Set(['SDRDL', 'SDROL', 'SRBNL', 'SRBRL', 'SRTNL', 'SUBRL']),
+        color: '#E6B800',
+        weight: 3,
+        opacity: 1
+    },
+    // Jeep/Car Tracks → ash dashed line
     'Jeep/Car Tracks': {
         codes: new Set(['TRBNL', 'TRBRL', 'TRCKL', 'TRCWL', 'TRKOL', 'TRUPL']),
-        color: '#000000',
+        color: '#3d3a3a',
         weight: 2,
         opacity: 1
+        //dashArray: '8, 6',
+        ///lineCap: 'butt'
     }
 };
 
@@ -164,42 +174,175 @@ function getRasterOverrideUrl(layerName, url) {
 
 function isRasterLegendLayer(layerName) {
     const normalizedLayerName = String(layerName || '').trim().toLowerCase();
-    return normalizedLayerName === 'DEM' || isSoilErosionHazardLayer(layerName);
+    return normalizedLayerName === 'dem' || isSoilErosionHazardLayer(layerName);
+}
+
+function isMiniWatershedLayerName(layerName) {
+    const normalizedLayerName = String(layerName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    return normalizedLayerName === 'miniwatershed' || normalizedLayerName === 'mini watershed';
+}
+
+function findLayerCheckboxByLabelText(labelText) {
+    const normalizedTarget = String(labelText || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    const labels = Array.from(document.querySelectorAll('#basePanel label'));
+    const matchingLabel = labels.find((label) => String(label.textContent || '').trim().toLowerCase().replace(/\s+/g, ' ') === normalizedTarget);
+    return matchingLabel && matchingLabel.htmlFor ? document.getElementById(matchingLabel.htmlFor) : null;
+}
+
+function getSelectedMwsCode() {
+    const selectElement = document.getElementById('selectMWSID');
+    return String(selectElement && selectElement.value ? selectElement.value : '')
+        .replace(/-/g, '_')
+        .replace(/^MWS_/i, '')
+        .trim();
+}
+
+async function resolveEnvironmentalProtectionUrls() {
+    return [ENVIRONMENTAL_PROTECTION_LAYER_URL];
+}
+
+function ensureLinkedEnvironmentalProtectionArea() {
+    const alreadyVisible = !!geoJsonLayers[ENVIRONMENTAL_PROTECTION_LAYER_NAME] || !!layerState[ENVIRONMENTAL_PROTECTION_LAYER_NAME];
+    layerState[ENVIRONMENTAL_PROTECTION_LAYER_NAME] = true;
+
+    const linkedCheckbox = findLayerCheckboxByLabelText(ENVIRONMENTAL_PROTECTION_LAYER_NAME);
+    if (linkedCheckbox) linkedCheckbox.checked = true;
+
+    if (!geoJsonLayers[ENVIRONMENTAL_PROTECTION_LAYER_NAME]) {
+        loadGeoJsonLayer(ENVIRONMENTAL_PROTECTION_LAYER_URL, ENVIRONMENTAL_PROTECTION_LAYER_NAME);
+    }
+
+    if (!alreadyVisible) {
+        miniWatershedLinkedEnvironmentalArea = true;
+    }
+}
+
+function removeLinkedEnvironmentalProtectionArea() {
+    if (!miniWatershedLinkedEnvironmentalArea) return;
+
+    miniWatershedLinkedEnvironmentalArea = false;
+    layerState[ENVIRONMENTAL_PROTECTION_LAYER_NAME] = false;
+
+    const linkedCheckbox = findLayerCheckboxByLabelText(ENVIRONMENTAL_PROTECTION_LAYER_NAME);
+    if (linkedCheckbox) linkedCheckbox.checked = false;
+
+    if (geoJsonLayers[ENVIRONMENTAL_PROTECTION_LAYER_NAME]) {
+        map.removeLayer(geoJsonLayers[ENVIRONMENTAL_PROTECTION_LAYER_NAME]);
+        removeRoadDecorations(ENVIRONMENTAL_PROTECTION_LAYER_NAME);
+        delete geoJsonLayers[ENVIRONMENTAL_PROTECTION_LAYER_NAME];
+    }
+
+    if (layerLegends[ENVIRONMENTAL_PROTECTION_LAYER_NAME]) {
+        map.removeControl(layerLegends[ENVIRONMENTAL_PROTECTION_LAYER_NAME]);
+        delete layerLegends[ENVIRONMENTAL_PROTECTION_LAYER_NAME];
+    }
 }
 
 function addRailwayDecorations(layerName, geoJsonLayer) {
     removeRoadDecorations(layerName);
 
-    const decorationGroup = L.layerGroup();
-    geoJsonLayer.eachLayer((subLayer) => {
-        const feature = subLayer && subLayer.feature ? subLayer.feature : null;
-        const category = getRoadCategoryFromCode(feature && feature.properties ? feature.properties.TL_GFCODE : '');
-        if (category !== 'Railways') return;
-        if (!subLayer.getBounds) return;
+    const TICK_INTERVAL_M = 55;   // metres between tick marks
+    const TICK_HALF_M     = 7;    // half-width of each tick in metres
+    const railColor       = ROAD_CATEGORY_CONFIG['Railways'].color;
+    const railWeight      = ROAD_CATEGORY_CONFIG['Railways'].weight;
 
-        const center = subLayer.getBounds().getCenter();
-        const marker = L.marker(center, {
-            interactive: false,
-            icon: L.divIcon({
-                className: 'railway-cross-icon',
-                html: '<div style="color:#808080;font-size:14px;font-weight:bold;line-height:14px;">+</div>',
-                iconSize: [14, 14],
-                iconAnchor: [7, 7]
-            })
+    const decorationGroup = L.layerGroup();
+
+    geoJsonLayer.eachLayer((subLayer) => {
+        const feature  = subLayer && subLayer.feature ? subLayer.feature : null;
+        const category = getRoadCategoryFromCode(
+            feature && feature.properties ? feature.properties.TL_GFCODE : ''
+        );
+        if (category !== 'Railways') return;
+        if (!(subLayer instanceof L.Polyline)) return;
+
+        // Flatten MultiLineString (array-of-arrays) and simple LineString
+        const raw      = subLayer.getLatLngs();
+        const segments = Array.isArray(raw[0]) ? raw : [raw];
+
+        segments.forEach((pts) => {
+            if (pts.length < 2) return;
+
+            for (let i = 0; i < pts.length - 1; i++) {
+                const A    = pts[i];
+                const B    = pts[i + 1];
+                const latA = A.lat !== undefined ? A.lat : A[0];
+                const lngA = A.lng !== undefined ? A.lng : A[1];
+                const latB = B.lat !== undefined ? B.lat : B[0];
+                const lngB = B.lng !== undefined ? B.lng : B[1];
+
+                // Segment length (metres, equirectangular approximation)
+                const midLat = (latA + latB) / 2;
+                const cosLat = Math.cos(midLat * Math.PI / 180);
+                const dLat   = (latB - latA) * 111320;
+                const dLng   = (lngB - lngA) * 111320 * cosLat;
+                const segLen = Math.sqrt(dLat * dLat + dLng * dLng);
+                if (segLen < 1) continue;
+
+                // Unit vector along segment and its perpendicular
+                const ux = dLng / segLen;   // east component
+                const uy = dLat / segLen;   // north component
+                const px = -uy;             // perpendicular east
+                const py =  ux;             // perpendicular north
+
+                const numTicks = Math.max(1, Math.floor(segLen / TICK_INTERVAL_M));
+                const step     = 1 / (numTicks + 1);
+
+                for (let t = step; t < 1 - step * 0.5; t += step) {
+                    const cLat = latA + (latB - latA) * t;
+                    const cLng = lngA + (lngB - lngA) * t;
+
+                    // Convert half-width metres → degrees
+                    const halfLatDeg = (TICK_HALF_M * px) / 111320;
+                    const halfLngDeg = (TICK_HALF_M * py) / (111320 * cosLat);
+
+                    const tick = L.polyline(
+                        [
+                            [cLat - halfLatDeg, cLng - halfLngDeg],
+                            [cLat + halfLatDeg, cLng + halfLngDeg]
+                        ],
+                        {
+                            color:       railColor,
+                            weight:      railWeight,
+                            opacity:     0.85,
+                            interactive: false
+                        }
+                    );
+                    decorationGroup.addLayer(tick);
+                }
+            }
         });
-        decorationGroup.addLayer(marker);
     });
 
-    if (Object.keys(decorationGroup._layers || {}).length) {
-        roadDecorations[layerName] = decorationGroup;
-        decorationGroup.addTo(map);
-    }
+    roadDecorations[layerName] = decorationGroup;
+    decorationGroup.addTo(map);
 }
 
 function removeRoadDecorations(layerName) {
     if (!roadDecorations[layerName]) return;
     try { map.removeLayer(roadDecorations[layerName]); } catch (e) { /* ignore */ }
     delete roadDecorations[layerName];
+}
+
+function ensureSharedBaseLayers(databaseLayers) {
+    const reservationGroup = 'Reservation';
+    if (!databaseLayers[reservationGroup]) {
+        databaseLayers[reservationGroup] = [];
+    }
+
+    const hasEnvironmentalProtection = databaseLayers[reservationGroup].some((layerInfo) =>
+        String(layerInfo && layerInfo.Layer || '').trim().toLowerCase() === ENVIRONMENTAL_PROTECTION_LAYER_NAME.toLowerCase()
+    );
+
+    if (!hasEnvironmentalProtection) {
+        databaseLayers[reservationGroup].push({
+            Layer: ENVIRONMENTAL_PROTECTION_LAYER_NAME,
+            geojson: ENVIRONMENTAL_PROTECTION_LAYER_URL,
+            Group: 'Base'
+        });
+    }
+
+    return databaseLayers;
 }
 
 // Function to activate buttons and fetch CSV for Base Layers
@@ -235,6 +378,7 @@ function activateBaseLayers() {
                             databaseLayers[Database].push({ Layer, geojson, Group });
                         });
 
+                        ensureSharedBaseLayers(databaseLayers);
                         updateBasePanel(databaseLayers);
                     }
                 });
@@ -298,6 +442,7 @@ function updateBasePanel(databaseLayers) {
                         loadGeoJsonLayer(geojson, Layer);
                     }
 
+
                     // Add the legend for the layer (if applicable)
                     if (!layerLegends[Layer]) {
                         const legendControl = createLegendControl(Layer); // Function to create a legend control
@@ -324,6 +469,10 @@ function updateBasePanel(databaseLayers) {
                         map.removeControl(layerLegends[Layer]);
                         delete layerLegends[Layer];
                         console.log(`Removed legend for layer: ${Layer}`);
+                    }
+
+                    if (isMiniWatershedLayerName(Layer)) {
+                        removeLinkedEnvironmentalProtectionArea();
                     }
                 }
             });
@@ -451,6 +600,12 @@ legendo.onAdd = function () {
     div.style.overflowY = 'auto';
     div.style.overflowX = 'hidden';
     div.innerHTML = '<h4>Layer</h4><ul id="legend-list"></ul>';
+    const legendList = div.querySelector('#legend-list');
+    if (legendList) {
+        legendList.style.listStyle = 'none';
+        legendList.style.paddingLeft = '0';
+        legendList.style.margin = '0';
+    }
 
 
     return div;
@@ -595,26 +750,72 @@ const colorRanges = {
         { "range": ">45", "color": "#f50000" }
     ],
 
-    'Monthly NDVI -01': [
-        { 'range': '-1.0 to -0.2', 'color': '#00008b' },  // Dark blue for very low NDVI
-        { 'range': '-0.2 to 0.0', 'color': '#8b4513' },   // Saddle brown for low NDVI
-        { 'range': '0.0 to 0.2', 'color': '#ffff66' },    // Light yellow for moderate NDVI
-        { 'range': '0.2 to 0.4', 'color': '#adff2f' },    // Green-yellow for higher NDVI
-        { 'range': '0.4 to 0.6', 'color': '#90ee90' },    // Light green for high NDVI
-        { 'range': '0.6 to 1.0', 'color': '#006400' }     // Dark green for very high NDVI
-
-    ],
-    'Monthly NDVI -12': [
-        { 'range': '-1.0 to -0.2', 'color': '#00008b' },  // Dark blue for very low NDVI
-        { 'range': '-0.2 to 0.0', 'color': '#8b4513' },   // Saddle brown for low NDVI
-        { 'range': '0.0 to 0.2', 'color': '#ffff66' },    // Light yellow for moderate NDVI
-        { 'range': '0.2 to 0.4', 'color': '#adff2f' },    // Green-yellow for higher NDVI
-        { 'range': '0.4 to 0.6', 'color': '#90ee90' },    // Light green for high NDVI
-        { 'range': '0.6 to 1.0', 'color': '#006400' }     // Dark green for very high NDVI
-
-    ],
-
+    // 'Monthly NDVI -01': [
+    //     { 'range': '-1.0 to -0.2', 'color': '#00008b' },  // Dark blue for very low NDVI
+    //     { 'range': '-0.2 to 0.0', 'color': '#8b4513' },   // Saddle brown for low NDVI
+    //     { 'range': '0.0 to 0.2', 'color': '#ffff66' },    // Light yellow for moderate NDVI
+    //     { 'range': '0.2 to 0.4', 'color': '#adff2f' },    // Green-yellow for higher NDVI
+    //     { 'range': '0.4 to 0.6', 'color': '#90ee90' },    // Light green for high NDVI
+    //     { 'range': '0.6 to 1.0', 'color': '#006400' }     // Dark green for very high NDVI
+    // ],
+    // 'Monthly NDVI -12': [
+    //     { 'range': '-1.0 to -0.2', 'color': '#00008b' },  // Dark blue for very low NDVI
+    //     { 'range': '-0.2 to 0.0', 'color': '#8b4513' },   // Saddle brown for low NDVI
+    //     { 'range': '0.0 to 0.2', 'color': '#ffff66' },    // Light yellow for moderate NDVI
+    //     { 'range': '0.2 to 0.4', 'color': '#adff2f' },    // Green-yellow for higher NDVI
+    //     { 'range': '0.4 to 0.6', 'color': '#90ee90' },    // Light green for high NDVI
+    //     { 'range': '0.6 to 1.0', 'color': '#006400' }     // Dark green for very high NDVI
+    // ]
 };
+
+// Reuse the defined monthly rainfall legend for the remaining rainfall rasters.
+// The repository exposes RF_2.png ... RF_12.png, but does not include separate
+// month-specific legend metadata alongside those images.
+for (let month = 2; month <= 12; month += 1) {
+    const monthKey = `Monthly Rainfall - ${String(month).padStart(2, '0')}`;
+    if (!colorRanges[monthKey]) {
+        colorRanges[monthKey] = colorRanges["Monthly Rainfall - 01"].map((entry) => ({ ...entry }));
+    }
+}
+
+const monthlyTemperatureMaxLegend = [
+    { range: '< 11', color: '#999bff' },
+    { range: '11 - 12', color: '#99a5ff' },
+    { range: '12 - 13', color: '#9cb3ff' },
+    { range: '13 - 14', color: '#9cbeff' },
+    { range: '14 - 15', color: '#9cdcff' },
+    { range: '15 - 16', color: '#9cd9ff' },
+    { range: '16 - 17', color: '#9ce6ff' },
+    { range: '17 - 18', color: '#99f3ff' },
+    { range: '18 - 19', color: '#99ffff' },
+    { range: '19 - 20', color: '#abfff1' },
+    { range: '20 - 21', color: '#b8ffe5' },
+    { range: '21 - 22', color: '#c7ffd8' },
+    { range: '22 - 23', color: '#d4ffcc' },
+    { range: '23 - 24', color: '#dfffbf' },
+    { range: '24 - 25', color: '#ebffb3' },
+    { range: '25 - 26', color: '#f5ffa6' },
+    { range: '26 - 27', color: '#ffff99' },
+    { range: '27 - 28', color: '#ffef99' },
+    { range: '28 - 29', color: '#ffe699' },
+    { range: '29 - 30', color: '#ffd899' },
+    { range: '30 - 31', color: '#ffca99' },
+    { range: '31 - 32', color: '#ffbe99' },
+    { range: '32 - 33', color: '#ffb199' },
+    { range: '33 - 34', color: '#ffa599' },
+    { range: '> 34', color: '#ff9999' }
+];
+
+for (let month = 1; month <= 12; month += 1) {
+    const monthLabel = String(month).padStart(2, '0');
+    colorRanges[`Monthly  Temporature - Max- ${monthLabel}`] = monthlyTemperatureMaxLegend.map((entry) => ({ ...entry }));
+    colorRanges[`Monthly  Temporature - Max-${monthLabel}`] = monthlyTemperatureMaxLegend.map((entry) => ({ ...entry }));
+    colorRanges[`Monthly  Temperature - Max-${monthLabel}`] = monthlyTemperatureMaxLegend.map((entry) => ({ ...entry }));
+    colorRanges[`Monthly  Temporature - Min- ${monthLabel}`] = monthlyTemperatureMaxLegend.map((entry) => ({ ...entry }));
+    colorRanges[`Monthly  Temporature - Min-${monthLabel}`] = monthlyTemperatureMaxLegend.map((entry) => ({ ...entry }));
+    colorRanges[`Monthly  Temperature - Min-${monthLabel}`] = monthlyTemperatureMaxLegend.map((entry) => ({ ...entry }));
+    colorRanges[`Monthly evoporation - ${monthLabel}`] = colorRanges["Monthly evoporation - 01"].map((entry) => ({ ...entry }));
+}
 
 
 // Function to update legend
@@ -633,10 +834,12 @@ function updateLegend(layerName) {
     activeBottomLegendLayer = layerName;
     const legendList = document.getElementById('legend-list');
     const normalizedLayerName = String(layerName || '').toLowerCase();
+    const isDemLegend = normalizedLayerName.trim() === 'dem';
+    const isSoilErosionLegend = normalizedLayerName.includes('soil erosion');
     const isWideLegend = isRasterLegendLayer(layerName) || normalizedLayerName.includes('soil type');
     const legendContainer = legendList ? legendList.closest('.legend') : null;
     if (legendContainer) {
-        legendContainer.style.width = isWideLegend ? '220px' : '120px';
+        legendContainer.style.width = isDemLegend ? '120px' : (isSoilErosionLegend ? '120px' : (isWideLegend ? '220px' : '120px'));
     }
 
     // Clear previous legend items for a clean update
@@ -1159,8 +1362,20 @@ function activateClimateLayers() {
                             'Rainfall',
                             'Temperature',
                             'Evaporation',
-                            'Evoporation'
-
+                            'Evoporation',
+                            'NDVI',
+                            'Monthly NDVI -01',
+                            'Monthly NDVI -02',
+                            'Monthly NDVI -03',
+                            'Monthly NDVI -04',
+                            'Monthly NDVI -05',
+                            'Monthly NDVI -06',
+                            'Monthly NDVI -07',
+                            'Monthly NDVI -08',
+                            'Monthly NDVI -09',
+                            'Monthly NDVI -10',
+                            'Monthly NDVI -11',
+                            'Monthly NDVI -12'
                         ]);
                         const data = results.data.filter(row =>
                             row.Group === 'Climate' && !excludedClimateLayers.has(row.Layer)
@@ -1298,6 +1513,9 @@ const styleOptions = {
     layer1: { color: "#FF0000", weight: 2, fillOpacity: 0.6 },
     layer2: { color: "#0000FF", weight: 1, fillOpacity: 0.3 },
     layer3: { color: "#00FF00", weight: 3, fillOpacity: 0.7 },
+    "Miniwatershed": { color: "#d4b84f", fillColor: "#fff7b3", weight: 1.5, fillOpacity: 0.55 },
+    "Mini Watershed": { color: "#d4b84f", fillColor: "#fff7b3", weight: 1.5, fillOpacity: 0.55 },
+    "Mini watershed": { color: "#d4b84f", fillColor: "#fff7b3", weight: 1.5, fillOpacity: 0.55 },
     "District Boundary": { color: "Black", weight: 5, dashArray: "5, 5", fillOpacity: 0 },
     "DSD Boundary": { color: "Brown", weight: 2.5, dashArray: "5, 5", fillOpacity: 0 },
     "GN Boundary": { color: "Orange", weight: 2, dashArray: "5, 5", fillOpacity: 0 },
@@ -1308,6 +1526,7 @@ const styleOptions = {
     "Conservation forest": { color: "DarkGreen", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
     "Reserved forest": { color: "Green", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
     "Wild life boundary": { color: "Brown", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
+    "Environmental protection area": { color: "#6b8e23", fillColor: "#dceda4", weight: 2, dashArray: "1, 1", fillOpacity: 0.35 },
     "To be forest": { color: "LightGreen", weight: 2, dashArray: "1, 1", fillOpacity: 0.2 },
 
 
@@ -1365,6 +1584,7 @@ const styleOptions = {
     "WM2a": { color: "#74A600", fillOpacity: 0.9, weight: 0 },  // RGB(116, 166, 0)
     "WM2b": { color: "#498A00", fillOpacity: 0.9, weight: 0 },  // RGB(73, 138, 0)
     "WM3a": { color: "#A4C400", fillOpacity: 0.9, weight: 0 },  // RGB(164, 196, 0)
+
     "WM3b": { color: "#FFF700", fillOpacity: 0.9, weight: 0 },  // RGB(255, 247, 0)
     "IU1": { color: "#F1F500", fillOpacity: 0.9, weight: 0 },   // RGB(241, 245, 0)
     "IU2": { color: "#A4FF73", fillOpacity: 0.9, weight: 0 },   // RGB(164, 255, 115)
@@ -1416,13 +1636,40 @@ const styleOptions = {
 const layerLegends = {};
 
 function loadGeoJsonLayer(url, layerName) {
-    fetch(url)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
+    const dataPromise = (async () => {
+        const normalizedLayerName = String(layerName || '').trim().toLowerCase().replace(/\s+/g, ' ');
+        if (normalizedLayerName === ENVIRONMENTAL_PROTECTION_LAYER_NAME.toLowerCase()) {
+            const urls = await resolveEnvironmentalProtectionUrls();
+            if (!urls.length) {
+                return { type: 'FeatureCollection', features: [] };
             }
-            return response.json();
-        })
+
+            const settledCollections = await Promise.allSettled(urls.map(async (targetUrl) => {
+                const response = await fetch(targetUrl);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            }));
+
+            const collections = settledCollections
+                .filter((result) => result.status === 'fulfilled')
+                .map((result) => result.value);
+
+            return {
+                type: 'FeatureCollection',
+                features: collections.flatMap((collection) => Array.isArray(collection && collection.features) ? collection.features : [])
+            };
+        }
+
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })();
+
+    dataPromise
         .then(data => {
             // Create GeoJSON layer with custom styles and symbols
             const geoJsonLayer = L.geoJSON(data, {
@@ -1503,60 +1750,210 @@ function loadGeoJsonLayer(url, layerName) {
                             iconSize: [40, 40],
                             iconAnchor: [20, 20]
                         });
+                    } else if (layerName === 'Soil Conservation') {
+                        icon = L.divIcon({
+                            className: 'red-cross-icon',
+                            html: '<div style="color: green; font-size: 30px; transform: rotate(45deg);">+</div>',
+                            iconSize: [40, 40],
+                            iconAnchor: [20, 20]
+                        });
                     }
 
-                    return L.marker(latlng, { icon: icon });
+                    else
+                        if (layerName === 'Tourist attract places') {
+                            icon = L.divIcon({
+                                className: 'tourist-attraction-icon',
+                                html: `
+            <div style="position: relative; width: 40px; height: 40px;">
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    background-color: rgba(255, 215, 0, 0.2); /* Gold circle with transparency */
+                "></div>
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: red;
+                    font-size: 16px;
+                    font-weight: bold;
+                ">★</div>
+            </div>
+        `,
+                                iconSize: [40, 40],
+                                iconAnchor: [20, 20]
+                            });
+                        }
+                        else
+                            if (layerName === 'Economic hubs') {
+                                icon = L.divIcon({
+                                    className: 'economic-hub-icon',
+                                    html: `
+            <div style="position: relative; width: 40px; height: 40px;">
+                <!-- Brownish circle with transparency -->
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    background-color: rgba(139, 69, 19, 0.8); /* Brown circle with opacity */
+                "></div>
+                <!-- Inner circle with darker brown -->
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background-color: #8B4513; /* Darker brown for inner circle */
+                "></div>
+            </div>
+        `,
+                                    iconSize: [40, 40],  // Size of the icon
+                                    iconAnchor: [20, 20] // Anchor to center the icon
+                                });
+                            }
+
+                            else {
+                                icon = L.divIcon({
+                                    className: 'undefine',
+                                    html: `
+        <div style="position: relative; width: 20px; height: 20px;">
+            <!-- Blue outer circle with transparency -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+                background-color: rgba(0, 0, 255, 0.5); /* Semi-transparent blue */
+            "></div>
+            <!-- Yellow inner circle -->
+            <div style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: #FFD700; /* Yellow */
+            "></div>
+        </div>
+    `,
+                                    iconSize: [20, 20],  // Further reduced size of the icon
+                                    iconAnchor: [10, 10] // Updated anchor for center alignment
+                                });
+
+
+                            }
+
+
+                    const amount = getAmountFromProps(feature && feature.properties);
+                    let marker;
+                    let labelTarget;
+                    if (amount !== null && shouldShowNoLabel(layerName)) {
+                        const color = getAmountColor(amount);
+                        const circle = L.circleMarker(latlng, {
+                            radius: getAmountRadius(amount),
+                            color: color,
+                            weight: 0,
+                            stroke: false,
+                            fillColor: color,
+                            fillOpacity: 0.15
+                        });
+                        const point = L.marker(latlng, { icon: icon });
+                        point.setZIndexOffset(1000);
+                        marker = L.layerGroup([circle, point]);
+                        labelTarget = point;
+                    } else {
+                        marker = L.marker(latlng, { icon: icon });
+                        labelTarget = marker;
+                    }
+                    const noValue = getNoValue(feature && feature.properties);
+                    if (noValue !== null && noValue !== undefined && shouldShowNoLabel(layerName)) {
+                        const labelText = String(noValue).trim();
+                        if (labelText) {
+                            labelTarget.bindTooltip(labelText, {
+                                permanent: true,
+                                direction: 'top',
+                                className: 'proposal-no-label',
+                                opacity: 0.9
+                            });
+                        }
+                    }
+                    return marker;
                 },
-                style: (feature) => {
-                    const landCoverType = feature.properties['classLULC'];
-                    const LandslideType = feature.properties['level'];
-                    const soilType = feature.properties['NAME'];
-                    const agroecoType = feature.properties['zone'];
-                    const soilErosionType = getSoilErosionClass(feature.properties);
-                    const populationDensity = feature.properties['Density'];
+                style: function (feature) {
+                    // ── Road category styling (TL_GFCODE-based) ──────────────
                     const roadStyle = getRoadStyle(feature);
+                    if (roadStyle) return roadStyle;
 
-                    if (roadStyle) {
-                        return roadStyle;
+                    // ── All other existing style logic ────────────────────────
+                    const props = (feature && feature.properties) ? feature.properties : {};
+                    const landCoverType     = props['classLULC'];
+                    const LandslideType     = props['level'];
+                    const soilType          = props['NAME'];
+                    const agroecoType       = props['zone'];
+                    const populationDensity = props['Density'];
+                    const erosionClass      = (typeof getSoilErosionClass === 'function') ? getSoilErosionClass(props) : null;
+
+                    if (populationDensity !== undefined && populationDensity !== null) {
+                        if      (populationDensity < 50)   return styleOptions['<50'];
+                        else if (populationDensity < 100)  return styleOptions['50-100'];
+                        else if (populationDensity < 200)  return styleOptions['100-200'];
+                        else if (populationDensity < 500)  return styleOptions['200-500'];
+                        else if (populationDensity < 1000) return styleOptions['500-1000'];
+                        else if (populationDensity < 2000) return styleOptions['1000-2000'];
+                        else if (populationDensity < 5000) return styleOptions['2000-5000'];
+                        else                               return styleOptions['>5000'];
                     }
 
-                    if (populationDensity !== undefined) {
-                        if (populationDensity < 50) {
-                            return styleOptions["<50"];
-                        } else if (populationDensity >= 50 && populationDensity < 100) {
-                            return styleOptions["50-100"];
-                        } else if (populationDensity >= 100 && populationDensity < 200) {
-                            return styleOptions["100-200"];
-                        } else if (populationDensity >= 200 && populationDensity < 500) {
-                            return styleOptions["200-500"];
-                        } else if (populationDensity >= 500 && populationDensity < 1000) {
-                            return styleOptions["500-1000"];
-                        } else if (populationDensity >= 1000 && populationDensity < 2000) {
-                            return styleOptions["1000-2000"];
-                        } else if (populationDensity >= 2000 && populationDensity < 5000) {
-                            return styleOptions["2000-5000"];
-                        } else if (populationDensity >= 5000) {
-                            return styleOptions[">5000"];
-                        }
-                    }
+                    if (erosionClass && styleOptions[erosionClass]) return styleOptions[erosionClass];
 
-                    return (styleOptions[agroecoType] || styleOptions[soilType] || styleOptions[soilErosionType] || styleOptions[LandslideType] || styleOptions[landCoverType] || styleOptions[layerName] || { color: "#333", weight: 1, fillOpacity: 0.5 });
+                    return (
+                        styleOptions[agroecoType]   ||
+                        styleOptions[soilType]      ||
+                        styleOptions[LandslideType] ||
+                        styleOptions[landCoverType] ||
+                        styleOptions[layerName]     ||
+                        { color: '#333', weight: 1, fillOpacity: 0.5 }
+                    );
                 },
+                // Define actions for each feature (e.g., polygons, lines)
                 onEachFeature: function (feature, layer) {
-                    layer.on('click', function (event) {
-                        const clickLatLng = (event && event.latlng) ? event.latlng : (layer.getLatLng ? layer.getLatLng() : null);
-                        if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
-                            return;
-                        }
-                        updateInfoPanel(feature.properties, layerName, layer);
-                        highlightFeature(layer);
-                    });
+                    const makeHandler = function (targetLayer) {
+                        return function (event) {
+                            const clickLatLng = (event && event.latlng) ? event.latlng : (targetLayer.getLatLng ? targetLayer.getLatLng() : null);
+                            if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
+                                return;
+                            }
+                            updateInfoPanel(feature.properties, layerName, targetLayer);
+                            highlightFeature(targetLayer);
+                        };
+                    };
+                    if (layer instanceof L.LayerGroup) {
+                        layer.eachLayer(function (child) {
+                            child.on('click', makeHandler(child));
+                        });
+                    } else {
+                        layer.on('click', makeHandler(layer));
+                    }
                 }
-            }).addTo(map);
+            });
 
-            // Store and add the layer to the map
-            geoJsonLayers[layerName] = geoJsonLayer;
-            geoJsonLayer.addTo(map);
+            // Store and add the GeoJSON layer to the map
+            geoJsonLayers[layerName] = geoJsonLayer.addTo(map);
 
             if (hasRoadCategories(data)) {
                 addRailwayDecorations(layerName, geoJsonLayer);
@@ -1573,9 +1970,10 @@ function loadGeoJsonLayer(url, layerName) {
                     const isSoilErosionLayer = normalizedLayerName.includes('erosion');
                     const isAgroEcoLayer = normalizedLayerName.includes('agro');
                     const isDemLayer = isRasterLegendLayer(layerName);
+                    const isDemOnlyLayer = normalizedLayerName.trim() === 'dem';
                     const displayLayerName = isSoilTypeLayer ? 'Soil Type' : (isSoilErosionLayer ? 'Soil Erosion' : (isAgroEcoLayer ? 'Agro Ecological Zone' : layerName));
                     const isRoadLayer = hasRoadCategories(data);
-                    const legendWidth = (isSoilTypeLayer || isDemLayer) ? '220px' : (isRoadLayer ? '160px' : '120px');
+                    const legendWidth = isDemOnlyLayer ? '120px' : (isSoilErosionLayer ? '120px' : ((isSoilTypeLayer || isDemLayer) ? '160px' : (isRoadLayer ? '160px' : '120px')));
                     // Add inline styles for background color and font size
                     div.style.backgroundColor = 'white';
                     div.style.padding = '10px'; // Adds padding inside the legend box
@@ -1648,29 +2046,88 @@ function loadGeoJsonLayer(url, layerName) {
                     }
 
                     if (isRoadLayer) {
-                        const roadCategories = ['Footpath', 'Major Roads', 'Railways', 'Secondary Roads', 'Jeep/Car Tracks'];
-                        roadCategories.forEach((category) => {
-                            const config = ROAD_CATEGORY_CONFIG[category];
-                            if (!config) return;
+                        // Only show categories that are actually present in this dataset
+                        const presentCategories = new Set();
+                        (Array.isArray(data.features) ? data.features : []).forEach((f) => {
+                            const cat = getRoadCategoryFromCode(
+                                f && f.properties ? f.properties.TL_GFCODE : ''
+                            );
+                            if (cat) presentCategories.add(cat);
+                        });
 
-                            if (category === 'Railways') {
-                                div.innerHTML += `
-                <div style="display:flex;align-items:center;margin-bottom:5px;">
-                    <span style="position:relative;display:inline-block;width:20px;height:10px;margin-right:5px;">
-                        <span style="position:absolute;left:0;right:0;top:50%;border-top:${config.weight}px solid ${config.color};transform:translateY(-50%);"></span>
-                        <span style="position:absolute;left:50%;top:50%;transform:translate(-50%,-55%);color:${config.color};font-weight:bold;">+</span>
-                    </span>
-                    <span>${category}</span>
-                </div>`;
-                                return;
+                        const orderedCategories = [
+                            'Major Roads',
+                            'Secondary Roads',
+                            'Jeep/Car Tracks',
+                            'Footpath',
+                            'Railways'
+                        ];
+
+                        div.innerHTML += '<div style="font-size:9px;font-weight:bold;margin-bottom:4px;"></div>';
+
+                        orderedCategories.forEach((category) => {
+                            if (!presentCategories.has(category)) return;
+                            const cfg = ROAD_CATEGORY_CONFIG[category];
+                            if (!cfg) return;
+
+                            let symbolHtml = '';
+
+                            if (category === 'Footpath') {
+                                // Ash dotted line
+                                symbolHtml = `
+                                    <svg width="28" height="12" style="margin-right:6px;flex-shrink:0;">
+                                        <line x1="1" y1="6" x2="27" y2="6"
+                                            stroke="${cfg.color}" stroke-width="2"
+                                            stroke-dasharray="2,5" stroke-linecap="round"/>
+                                    </svg>`;
+
+                            } else if (category === 'Major Roads') {
+                                // Red solid line
+                                symbolHtml = `
+                                    <svg width="28" height="12" style="margin-right:6px;flex-shrink:0;">
+                                        <line x1="1" y1="6" x2="27" y2="6"
+                                            stroke="${cfg.color}" stroke-width="${cfg.weight}"
+                                            stroke-linecap="butt"/>
+                                    </svg>`;
+
+                            } else if (category === 'Secondary Roads') {
+                                // Yellow solid line
+                                symbolHtml = `
+                                    <svg width="28" height="12" style="margin-right:6px;flex-shrink:0;">
+                                        <line x1="1" y1="6" x2="27" y2="6"
+                                            stroke="${cfg.color}" stroke-width="${cfg.weight}"
+                                            stroke-linecap="butt"/>
+                                    </svg>`;
+
+                            } else if (category === 'Jeep/Car Tracks') {
+                                // Ash dashed line
+                                symbolHtml = `
+                                    <svg width="28" height="12" style="margin-right:6px;flex-shrink:0;">
+                                        <line x1="1" y1="6" x2="27" y2="6"
+                                            stroke="${cfg.color}" stroke-width="2"
+                                            stroke-linecap="butt"/>
+                                    </svg>`;
+
+                            } else if (category === 'Railways') {
+                                // Ash line with perpendicular cross ticks
+                                symbolHtml = `
+                                    <svg width="28" height="12" style="margin-right:6px;flex-shrink:0;">
+                                        <line x1="1" y1="6" x2="27" y2="6"
+                                            stroke="${cfg.color}" stroke-width="${cfg.weight}"/>
+                                        <line x1="8"  y1="2" x2="8"  y2="10"
+                                            stroke="${cfg.color}" stroke-width="1.5"/>
+                                        <line x1="20" y1="2" x2="20" y2="10"
+                                            stroke="${cfg.color}" stroke-width="1.5"/>
+                                    </svg>`;
                             }
 
                             div.innerHTML += `
-                <div style="display:flex;align-items:center;margin-bottom:5px;">
-                    <span style="display:inline-block;width:20px;height:0;border-top:${config.weight}px ${config.dashArray ? 'dashed' : 'solid'} ${config.color};margin-right:5px;"></span>
-                    <span>${category}</span>
-                </div>`;
+                                <div style="display:flex;align-items:center;margin-bottom:5px;">
+                                    ${symbolHtml}
+                                    <span style="font-size:9px;">${category}</span>
+                                </div>`;
                         });
+
                         return div;
                     }
 
@@ -1750,6 +2207,9 @@ function loadGeoJsonLayer(url, layerName) {
                     } else if (layerName === 'Wild life boundary') {
                         categories = ['Wild life boundary'];
                         colors = ['Brown'];
+                    } else if (layerName === ENVIRONMENTAL_PROTECTION_LAYER_NAME) {
+                        categories = [ENVIRONMENTAL_PROTECTION_LAYER_NAME];
+                        colors = ['#dceda4'];
                     } else if (layerName === 'District Boundary') {
                         categories = ['District Boundary'];
                         colors = ['Black']; // Simplified for display
@@ -1804,7 +2264,6 @@ function loadGeoJsonLayer(url, layerName) {
         });
 }
 
-
 // Helper function to remove a layer and its associated legend
 function removeControl(layerName, type) {
     // Remove the layer based on its type (Raster or GeoJSON)
@@ -1834,7 +2293,6 @@ function removeLayerAndLegend(layerName) {
         delete layerLegends[layerName];
     }
 }
-
 
 // Function to update the attribute panel with properties of the clicked feature
 // Function to update the attribute panel with properties of the clicked feature
