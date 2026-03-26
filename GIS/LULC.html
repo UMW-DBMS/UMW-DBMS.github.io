@@ -258,6 +258,27 @@
       return cleaned;
     }
 
+    function normalizeForFileMatch(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/-/g, '_')
+        .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function fileMatchesMws(fileName, mwsId) {
+      const normalizedFileName = normalizeForFileMatch(fileName);
+      const normalizedFolder = normalizeForFileMatch(normalizeMwsFolder(mwsId));
+      const normalizedMwsId = normalizeForFileMatch(mwsId);
+
+      return !!normalizedFileName &&
+        (
+          normalizedFileName.includes(normalizedFolder) ||
+          normalizedFileName.includes(`mws_${normalizedMwsId}`) ||
+          normalizedFileName.includes(normalizedMwsId)
+        );
+    }
+
     function resetSelect(selectEl, placeholder) {
       selectEl.innerHTML = '';
       const option = document.createElement('option');
@@ -455,7 +476,7 @@
         } else {
           const files = await response.json();
           const lulcFiles = Array.isArray(files) 
-            ? files.filter(f => f.name && f.name.endsWith('.geojson') && f.name.toLowerCase().includes(mwsId.toLowerCase()))
+            ? files.filter((f) => f.name && f.name.toLowerCase().endsWith('.geojson') && fileMatchesMws(f.name, mwsId))
             : [];
 
           if (lulcFiles.length === 0) {
