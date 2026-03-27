@@ -135,6 +135,25 @@
     flex-shrink: 0;
   }
 
+  .nav-group-title {
+    padding: 14px 20px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: #6ea78b;
+  }
+
+  .nav-item.sub-item {
+    padding-left: 42px;
+    font-size: 13px;
+  }
+
+  .nav-item.sub-item .nav-icon {
+    font-size: 12px;
+    width: 16px;
+  }
+
   /* CONTENT */
   .content-area {
     flex: 1;
@@ -163,6 +182,13 @@
     padding: 28px 32px;
     box-shadow: 0 2px 12px rgba(0,0,0,0.055);
     margin-bottom: 20px;
+  }
+
+  #intro .card,
+  #step12 .card {
+    min-height: calc(100vh - 144px);
+    display: flex;
+    flex-direction: column;
   }
 
   .section-title {
@@ -253,7 +279,23 @@
     border-radius: 10px;
     border: 1px solid var(--border);
     cursor: zoom-in;
-    height:1000px;
+    display: block;
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100vh - 250px);
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .help-video {
+    width: 100%;
+    display: block;
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100vh - 250px);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #000;
   }
 
   .note-box {
@@ -352,6 +394,61 @@
   .sidebar::-webkit-scrollbar-thumb { background: #2e5040; border-radius: 4px; }
   .content-area::-webkit-scrollbar-track { background: transparent; }
   .content-area::-webkit-scrollbar-thumb { background: #c0d8c8; border-radius: 4px; }
+
+  @media (max-width: 900px) {
+    .layout {
+      flex-direction: column;
+      height: auto;
+      overflow: auto;
+    }
+
+    .sidebar {
+      width: 100%;
+      min-width: 100%;
+      max-height: 32vh;
+    }
+
+    .content-area {
+      padding: 20px;
+    }
+
+    #intro .card,
+    #step12 .card {
+      min-height: auto;
+    }
+
+    .intro-image,
+    .help-video {
+      max-height: calc(100vh - 220px);
+    }
+  }
+
+  @media (max-width: 640px) {
+    header {
+      padding: 14px 16px;
+    }
+
+    .content-area {
+      padding: 16px;
+    }
+
+    .card {
+      padding: 18px;
+    }
+
+    .section-title {
+      font-size: 18px;
+    }
+
+    .divider {
+      margin: 10px 0 14px;
+    }
+
+    .intro-image,
+    .help-video {
+      max-height: calc(100vh - 190px);
+    }
+  }
 </style>
 </head>
 <body>
@@ -389,7 +486,10 @@
     <div class="nav-item" data-target="step8">            <span class="nav-icon">📈</span> Statistics</div>
     <div class="nav-item" data-target="step9">            <span class="nav-icon">🖨️</span> Print</div>
     <div class="nav-item" data-target="step10">           <span class="nav-icon">📏</span> Measure</div>
-    <div class="nav-item" data-target="step11">           <span class="nav-icon">🔐</span> Login</div>
+    <div id="loginGroupLabel" class="nav-group-title">Login</div>
+    <div class="nav-item sub-item" data-target="step11">      <span class="nav-icon">•</span> Proposal Data</div>
+    <div class="nav-item sub-item" data-target="step11wq">    <span class="nav-icon">•</span> Water Quality</div>
+    <div class="nav-item sub-item" data-target="step11lulc">  <span class="nav-icon">•</span> LULC</div>
     <div class="nav-item" data-target="step12">           <span class="nav-icon">🎬</span> Video Guide</div>
   </nav>
 
@@ -664,14 +764,78 @@
       </div>
     </div>
 
+    <div id="step11wq" class="section-panel">
+      <div class="card">
+        <div class="section-title"><span class="title-icon">💧</span> How to Update Water Quality Data via Login</div>
+        <div class="divider"></div>
+
+        <h4>Click the Water Quality Button</h4>
+        <p>Click the <b>Water Quality</b> button and open the <b>Water Quality</b> page.</p>
+
+        <h4>Select the Agency</h4>
+        <p>Choose the relevant agency from the available options: <b>CEA</b>, <b>MASL</b>, or <b>NWSDB</b>.</p>
+        <ul class="cat-list">
+          <li>CEA</li><li>MASL</li><li>NWSDB</li>
+        </ul>
+
+        <h4>Enter Login Credentials</h4>
+        <p>Enter the authorized <b>Email</b>, <b>Password</b>, and <b>GitHub token</b> provided for data updates.</p>
+
+        <h4>Select the CSV Name</h4>
+        <p>After selecting the agency, choose the required <b>CSV file name</b> from the dropdown list.</p>
+
+        <h4>Load the Existing File</h4>
+        <p>Click <b>Load Existing CSV</b> to view and download the current file already available in the dashboard repository.</p>
+
+        <h4>Upload the Updated CSV</h4>
+        <p>Select the updated CSV file from your computer and click <b>Upload CSV</b> to replace the existing dataset.</p>
+
+        <div class="note-box">
+          <span class="note-icon">🔒</span>
+          <span>Only approved agency users can access and update water quality CSV files.</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="step11lulc" class="section-panel">
+      <div class="card">
+        <div class="section-title"><span class="title-icon">🗂️</span> How to Update LULC Data via Login</div>
+        <div class="divider"></div>
+
+        <h4>Click the LULC Button</h4>
+        <p>Click the <b>LULC</b> button and open the <b>LULC</b> page.</p>
+
+        <h4>Select District, DSD, and MWS_ID</h4>
+        <p>Choose the relevant <b>District</b>, <b>DSD</b>, and <b>MWS_ID</b> to identify the area for the upload.</p>
+
+        <h4>Enter Login Credentials</h4>
+        <p>Enter the authorized <b>Email</b> and <b>Password</b>, then provide the <b>GitHub token</b> with access to the repository.</p>
+
+        <h4>Load Existing LULC Files</h4>
+        <p>Click <b>Load LULC Files</b> to display the currently available LULC files linked to the selected watershed.</p>
+
+        <h4>Select the GeoJSON File</h4>
+        <p>Choose the updated <b>LULC GeoJSON</b> file from your computer before uploading.</p>
+
+        <h4>Upload the LULC Data</h4>
+        <p>Click <b>Upload GeoJSON</b> to save the updated LULC file to the dashboard repository.</p>
+
+        <div class="note-box">
+          <span class="note-icon">ℹ️</span>
+          <span>Use the correct MWS_ID and file before uploading so the selected watershed data is updated in the right location.</span>
+        </div>
+      </div>
+    </div>
+
     <!-- STEP 12 -->
     <div id="step12" class="section-panel">
       <div class="card">
         <div class="section-title"><span class="title-icon">🎬</span> Video Guide</div>
         <div class="divider"></div>
         <video id="helpVideo" class="help-video" controls preload="metadata">
-          <source src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Guide.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
+          <source src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Guide.webm" type="video/webm" />
+          <!-- <source src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Guide.mp4" type="video/mp4" /> -->
+        
         </video>
       </div>
     </div>
@@ -734,7 +898,8 @@
       pageSubtitle: 'Step-by-step walkthrough',
       langLabel: 'Lang',
       sidebarLabel: 'Navigation',
-      nav: ['Introduction', 'Access to Dashboard', 'Base Layers', 'Proposal', 'Climate Layer', 'Station Data', 'Data Catalog', 'Data Table', 'Statistics', 'Print', 'Measure', 'Login', 'Video Guide'],
+      loginGroupLabel: 'Login',
+      nav: ['Introduction', 'Access to Dashboard', 'Base Layers', 'Proposal', 'Climate Layer', 'Station Data', 'Data Catalog', 'Data Table', 'Statistics', 'Print', 'Measure', 'Proposal Data', 'Water Quality', 'LULC', 'Video Guide'],
       sectionTitles: {
         intro: 'Introduction',
         step1: 'How to Access the Dashboard',
@@ -748,6 +913,8 @@
         step9: 'How to Print a Map',
         step10: 'How to Measure Distance',
         step11: 'How to Add New Proposal Data via Login',
+        step11wq: 'How to Update Water Quality Data via Login',
+        step11lulc: 'How to Update LULC Data via Login',
         step12: 'Video Guide'
       },
       sections: {
@@ -858,6 +1025,31 @@
             'Only authorized users with a valid email, password, and GitHub access token are allowed to upload new data.',
             'Ensure the photo file size is <b>less than 1 MB</b> before uploading.'
           ]
+        },
+        step11wq: {
+          h4: ['Click the Water Quality Button', 'Select the Agency', 'Enter Login Credentials', 'Select the CSV Name', 'Load the Existing File', 'Upload the Updated CSV'],
+          p: [
+            'Click the <b>Water Quality</b> button and open the <b>Water Quality</b> page.',
+            'Choose the relevant agency from the available options: <b>CEA</b>, <b>MASL</b>, or <b>NWSDB</b>.',
+            'Enter the authorized <b>Email</b>, <b>Password</b>, and <b>GitHub token</b> provided for data updates.',
+            'After selecting the agency, choose the required <b>CSV file name</b> from the dropdown list.',
+            'Click <b>Load Existing CSV</b> to view and download the current file already available in the dashboard repository.',
+            'Select the updated CSV file from your computer and click <b>Upload CSV</b> to replace the existing dataset.'
+          ],
+          list: ['CEA', 'MASL', 'NWSDB'],
+          note: 'Only approved agency users can access and update water quality CSV files.'
+        },
+        step11lulc: {
+          h4: ['Click the LULC Button', 'Select District, DSD, and MWS_ID', 'Enter Login Credentials', 'Load Existing LULC Files', 'Select the GeoJSON File', 'Upload the LULC Data'],
+          p: [
+            'Click the <b>LULC</b> button and open the <b>LULC</b> page.',
+            'Choose the relevant <b>District</b>, <b>DSD</b>, and <b>MWS_ID</b> to identify the area for the upload.',
+            'Enter the authorized <b>Email</b> and <b>Password</b>, then provide the <b>GitHub token</b> with access to the repository.',
+            'Click <b>Load LULC Files</b> to display the currently available LULC files linked to the selected watershed.',
+            'Choose the updated <b>LULC GeoJSON</b> file from your computer before uploading.',
+            'Click <b>Upload GeoJSON</b> to save the updated LULC file to the dashboard repository.'
+          ],
+          note: 'Use the correct MWS_ID and file before uploading so the selected watershed data is updated in the right location.'
         },
         step12: {
           videoFallback: 'Your browser does not support the video tag.'
@@ -1191,11 +1383,15 @@
     if (pageSubtitle) pageSubtitle.textContent = t.pageSubtitle;
     if (langLabel) langLabel.textContent = t.langLabel;
     if (sidebarLabel) sidebarLabel.textContent = t.sidebarLabel;
+    const loginGroupLabel = document.getElementById('loginGroupLabel');
+    if (loginGroupLabel) loginGroupLabel.textContent = t.loginGroupLabel || loginGroupLabel.textContent;
 
     document.querySelectorAll('.nav-item').forEach((item, index) => {
       const icon = item.querySelector('.nav-icon');
       const iconHtml = icon ? icon.outerHTML : '';
-      const labelText = t.nav[index] || '';
+      const currentLabelNode = item.querySelector('.nav-label');
+      const currentLabelText = currentLabelNode ? currentLabelNode.textContent : item.textContent.trim();
+      const labelText = t.nav[index] !== undefined ? t.nav[index] : currentLabelText;
       item.innerHTML = `${iconHtml}<span class="nav-label">${labelText}</span>`;
     });
     Object.keys(t.sectionTitles).forEach((sectionId) => setSectionTitle(sectionId, t.sectionTitles[sectionId]));
@@ -1252,6 +1448,21 @@
     setListItems('step11', step11.list);
     setNote('step11', step11.notes[0], 0);
     setNote('step11', step11.notes[1], 1);
+
+    if (t.sections.step11wq) {
+      const step11wq = t.sections.step11wq;
+      setNodeArrayText(document.querySelectorAll('#step11wq h4'), step11wq.h4);
+      setNodeArrayHtml(document.querySelectorAll('#step11wq p'), step11wq.p);
+      setListItems('step11wq', step11wq.list);
+      setNote('step11wq', step11wq.note);
+    }
+
+    if (t.sections.step11lulc) {
+      const step11lulc = t.sections.step11lulc;
+      setNodeArrayText(document.querySelectorAll('#step11lulc h4'), step11lulc.h4);
+      setNodeArrayHtml(document.querySelectorAll('#step11lulc p'), step11lulc.p);
+      setNote('step11lulc', step11lulc.note);
+    }
 
     const videoTextNode = document.querySelector('#step12 video').nextSibling;
     if (videoTextNode) videoTextNode.textContent = `\n          ${t.sections.step12.videoFallback}\n        `;

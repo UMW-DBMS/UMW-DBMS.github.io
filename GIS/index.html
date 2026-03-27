@@ -334,6 +334,39 @@
             overflow-x: auto;
         }
 
+        #partnersPanel {
+            position: absolute;
+            top: 8vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(min(100%, 96vw) - 10px);
+            max-height: 60vh;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        #partnersPanel table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: auto;
+            font-size: 12px;
+        }
+
+        #partnersPanel th,
+        #partnersPanel td {
+            padding: 6px 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+
+        #partnersPanel th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
 
 
         #attributePanel {
@@ -914,6 +947,7 @@
             <button id="help-button" class="button" onclick="openWorkthrough()">Help</button>
             <button id="info-button" class="button" onclick="openWorkthrough()">User Guide</button>
             <button id="userInputBtn" class="button" onclick="openUserInput()">Log in</button>
+            <button id="partnersBtn" class="button" onclick="handleButtonClick('partnersBtn', 'partnersPanel')">Partners</button>
         </div>
 
 
@@ -981,6 +1015,94 @@
     <div id="tablePanel" class="panel">Data Table <button class="hide-btn"
             onclick="hidePanel('tablePanel')">Close</button>
 
+    </div>
+    <div id="partnersPanel" class="panel">
+        <span style="font-size:12px; font-weight:bold;">Partners</span>
+        <button class="hide-btn" onclick="hidePanel('partnersPanel')">Close</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Institute</th>
+                    <th>Name of the data</th>
+                    <th>Access</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Land Use Policy Planning Department (LUPPD)</td>
+                    <td>Land use and land cover</td>
+                    <td>Restricted</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Forest Department (FD)</td>
+                    <td>Forest cover</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Mahaweli Authority of Sri Lanka (MASL)</td>
+                    <td>Spot height and contour</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Department of Wildlife Conservation (DWLC)</td>
+                    <td>Wildlife conservation area</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Survey Department (SD)</td>
+                    <td>Administration boundary</td>
+                    <td>Public data</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Natural Resource Management Centre (NRMC)</td>
+                    <td>Argo- ecological zone/ Soil type</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Department of Meteorology (DM)</td>
+                    <td>Rainfall, Temperature, evaporation</td>
+                    <td>Restricted</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>National Building Research Organization (NBRO)</td>
+                    <td>Hazard Zonation map</td>
+                    <td>Restricted</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Central Environment Authority (CEA)</td>
+                    <td>Monthly Water quality data</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Resource profile (DSD office)<br>Deltota<br>Pathahewahata<br>Hanguranketa</td>
+                    <td>Demographic data</td>
+                    <td>Public data</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>Survey Department (SD)</td>
+                    <td>Hydro layers<br>transportation<br>place</td>
+                    <td>Restricted</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>National Water Supply and Drainage Board (NWSDB)</td>
+                    <td>Water quality data</td>
+                    <td></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
     <div id="waterQualityStationPanel" class="panel"></div>
     <div id="catalogPanel" class="panel"><span style="font-size:12px; font-weight:bold;">Data Catalog Content</span>
