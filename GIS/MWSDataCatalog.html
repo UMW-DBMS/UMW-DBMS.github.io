@@ -26,27 +26,12 @@
       font-weight: bold;
     }
 
-    /* Footer style */
-    footer {
-      background-color: #333;
-      color: white;
-      text-align: center;
-      padding: 10px 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      left: 0;
-      z-index: 10;
-    }
-
     /* Main content layout */
     main {
       display: flex;
       flex: 1;
       overflow: hidden;
       /* Prevent overflow */
-      padding-bottom: 50px;
-      /* Prevent content from being hidden behind the footer */
     }
 
     /* File list panel */
@@ -176,7 +161,7 @@
       min-width: 240px;
       max-width: 55%;
       border-left: 1px solid #ccc;
-      padding: 5px;
+      padding: 5px 5px 5px 14px;
       background-color: #f4f4f4;
       overflow-y: auto;
       font-size: 12px;
@@ -215,22 +200,27 @@
     }
 
     #right-panel-resizer {
-      position: absolute;
-      left: 0;
-      bottom: 0;
+      position: fixed;
+      right: 12px;
+      bottom: 12px;
       width: 18px;
       height: 18px;
       cursor: ew-resize;
+      margin-left: 0;
+      z-index: 1200;
+      border-radius: 3px;
+      background-color: rgba(255, 255, 255, 0.95);
       background:
-        linear-gradient(135deg, transparent 48%, #89a9bc 48%, #89a9bc 56%, transparent 56%),
-        linear-gradient(135deg, transparent 64%, #89a9bc 64%, #89a9bc 72%, transparent 72%),
-        linear-gradient(135deg, transparent 80%, #89a9bc 80%, #89a9bc 88%, transparent 88%);
+        linear-gradient(135deg, transparent 48%, #d32f2f 48%, #d32f2f 56%, transparent 56%),
+        linear-gradient(135deg, transparent 64%, #d32f2f 64%, #d32f2f 72%, transparent 72%),
+        linear-gradient(135deg, transparent 80%, #d32f2f 80%, #d32f2f 88%, transparent 88%);
       opacity: 0.9;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     #right-panel.resizing {
       user-select: none;
-      box-shadow: inset 3px 0 0 #80b7d6;
+      box-shadow: inset 3px 0 0 #d32f2f;
     }
 
 
@@ -363,10 +353,6 @@
     </div>
     <button id="download-button" onclick="downloadFile()">Download</button>
   </main>
-
-  <footer>
-
-  </footer>
 
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
   <script>

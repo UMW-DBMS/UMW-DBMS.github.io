@@ -337,9 +337,10 @@
         #partnersPanel {
             position: absolute;
             top: 8vh;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(min(100%, 96vw) - 10px);
+            right: 0;
+            left: auto;
+            transform: none;
+            width: calc(min(30rem, 56vw) - 10px);
             max-height: 60vh;
             overflow-y: auto;
             overflow-x: auto;
@@ -358,6 +359,9 @@
             text-align: left;
             border: 1px solid #ddd;
             vertical-align: top;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
 
         #partnersPanel th {
@@ -947,7 +951,7 @@
             <button id="help-button" class="button" onclick="openWorkthrough()">Help</button>
             <button id="info-button" class="button" onclick="openWorkthrough()">User Guide</button>
             <button id="userInputBtn" class="button" onclick="openUserInput()">Log in</button>
-            <button id="partnersBtn" class="button" onclick="handleButtonClick('partnersBtn', 'partnersPanel')">Partners</button>
+            <button id="partnersBtn" class="button" onclick="handleButtonClick('partnersBtn', 'partnersPanel')">Stakeholders</button>
         </div>
 
 
@@ -1017,89 +1021,59 @@
 
     </div>
     <div id="partnersPanel" class="panel">
-        <span style="font-size:12px; font-weight:bold;">Partners</span>
+        <span style="font-size:12px; font-weight:bold;"></span>
         <button class="hide-btn" onclick="hidePanel('partnersPanel')">Close</button>
         <table>
             <thead>
                 <tr>
                     <th>No</th>
                     <th>Institute</th>
-                    <th>Name of the data</th>
-                    <th>Access</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <td>1</td>
                     <td>Land Use Policy Planning Department (LUPPD)</td>
-                    <td>Land use and land cover</td>
-                    <td>Restricted</td>
                 </tr>
                 <tr>
                     <td>2</td>
                     <td>Forest Department (FD)</td>
-                    <td>Forest cover</td>
-                    <td></td>
                 </tr>
                 <tr>
                     <td>3</td>
                     <td>Mahaweli Authority of Sri Lanka (MASL)</td>
-                    <td>Spot height and contour</td>
-                    <td></td>
                 </tr>
                 <tr>
                     <td>4</td>
                     <td>Department of Wildlife Conservation (DWLC)</td>
-                    <td>Wildlife conservation area</td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td>5</td>
-                    <td>Survey Department (SD)</td>
-                    <td>Administration boundary</td>
-                    <td>Public data</td>
                 </tr>
                 <tr>
                     <td>6</td>
                     <td>Natural Resource Management Centre (NRMC)</td>
-                    <td>Argo- ecological zone/ Soil type</td>
-                    <td></td>
                 </tr>
                 <tr>
                     <td>7</td>
                     <td>Department of Meteorology (DM)</td>
-                    <td>Rainfall, Temperature, evaporation</td>
-                    <td>Restricted</td>
                 </tr>
                 <tr>
                     <td>8</td>
                     <td>National Building Research Organization (NBRO)</td>
-                    <td>Hazard Zonation map</td>
-                    <td>Restricted</td>
                 </tr>
                 <tr>
                     <td>9</td>
                     <td>Central Environment Authority (CEA)</td>
-                    <td>Monthly Water quality data</td>
-                    <td></td>
                 </tr>
                 <tr>
                     <td>10</td>
-                    <td>Resource profile (DSD office)<br>Deltota<br>Pathahewahata<br>Hanguranketa</td>
-                    <td>Demographic data</td>
-                    <td>Public data</td>
+                    <td>Resource profile (DSD office)</td>
                 </tr>
                 <tr>
                     <td>11</td>
                     <td>Survey Department (SD)</td>
-                    <td>Hydro layers<br>transportation<br>place</td>
-                    <td>Restricted</td>
                 </tr>
                 <tr>
                     <td>12</td>
                     <td>National Water Supply and Drainage Board (NWSDB)</td>
-                    <td>Water quality data</td>
-                    <td></td>
                 </tr>
             </tbody>
         </table>
@@ -1995,22 +1969,12 @@
 
                         layer.eachLayer((featureLayer) => {
                             if (!featureLayer) return;
-                            if (typeof featureLayer.toGeoJSON === 'function') {
-                                pushFeatureFromLayer(featureLayer);
+                            if (featureLayer instanceof L.LayerGroup && typeof featureLayer.eachLayer === 'function') {
+                                featureLayer.eachLayer((child) => pushFeatureFromLayer(child));
                                 return;
                             }
-                            if (featureLayer instanceof L.LayerGroup && typeof featureLayer.eachLayer === 'function') {
-                                let preferredChild = null;
-                                featureLayer.eachLayer((child) => {
-                                    if (!child || typeof child.toGeoJSON !== 'function') return;
-                                    if (!preferredChild && child instanceof L.Marker) preferredChild = child;
-                                    if (!preferredChild) preferredChild = child;
-                                });
-                                if (preferredChild) {
-                                    pushFeatureFromLayer(preferredChild);
-                                } else {
-                                    featureLayer.eachLayer((child) => pushFeatureFromLayer(child));
-                                }
+                            if (typeof featureLayer.toGeoJSON === 'function') {
+                                pushFeatureFromLayer(featureLayer);
                             }
                         });
 
@@ -2258,7 +2222,6 @@
                 function getPreferredPrintBounds() {
                     const mwsBounds = getSelectedMwsBoundsFromVisibleLayers();
                     if (mwsBounds) return mwsBounds;
-
                     const selectedLayerName = getCurrentSelectedLayerName();
                     const selectedLayer = getOverlayLayerByName(selectedLayerName);
 
@@ -2283,12 +2246,12 @@
 
                     const center = map.getCenter();
                     const zoom = map.getZoom();
-
                     const preferredBounds = getPreferredPrintBounds();
                     const activeBounds = preferredBounds || map.getBounds();
                     const selectedLayers = Object.keys(layerState || {}).filter((layerName) => layerState[layerName]);
                     const waterSourceLayers = Object.keys(waterQualityLayers || {}).filter((layerName) => waterQualityLayers[layerName]);
                     const allSelectedLayers = Array.from(new Set([...selectedLayers, ...waterSourceLayers]));
+                    
 
                     const dsdSelect = document.getElementById('selectDSD');
                     const mwsSelect = document.getElementById('selectMWSID');
@@ -2454,9 +2417,9 @@
                     }
 
                     if (activePanel && activePanel.id !== panelId) {
-                        // Keep water station selections/layers when switching to another panel.
-
-                        if (activePanel.id !== 'waterPanel') {
+                        // Keep base, proposal, and water station selections/layers when switching panels.
+                        const preserveSelections = ['basePanel', 'proposalPanel', 'waterPanel'];
+                        if (!preserveSelections.includes(activePanel.id)) {
                             clearPanelSelections(activePanel.id);
                         }
                         hidePanel(activePanel.id);
@@ -2470,10 +2433,19 @@
                     // Show the panel first so we can measure it if needed
                     panel.style.display = 'block';
 
-                    // Use default positioning (CSS) for panels
+                     // Use default positioning (CSS) for panels, with right-side placement for table panels.
                     panel.style.left = '';
+                    panel.style.right = '';
                     panel.style.top = '';
+                    panel.style.transform = '';
                     panel.style.position = 'absolute';
+
+                    if (panelId === 'tablePanel' || panelId === 'partnersPanel') {
+                        panel.style.top = '8vh';
+                        panel.style.right = '0';
+                        panel.style.left = 'auto';
+                        panel.style.transform = 'none';
+                    }
 
                     if (panelId === 'proposalPanel') {
                         const label = document.getElementById('proposalNoLabel');
