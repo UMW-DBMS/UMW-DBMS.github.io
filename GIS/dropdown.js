@@ -2,6 +2,12 @@
 let geojsonLayer; // To store the GeoJSON layer
 let originalData; // To store the original GeoJSON data
 
+function sortAscending(values) {
+    return Array.from(values).sort((a, b) =>
+        String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+    );
+}
+
 // Function to fetch the GeoJSON data and populate the dropdown menus
 function populateDropdowns() {
     var geojsonURL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/UMW/MWS_Boundary_Updated_UMC_Names.geojson';
@@ -25,7 +31,7 @@ function populateDropdowns() {
             var selectDist = document.getElementById('selectDist');
 
             // Populate the District dropdown with unique values
-            districtValues.forEach(value => {
+            sortAscending(districtValues).forEach(value => {
                 var option = document.createElement('option');
                 option.value = value;
                 option.textContent = value;
@@ -100,7 +106,7 @@ function populateSelectDSDDropdown(filteredFeatures) {
     });
 
     // Populate the SelectDSD dropdown with unique values
-    mainDSDValues.forEach(value => {
+    sortAscending(mainDSDValues).forEach(value => {
         var option = document.createElement('option');
         option.value = value;
         option.textContent = value;
@@ -168,7 +174,7 @@ function populateSelectMWSIDDropdown(filteredFeatures) {
     });
 
     // Populate the SelectMWSID dropdown with unique values
-    mwsIDValues.forEach(value => {
+    sortAscending(mwsIDValues).forEach(value => {
         var option = document.createElement('option');
         option.value = value;
         option.textContent = value;

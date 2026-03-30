@@ -289,6 +289,12 @@
       selectEl.disabled = true;
     }
 
+    function sortAscending(values) {
+      return Array.from(values).sort((a, b) =>
+        String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
+      );
+    }
+
     function populateDistricts(data) {
       resetSelect(distSelect, '--Select District--');
       const districts = new Set();
@@ -297,7 +303,7 @@
           districts.add(feature.properties.District);
         }
       });
-      districts.forEach((value) => {
+      sortAscending(districts).forEach((value) => {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value;
@@ -324,7 +330,7 @@
         }
       });
 
-      dsdValues.forEach((value) => {
+      sortAscending(dsdValues).forEach((value) => {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value;
@@ -352,7 +358,7 @@
         }
       });
 
-      mwsValues.forEach((value) => {
+      sortAscending(mwsValues).forEach((value) => {
         const option = document.createElement('option');
         option.value = value;
         option.textContent = value;
