@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LULC Data</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7f9;
+      color: #1a1a1a;
+    }
+
+    header {
+      background: #388e3c;
+      color: #fff;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .header-btn {
+      background: #2e7d32;
+      color: #fff;
+      border: 1px solid #c8e6c9;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .hint {
+      color: #5b5b5b;
+      font-size: 13px;
+      margin-top: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 12px;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 13px;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .actions {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: #4caf50;
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      font-size: 13px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn:disabled {
+      background: #a5d6a7;
+      cursor: not-allowed;
+    }
+
+    .note {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .status {
+      min-height: 18px;
+      display: inline-block;
+    }
+
+    .file-list {
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      background: #fafafa;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .file-item {
+      padding: 8px;
+      margin: 4px 0;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      background: #fff;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .file-link {
+      color: #388e3c;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .file-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-title">LULC Data</div>
+    <button class="header-btn" type="button" onclick="window.location.href='UserInput.html'">Back To User Input</button>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2>LULC Data Upload & View</h2>
+      <p class="hint">Select District, DSD, and MWS_ID. Sign in with Supabase credentials. Enter GitHub token to view and upload LULC GeoJSON files.</p>
+
+      <div class="form-grid">
+        <div>
+          <label for="selectDist">Select District</label>
+          <select id="selectDist">
+            <option value="">--Select District--</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="selectDSD">Select DSD</label>
+          <select id="selectDSD" disabled>
+            <option value="">--Select DSD--</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="selectMWSID">Select MWS_ID</label>
+          <select id="selectMWSID" disabled>
+            <option value="">--Select MWS_ID--</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="Supabase email" />
+        </div>
+
+        <div>
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Supabase password" />
+        </div>
+
+        <div>
+          <label for="githubToken">GitHub Token</label>
+          <input id="githubToken" type="password" placeholder="PAT with repo scope" />
+        </div>
+
+        <div class="full">
+          <label for="geojsonFile">LULC GeoJSON File</label>
+          <input id="geojsonFile" type="file" accept=".geojson,application/json" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="loadBtn" class="btn" type="button" disabled>Load LULC Files</button>
+        <button id="uploadBtn" class="btn" type="button" disabled>Upload GeoJSON</button>
+        <span id="status" class="note status"></span>
+      </div>
+
+      <div id="fileList" class="file-list" style="display: none;"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const geojsonURL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/UMW/MWS_Boundary_Updated_UMC_Names.geojson';
+    const SUPABASE_URL = 'https://dmjutfgdkcvilutkuxwe.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtanV0Zmdka2N2aWx1dGt1eHdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MDI2MDMsImV4cCI6MjA5MDA3ODYwM30.nGY2ZNCGlih9l7Jy6o12vMLOoA8-YBFeR0_A5pQtHXk';
+    const DSD_ACCESS_TABLE = 'user_dsd_access';
+    const GITHUB_OWNER = 'MWS003-GIS';
+    const GITHUB_REPO = 'MWS003-GIS.github.io';
+    const LULC_BASE = 'IWWRMP/Data/EXD/04_LND/LND_LULC';
+
+    const supabaseClient = (
+      window.supabase &&
+      SUPABASE_URL &&
+      SUPABASE_ANON_KEY
+    ) ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+    let originalData = null;
+    let isAccessGranted = false;
+
+    const distSelect = document.getElementById('selectDist');
+    const dsdSelect = document.getElementById('selectDSD');
+    const mwsIdSelect = document.getElementById('selectMWSID');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const githubTokenInput = document.getElementById('githubToken');
+    const geojsonFileInput = document.getElementById('geojsonFile');
+    const loadBtn = document.getElementById('loadBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const statusEl = document.getElementById('status');
+    const fileListEl = document.getElementById('fileList');
+
+    function updateButtonStates() {
+      const hasSelection = distSelect.value && dsdSelect.value && mwsIdSelect.value;
+      const hasToken = githubTokenInput.value.trim() !== '';
+      loadBtn.disabled = !(hasSelection && hasToken && isAccessGranted);
+      uploadBtn.disabled = !(hasSelection && hasToken && isAccessGranted && geojsonFileInput.files.length > 0);
+    }
+
+    function normalizeMwsFolder(mwsId) {
+      let cleaned = String(mwsId || '').trim();
+      if (!cleaned) return '';
+      cleaned = cleaned.replace(/-/g, '_').replace(/[^A-Za-z0-9_]/g, '');
+      if (!cleaned.toUpperCase().startsWith('MWS_')) cleaned = `MWS_${cleaned}`;
+      return cleaned;
+    }
+
+    function normalizeForFileMatch(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/-/g, '_')
+        .replace(/[^a-z0-9_]/g, '');
+    }
+
+    function fileMatchesMws(fileName, mwsId) {
+      const normalizedFileName = normalizeForFileMatch(fileName);
+      const normalizedFolder = normalizeForFileMatch(normalizeMwsFolder(mwsId));
+      const normalizedMwsId = normalizeForFileMatch(mwsId);
+
+      return !!normalizedFileName &&
+        (
+          normalizedFileName.includes(normalizedFolder) ||
+          normalizedFileName.includes(`mws_${normalizedMwsId}`) ||
+          normalizedFileName.includes(normalizedMwsId)
+        );
+    }
+
+    function resetSelect(selectEl, placeholder) {
+      selectEl.innerHTML = '';
+      const option = document.createElement('option');
+      option.value = '';
+      option.textContent = placeholder;
+      selectEl.appendChild(option);
+      selectEl.value = '';
+      selectEl.disabled = true;
+    }
+
+    function populateDistricts(data) {
+      resetSelect(distSelect, '--Select District--');
+      const districts = new Set();
+      data.features.forEach((feature) => {
+        if (feature.properties && feature.properties.District) {
+          districts.add(feature.properties.District);
+        }
+      });
+      districts.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        distSelect.appendChild(option);
+      });
+      distSelect.disabled = false;
+    }
+
+    function populateDSD(data, district) {
+      resetSelect(dsdSelect, '--Select DSD--');
+      resetSelect(mwsIdSelect, '--Select MWS_ID--');
+
+      if (!district) {
+        updateButtonStates();
+        return;
+      }
+
+      const dsdValues = new Set();
+      data.features.forEach((feature) => {
+        if (feature.properties && feature.properties.District === district) {
+          if (feature.properties.MainDSD) {
+            dsdValues.add(feature.properties.MainDSD);
+          }
+        }
+      });
+
+      dsdValues.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        dsdSelect.appendChild(option);
+      });
+
+      dsdSelect.disabled = false;
+      updateButtonStates();
+    }
+
+    function populateMWSID(data, dsd) {
+      resetSelect(mwsIdSelect, '--Select MWS_ID--');
+
+      if (!dsd) {
+        updateButtonStates();
+        return;
+      }
+
+      const mwsValues = new Set();
+      data.features.forEach((feature) => {
+        if (feature.properties && feature.properties.MainDSD === dsd) {
+          if (feature.properties.MWS_ID) {
+            mwsValues.add(feature.properties.MWS_ID);
+          }
+        }
+      });
+
+      mwsValues.forEach((value) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        mwsIdSelect.appendChild(option);
+      });
+
+      mwsIdSelect.disabled = false;
+      updateButtonStates();
+    }
+
+    async function initDropdowns() {
+      try {
+        const response = await fetch(geojsonURL);
+        if (!response.ok) throw new Error('Failed to fetch boundary GeoJSON');
+        originalData = await response.json();
+        populateDistricts(originalData);
+      } catch (error) {
+        console.error('Error loading GeoJSON for dropdowns:', error);
+        statusEl.textContent = `Error loading districts: ${error.message}`;
+      }
+    }
+
+    async function hasDsdAccess(userId, district, dsd) {
+      if (!supabaseClient) throw new Error('Supabase not initialized');
+      const { data, error } = await supabaseClient
+        .from(DSD_ACCESS_TABLE)
+        .select('user_id')
+        .eq('user_id', userId)
+        .eq('district', district)
+        .eq('dsd', dsd)
+        .eq('can_edit', true)
+        .limit(1);
+
+      if (error) throw new Error(error.message);
+      return Array.isArray(data) && data.length > 0;
+    }
+
+    async function verifyLogin() {
+      const district = distSelect.value;
+      const dsd = dsdSelect.value;
+      const email = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!district || !dsd) {
+        statusEl.textContent = 'Error: Select District and DSD first.';
+        return;
+      }
+      if (!email || !password) {
+        statusEl.textContent = 'Error: Email and password required.';
+        return;
+      }
+
+      try {
+        statusEl.textContent = 'Verifying login...';
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        });
+
+        if (error) {
+          throw new Error(`Sign-in failed: ${error.message}`);
+        }
+
+        if (!data.user || !data.session) {
+          throw new Error('Sign-in failed: session not returned.');
+        }
+
+        const allowed = await hasDsdAccess(data.user.id, district, dsd);
+        if (!allowed) {
+          await supabaseClient.auth.signOut();
+          throw new Error(`Access denied for ${district} / ${dsd}.`);
+        }
+
+        isAccessGranted = true;
+        statusEl.textContent = `Login verified for ${district} / ${dsd}.`;
+        updateButtonStates();
+      } catch (error) {
+        isAccessGranted = false;
+        statusEl.textContent = `Error: ${error.message}`;
+        updateButtonStates();
+      }
+    }
+
+    async function loadLULCFiles() {
+      const mwsId = mwsIdSelect.value;
+      const token = githubTokenInput.value.trim();
+
+      if (!token) {
+        statusEl.textContent = 'Error: GitHub token required.';
+        return;
+      }
+
+      if (!mwsId) {
+        statusEl.textContent = 'Error: Select MWS_ID first.';
+        return;
+      }
+
+      const folder = normalizeMwsFolder(mwsId);
+      if (!folder) {
+        statusEl.textContent = 'Error: Invalid MWS_ID.';
+        return;
+      }
+
+      try {
+        statusEl.textContent = 'Fetching LULC files...';
+        const path = `${LULC_BASE}`;
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+
+        const response = await fetch(apiUrl, {
+          headers: { 'Authorization': `token ${token}` }
+        });
+
+        if (!response.ok) {
+          if (response.status === 404) {
+            statusEl.textContent = `No LULC files found in ${LULC_BASE}.`;
+            fileListEl.innerHTML = '<p>No files available yet.</p>';
+          } else {
+            throw new Error(`Failed to fetch files (${response.status})`);
+          }
+        } else {
+          const files = await response.json();
+          const lulcFiles = Array.isArray(files) 
+            ? files.filter((f) => f.name && f.name.toLowerCase().endsWith('.geojson') && fileMatchesMws(f.name, mwsId))
+            : [];
+
+          if (lulcFiles.length === 0) {
+            fileListEl.innerHTML = `<p>No LULC GeoJSON files found for MWS ${mwsId}.</p>`;
+          } else {
+            fileListEl.innerHTML = '';
+            lulcFiles.forEach(file => {
+              const item = document.createElement('div');
+              item.className = 'file-item';
+              const link = document.createElement('a');
+              link.className = 'file-link';
+              link.href = '#';
+              link.textContent = file.name;
+              link.addEventListener('click', (e) => {
+                e.preventDefault();
+                downloadFile(file.download_url);
+              });
+              item.appendChild(link);
+              fileListEl.appendChild(item);
+            });
+          }
+
+          fileListEl.style.display = 'block';
+          statusEl.textContent = `Found ${lulcFiles.length} LULC file(s) for MWS ${mwsId}.`;
+        }
+      } catch (error) {
+        statusEl.textContent = `Error: ${error.message}`;
+        fileListEl.style.display = 'none';
+      }
+    }
+
+    function toBase64Utf8(text) {
+      const bytes = new TextEncoder().encode(text);
+      let binary = '';
+      bytes.forEach((b) => { binary += String.fromCharCode(b); });
+      return btoa(binary);
+    }
+
+    async function getFileSha(path, token) {
+      const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
+        headers: { 'Authorization': `token ${token}` }
+      });
+      if (resp.status === 404) return null;
+      if (!resp.ok) throw new Error(`Failed to get SHA (${resp.status})`);
+      const data = await resp.json();
+      return data.sha || null;
+    }
+
+    async function uploadLULCFile() {
+      const mwsId = mwsIdSelect.value;
+      const token = githubTokenInput.value.trim();
+      const file = geojsonFileInput.files[0];
+
+      if (!token) {
+        statusEl.textContent = 'Error: GitHub token required.';
+        return;
+      }
+
+      if (!file) {
+        statusEl.textContent = 'Error: Select a GeoJSON file.';
+        return;
+      }
+
+      if (!file.name.toLowerCase().endsWith('.geojson')) {
+        statusEl.textContent = 'Error: Only .geojson files are allowed.';
+        return;
+      }
+
+      const folder = normalizeMwsFolder(mwsId);
+      if (!folder) {
+        statusEl.textContent = 'Error: Invalid MWS_ID.';
+        return;
+      }
+
+      try {
+        statusEl.textContent = 'Uploading GeoJSON file...';
+
+        const filePath = `${LULC_BASE}/${file.name}`;
+        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
+
+        const contentBuffer = await file.arrayBuffer();
+        const content = toBase64Utf8(new TextDecoder().decode(contentBuffer));
+        const sha = await getFileSha(filePath, token);
+
+        const resp = await fetch(apiUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `token ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            message: `Upload LULC file: ${file.name}`,
+            content,
+            sha: sha || undefined
+          })
+        });
+
+        if (!resp.ok) {
+          const text = await resp.text();
+          throw new Error(`GitHub upload failed (${resp.status}): ${text}`);
+        }
+
+        statusEl.textContent = `Successfully uploaded ${file.name}!`;
+        geojsonFileInput.value = '';
+        updateButtonStates();
+
+        // Reload the file list
+        await loadLULCFiles();
+      } catch (error) {
+        statusEl.textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Event listeners
+    distSelect.addEventListener('change', () => {
+      if (!originalData) return;
+      populateDSD(originalData, distSelect.value);
+      isAccessGranted = false;
+      updateButtonStates();
+    });
+
+    dsdSelect.addEventListener('change', () => {
+      if (!originalData) return;
+      populateMWSID(originalData, dsdSelect.value);
+      isAccessGranted = false;
+      updateButtonStates();
+    });
+
+    mwsIdSelect.addEventListener('change', updateButtonStates);
+    githubTokenInput.addEventListener('input', updateButtonStates);
+    geojsonFileInput.addEventListener('change', updateButtonStates);
+
+    loadBtn.addEventListener('click', loadLULCFiles);
+    uploadBtn.addEventListener('click', uploadLULCFile);
+
+    // Handle email/password input - Auto-verify when all fields are filled
+    emailInput.addEventListener('blur', () => {
+      if (emailInput.value.trim() && passwordInput.value && distSelect.value && dsdSelect.value) {
+        verifyLogin();
+      }
+    });
+
+    passwordInput.addEventListener('blur', () => {
+      if (emailInput.value.trim() && passwordInput.value && distSelect.value && dsdSelect.value) {
+        verifyLogin();
+      }
+    });
+
+    function toRawGitHubUrl(url) {
+      if (!url) return url;
+      try {
+        const u = url.trim();
+        // If already a raw.githubusercontent URL, return as-is
+        if (u.includes('raw.githubusercontent.com')) return u;
+        // Convert typical GitHub blob URLs to raw URLs
+        // e.g. https://github.com/<owner>/<repo>/blob/<branch>/path -> https://raw.githubusercontent.com/<owner>/<repo>/<branch>/path
+        if (u.includes('github.com') && u.includes('/blob/')) {
+          return u.replace('https://github.com/', 'https://raw.githubusercontent.com/').replace('/blob/', '/');
+        }
+        return u;
+      } catch (e) {
+        return url;
+      }
+    }
+
+    async function downloadFile(path) {
+      if (!path) {
+        alert("No file selected to download.");
+        return;
+      }
+
+      const fetchUrl = toRawGitHubUrl(path);
+      try {
+        const resp = await fetch(fetchUrl);
+        if (!resp.ok) throw new Error(`Network response was not ok (${resp.status})`);
+
+        // If response is HTML (e.g., GitHub page), attempt to convert again or fail
+        const contentType = resp.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          // If we received HTML, try converting original path to raw URL (again) and refetch
+          if (!fetchUrl.includes('raw.githubusercontent.com') && path.includes('github.com')) {
+            const raw = toRawGitHubUrl(path);
+            if (raw !== fetchUrl) {
+              const retry = await fetch(raw);
+              if (retry.ok) {
+                const blob2 = await retry.blob();
+                const urlObj2 = URL.createObjectURL(blob2);
+                const a2 = document.createElement('a');
+                a2.href = urlObj2;
+                a2.download = (path.split('/').pop() || 'download').split('?')[0];
+                document.body.appendChild(a2);
+                a2.click();
+                a2.remove();
+                setTimeout(() => URL.revokeObjectURL(urlObj2), 1000);
+                return;
+              }
+            }
+          }
+          throw new Error('Fetched resource is HTML, not the expected file content.');
+        }
+
+        const blob = await resp.blob();
+        const urlObj = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = urlObj;
+        const filename = (path.split("/").pop() || "download").split('?')[0];
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(urlObj), 1000);
+      } catch (err) {
+        console.error("Download failed:", err);
+        alert("Download failed: " + err.message + " (see console for details)");
+      }
+    }
+
+    // Initialize on page load
+    initDropdowns();
+  </script>
+</body>
+</html>

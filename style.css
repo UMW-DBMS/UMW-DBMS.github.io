@@ -83,3 +83,14 @@ header, footer {
   flex-shrink: 0; /* Prevent shrinking */
   width: 100%;
 }
+
+/* Keep all map legend boxes at a consistent width for cleaner alignment */
+.leaflet-control .legend,
+.leaflet-control .info.legend {
+  width: 120px;
+  box-sizing: border-box;
+  max-height: 45vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  white-space: normal;
+}

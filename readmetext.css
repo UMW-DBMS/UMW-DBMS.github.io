@@ -1,41 +1,332 @@
+/* Modal background */
 .modal {
-    display: flex; /* Show modal by default for testing; update to 'none' for production */
+    display: flex;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
     align-items: center;
     justify-content: center;
-	font-size: 10px; /* Smaller font for panels */
-    z-index: 999; /* Ensure modal appears above the map */
+}
+
+/* Modal card */
+.modal-content {
+    background: #ffffff;
+    width: 48vw; /* roughly half the viewport width */
+    min-width: min(640px, calc(100vw - 24px));
+    max-width: 680px;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+    overflow: hidden;
+    animation: fadeIn 0.3s ease;
+    font-family: "Segoe UI", Roboto, sans-serif;
+    padding: 12px; /* compact padding */
+    max-height: 50vh; /* restrict height to half the viewport */
+    overflow-y: auto;
+}
+
+/* Modal title color */
+.modal-content h2 {
+    color: #145a32; /* dark green */
+    font-size: 1.4rem; /* larger title */
+    margin: 10px 0 14px 0;
+    text-align: center; /* center title */
+    font-weight: 700;
+}
+
+/* Header */
+.modal-header {
+    background: linear-gradient(135deg, #2e8b57, #1c6e4a);
+    color: #fff;
+    padding: 20px 24px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-header p {
+    margin-top: 6px;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+/* Body */
+.modal-body {
+    padding: 12px 14px;
+    max-height: 44vh;
+    overflow-y: auto;
+    font-size: 0.92rem;
+}
+
+.steps {
+    padding-left: 0;
+}
+
+.steps > li {
+    list-style: none;
+    margin-bottom: 12px;
+    padding-left: 0; /* no reserved space for numbers */
+    position: relative;
+    line-height: 1.4;
+}
+
+.steps ul {
+    margin-top: 6px;
+    margin-left: 18px;
+}
+
+/* Footer */
+.modal-footer {
+    padding: 16px;
+    text-align: center;
+    background: #f5f7f6;
+}
+
+/* Button */
+.close-btn {
+    background: #2e8b57;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 25px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.close-btn:hover {
+    background: #256f47;
+    transform: translateY(-1px);
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Step toggle button and content */
+.flowchart {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 6px 4px;
+}
+
+.flowchart.step-mode {
+    position: relative;
+    display: block;
+    min-height: 360px;
+    overflow: hidden;
+}
+
+.flow-node {
+    background: #e8f5e9; /* light green */
+    border: 1px solid #cfeada;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06), 0 0 18px rgba(255,255,255,0.6); /* white glow */
+    padding: 8px 12px;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 640px;
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 8px 12px;
+    align-items: start;
+}
+
+.flowchart.step-mode .flow-node {
+    position: absolute;
+    top: 50%;
+    width: min(62%, 560px);
+    transition: transform 0.28s ease, opacity 0.28s ease;
+}
+
+.flowchart.step-mode .flow-node.current-step {
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+.flowchart.step-mode .flow-node.next-step {
+    opacity: 0;
+    transform: translate(120%, -50%) scale(0.9);
+    pointer-events: none;
+}
+
+.flowchart.step-mode .flow-node.hidden-step {
+    opacity: 0;
+    transform: translate(120%, -50%) scale(0.9);
+    pointer-events: none;
+}
+
+.flow-node::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -12px;
+    width: 2px;
+    height: 12px;
+    background: #dceddb;
+    transform: translateX(-50%);
+}
+
+.flow-node:last-child::after {
+    display: none;
+}
+
+.flow-title {
+    font-weight: 700;
+    color: #1b5e20;
+    margin-bottom: 6px;
+    font-size: 0.98rem; /* slightly smaller */
+    grid-column: 1 / -1;
+}
+
+.flow-body {
+    color: #333;
+    font-size: 0.86rem; /* reduced body font */
+    line-height: 1.35;
+    grid-column: 1;
+}
+
+.step-video {
+    grid-column: 2;
+    width: 100%;
+    height: 110px;
+    display: block;
+    border-radius: 8px;
+    background: #000;
+    object-fit: cover;
+}
+
+.step-photo {
+    grid-column: 2;
+    width: 100%;
+    height: 110px;
+    display: block;
+    border-radius: 8px;
+    background: #f2f2f2;
+    object-fit: cover;
+    margin-bottom: 6px;
+}
+
+@media (max-width: 900px) {
+    .modal-content {
+        width: min(92vw, 680px);
+        min-width: 0;
+        max-height: 78vh;
+    }
+
+    .flow-node {
+        grid-template-columns: 1fr;
+    }
+
+    .step-photo {
+        grid-column: 1;
+        height: auto;
+        max-height: 220px;
+    }
+
+    .step-video {
+        grid-column: 1;
+        height: auto;
+        max-height: 220px;
+    }
+}
+
+@media (max-width: 600px) {
+    .modal-content {
+        width: calc(100vw - 20px);
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .modal-content h2 {
+        font-size: 1.15rem;
+    }
+
+    .flowchart.step-mode {
+        min-height: 300px;
+    }
+
+    .flowchart.step-mode .flow-node {
+        width: min(92%, 520px);
+    }
+
+    .modal-footer {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .step-nav-buttons {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+/* Make close button smaller to fit half-page layout */
+.close-btn {
+    padding: 8px 14px;
+    font-size: 0.92rem;
 }
 
 .modal-content {
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 600px;
-    text-align: left;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+}
+
+.flowchart {
     overflow-y: auto;
-    max-height: 80%;
+    flex: 1;
 }
 
-button {
-    padding: 4px 10px;
-    background-color: green;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.modal-footer {
+    padding: 15px;
+    border-top: 1px solid #ddd;
+    text-align: left;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    background: #ffffff;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-button:hover {
-    background-color: green;
+.modal-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #2f4f3a;
+    font-size: 0.9rem;
 }
 
-#map {
-    width: 100%;
-    height: 600px;
+.modal-checkbox input {
+    margin: 0;
+}
+
+.step-next-btn {
+    min-width: 36px;
+    padding: 8px 12px;
+    font-weight: 700;
+}
+
+.step-nav-buttons {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
 }

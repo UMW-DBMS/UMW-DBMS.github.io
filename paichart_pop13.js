@@ -28,8 +28,6 @@ var areaTotals22D = {};
 // Declare a global variable for the chart instance
 var chartInstance22 = null;
 
-// Flag to track if the pie chart is currently visible
-var isChartVisible22 = false;
 
 // Function to update the data based on the selected MWS ID
 function updateData2(selectMWSID) {
@@ -91,6 +89,11 @@ function renderPieChart2(ids, areas, totalArea, showChart = true) {
     // Get the chart context
     var ctx = document.getElementById('areaPieChart').getContext('2d');
 
+    if (window.Chart && typeof Chart.getChart === 'function') {
+        const existingChart = Chart.getChart('areaPieChart');
+        if (existingChart) existingChart.destroy();
+    }
+
     // Destroy the old chart instance if it exists
     if (chartInstance22 !== null) {
         chartInstance22.destroy();
@@ -134,36 +137,20 @@ function renderPieChart2(ids, areas, totalArea, showChart = true) {
     }
 }
 
-// Toggle the pie chart and side panel
+// Render the pie chart when the tab is clicked
 function setupToggleButton2() {
     var sidePanel = document.getElementById('statPanel');
     var toggleButton = document.getElementById('demostatPanel');
 
     toggleButton.addEventListener('click', function () {
-        // Toggle the panel's open class
-        sidePanel.classList.toggle('open');
-        
-        // Toggle the chart visibility
-        isChartVisible22 = !isChartVisible22;
+        // Ensure the panel stays open
+        sidePanel.classList.add('open');
 
-        if (isChartVisible22) {
-            toggleButton.innerText = 'Hide Chart';
-
-            // Render the chart with the stored data
-            var ids = Object.keys(areaTotals22D);
-            var areas = Object.values(areaTotals22D);
-            var totalArea = areas.reduce((a, b) => a + b, 0);
-
-            renderPieChart2(ids, areas, totalArea, true);
-        } else {
-            toggleButton.innerText = 'Demography';
-
-            // Destroy the chart to hide it
-            if (chartInstance22 !== null) {
-                chartInstance22.destroy();
-                chartInstance22 = null;
-            }
-        }
+        // Render the chart with the stored data
+        var ids = Object.keys(areaTotals22D);
+        var areas = Object.values(areaTotals22D);
+        var totalArea = areas.reduce((a, b) => a + b, 0);
+        renderPieChart2(ids, areas, totalArea, true);
     });
 }
 
@@ -207,10 +194,6 @@ function downloadChart2() {
 
 // Attach event listeners to buttons
 document.getElementById('downloadButton').addEventListener('click', downloadCSV2);
-document.getElementById('downloadChartButton').addEventListener('click', downloadChart2);
-
-
-
 // Example: Add an event listener for MWS ID selection (e.g., dropdown menu)
 document.getElementById('selectMWSID').addEventListener('change', function(event) {
     var selectedMwsID = event.target.value;

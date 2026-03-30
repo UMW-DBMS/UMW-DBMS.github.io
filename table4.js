@@ -100,11 +100,80 @@ function displayData(data) {
             tr.appendChild(td);
         });
 
-        // Add a "Download SHP" button in the last column
+        // Add a download button in the last column (robustly handle different field names)
         const td = document.createElement('td');
         const button = document.createElement('button');
-        button.textContent = "Download SHP";
-        button.onclick = () => window.open(row['Download-SHP'], '_blank');
+        // try several common column names for download URL
+        const url = row['Download-SHP'] || row['Download'] || row['download'] || row['geojson'] || row['GeoJSON'] || row['Download_URL'] || row['download_url'] || row['File'] || row['file'];
+        if (!url) {
+            button.textContent = 'Not available';
+            button.disabled = true;
+            button.classList.add('disabled');
+        } else {
+            button.textContent = 'Download';
+            button.addEventListener('click', async () => {
+                // Helper to convert GitHub blob URLs to raw.githubusercontent URLs
+                function toRawGitHubUrl(u) {
+                    try {
+                        const gh = u.match(/https?:\/\/github.com\/(.+?)\/blob\/(.+)/);
+                        if (gh) {
+                            return `https://raw.githubusercontent.com/${gh[1]}/${gh[2]}`;
+                        }
+                    } catch (e) { }
+                    return u;
+                }
+
+                async function tryFetchAndDownload(u) {
+                    const resp = await fetch(u, { mode: 'cors' });
+                    if (!resp.ok) throw new Error(`Network response was not ok (${resp.status})`);
+                    const ct = resp.headers.get('content-type') || '';
+                    // If server returned an HTML page, don't try to download that
+                    if (ct.includes('text/html')) throw new Error('Received HTML response instead of file');
+                    const blob = await resp.blob();
+                    const objectUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = objectUrl;
+                    const filename = (u.split('/').pop() || 'download').split('?')[0];
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+                }
+
+                try {
+                    await tryFetchAndDownload(url);
+                } catch (err) {
+                    console.warn('Initial fetch/download failed:', err);
+                    // Try converting GitHub blob URL to raw URL and retry
+                    const raw = toRawGitHubUrl(url);
+                    if (raw !== url) {
+                        try {
+                            await tryFetchAndDownload(raw);
+                            return;
+                        } catch (err2) {
+                            console.warn('Retry with raw.githubusercontent.com failed:', err2);
+                        }
+                    }
+
+                    // Final fallback: provide user with the direct URL to open or copy
+                    const userChoice = confirm('Automatic download failed (CORS or sandboxed frame).\nClick OK to open the file URL in a new tab, or Cancel to copy the URL to clipboard.');
+                    if (userChoice) {
+                        // Attempt to open in a new tab — note this can fail if the page is inside a sandboxed iframe.
+                        try { window.open(url, '_blank', 'noopener'); }
+                        catch (e) { console.error('Could not open new tab:', e); alert('Unable to open new tab. URL:\n' + url); }
+                    } else {
+                        try {
+                            await navigator.clipboard.writeText(url);
+                            alert('Download URL copied to clipboard. Paste it in your browser address bar to open.');
+                        } catch (e) {
+                            // As a last resort, show the URL so the user can copy it manually
+                            alert('Could not copy to clipboard. Please copy this URL manually:\n' + url);
+                        }
+                    }
+                }
+            });
+        }
         td.appendChild(button);
         tr.appendChild(td);
         

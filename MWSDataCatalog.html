@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,448 +8,785 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
   <style>
-/* Global styles */
-body {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  margin: 0;
-}
+    /* Global styles */
+    body {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
 
-/* Header style */
-header {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 0;
-  text-align: center;
-  font-size: 24px;
-  font-weight: bold;
-}
+    /* Header style */
+    header {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 0;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+    }
 
-/* Footer style */
-footer {
-  background-color: #333;
-  color: white;
-  text-align: center;
-  padding: 10px 0;
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  left: 0;
-  z-index: 10;
-}
+    /* Footer style */
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 10px 0;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      left: 0;
+      z-index: 10;
+    }
 
-/* Main content layout */
-main {
-  display: flex;
-  flex: 1;
-  overflow: hidden; /* Prevent overflow */
-  padding-bottom: 50px; /* Prevent content from being hidden behind the footer */
-}
+    /* Main content layout */
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      /* Prevent overflow */
+      padding-bottom: 50px;
+      /* Prevent content from being hidden behind the footer */
+    }
 
-/* File list panel */
-#file-list {
-  width: 25%;
-  border-right: 1px solid #ccc;
-  overflow-y: auto;
-  padding: 10px;
-}
+    /* File list panel */
+    #file-list {
+      width: 26%;
+      min-width: 260px;
+      max-width: 320px;
+      border-right: 1px solid #ccc;
+      background: linear-gradient(180deg, #f9fdff 0%, #ecf7ff 100%);
+      overflow-y: auto;
+      padding: 12px;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+      transition: width 0.2s ease, transform 0.2s ease;
+      position: relative;
+    }
 
-ul {
-  list-style: none;
-  padding-left: 20px;
-}
+    #file-list:hover {
+      width: 28%;
+      transform: scaleX(1.01);
+    }
 
-.collapsible {
-  cursor: pointer;
-  font-weight: bold;
-}
+    #file-list h2,
+    #file-list p {
+      margin: 8px 0;
+    }
 
-.nested {
-  display: none;
-}
+    ul {
+      list-style: none;
+      padding-left: 12px;
+    }
 
-.active {
-  display: block;
-}
+    .collapsible {
+      cursor: pointer;
+      font-weight: 600;
+      color: #2c5a79;
+      border-radius: 4px;
+      padding: 4px 8px;
+      transition: background 0.2s ease;
+      font-size: 18px;
+    }
 
-/* Preview panel */
-#preview-panel {
-  width: 50%;
-  display: flex;
-  flex-direction: column;
-}
+    .collapsible:hover {
+      background: rgba(90, 170, 220, 0.15);
+    }
 
-#table-preview {
-  flex: 1;
-  overflow: auto;
-}
+    .nested {
+      display: none;
+      margin-left: 10px;
+      padding-left: 8px;
+      border-left: 1px dashed #bcd0dd;
+    }
 
-#map {
-  flex: 1;
-  height: 100%;
-  z-index: 0;
-}
+    .active {
+      display: block;
+    }
 
-#image-preview {
-  max-height: 100%;
-  object-fit: contain;
-  display: none; /* Initially hidden */
-}
+    .file-item {
+      border: 1px solid #bcd0dd;
+      background: #ffffff;
+      padding: 6px 8px;
+      margin: 5px 0;
+      border-radius: 4px;
+      box-shadow: inset 0 0 0 1px rgba(60, 120, 160, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
 
-/* Right panel */
-#right-panel {
-  width: 25%;
-  border-left: 1px solid #ccc;
-  padding: 10px;
-  background-color: #f4f4f4;
-  overflow-y: auto;
-  font-size: 9px;
-  position: relative; /* Makes it a positioning context for absolute children */
-}
+    .file-item:hover {
+      transform: translateX(2px);
+      box-shadow: inset 0 0 0 1px rgba(20, 90, 130, 0.35), 0 2px 7px rgba(0, 0, 0, 0.08);
+    }
 
-/* Download button */
-#download-button {
-  display: block;
-  position: absolute; /* Positioned within the right panel */
-  top: 10px;
-  right: 10px;
-  padding: 10px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
+    .file-link {
+      color: #045a8d;
+      text-decoration: none;
+      font-size: 18px;
+    }
 
-#download-button:hover {
-  background-color: #45a049;
-}
+    .file-link:hover {
+      text-decoration: underline;
+    }
 
-/* CSV Table */
-.csv-table {
-  width: 100%;
-  border-collapse: collapse; /* Ensures borders don't double up */
-  font-size: 12px; /* Compact font size */
-  font-family: Arial, sans-serif;
-  text-align: left;
-  margin: 0 auto; /* Center the table */
-  line-height: 1.2; /* Reduce line height for a tighter look */
-}
 
-.csv-table th,
-.csv-table td {
-  border: 1px solid #000; /* Dark border for clear visibility */
-  padding: 4px; /* Reduced padding for compactness */
-  white-space: nowrap; /* Prevent text wrapping for a clean appearance */
-}
+    .collapsible {
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.csv-table th {
-  background-color: #eaeaea; /* Subtle header background color */
-  font-weight: bold;
-  text-align: center; /* Center align headers */
-}
+    .nested {
+      display: none;
+    }
 
-.csv-table tr:nth-child(even) {
-  background-color: #f7f7f7; /* Light gray for alternate rows */
-}
+    .active {
+      display: block;
+    }
 
-.csv-table tr:hover {
-  background-color: #f0f0f0; /* Hover effect for row highlighting */
-}
+    /* Preview panel */
+    #preview-panel {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
+      min-width: 280px;
+    }
 
-.csv-table td {
-  color: #333; /* Neutral text color */
-  text-align: left; /* Align text to the left */
-}
+    #table-preview {
+      flex: 1;
+      overflow: auto;
+    }
 
-/* Preview container with fixed height */
-#imagePreview,
-#mapPreview,
-#tablePreview {
-  height: 80%; /* Full height */
-  overflow: auto; /* Scrollable content if it exceeds the height */
-  border: 1px solid #ccc; /* Optional: border for visual separation */
-  box-sizing: border-box; /* Ensure padding is included in height */
-  background-color: #f9f9f9; /* Light background for better readability */
-}
+    #map {
+      flex: 1;
+      height: 100%;
+      z-index: 0;
+    }
 
+    #image-preview {
+      max-height: 100%;
+      object-fit: contain;
+      display: none;
+      /* Initially hidden */
+    }
+
+    /* Right panel */
+    #right-panel {
+      width: 25%;
+      flex: 0 0 25%;
+      min-width: 240px;
+      max-width: 55%;
+      border-left: 1px solid #ccc;
+      padding: 5px;
+      background-color: #f4f4f4;
+      overflow-y: auto;
+      font-size: 12px;
+      position: relative;
+      /* Makes it a positioning context for absolute children */
+      transition: box-shadow 0.2s ease;
+    }
+
+    #right-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-bottom: 10px;
+    }
+
+    #right-panel-title {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    #right-panel-content {
+      overflow-x: auto;
+    }
+
+    #right-panel-placeholder,
+    #right-panel-hint {
+      margin: 0;
+      color: #555;
+      line-height: 1.5;
+    }
+
+    #right-panel-hint {
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: #47606f;
+    }
+
+    #right-panel-resizer {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 18px;
+      height: 18px;
+      cursor: ew-resize;
+      background:
+        linear-gradient(135deg, transparent 48%, #89a9bc 48%, #89a9bc 56%, transparent 56%),
+        linear-gradient(135deg, transparent 64%, #89a9bc 64%, #89a9bc 72%, transparent 72%),
+        linear-gradient(135deg, transparent 80%, #89a9bc 80%, #89a9bc 88%, transparent 88%);
+      opacity: 0.9;
+    }
+
+    #right-panel.resizing {
+      user-select: none;
+      box-shadow: inset 3px 0 0 #80b7d6;
+    }
+
+
+    /* Avoid extra white space by shrinking map panel and file list appropriately */
+    #preview-panel {
+      width: 60%;
+    }
+
+    #file-list {
+      width: 26%;
+    }
+
+
+    /* Download button */
+    #download-button {
+      display: block;
+      position: absolute;
+      /* Positioned within the right panel */
+      top: 10px;
+      right: 10px;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #download-button:hover {
+      background-color: #45a049;
+    }
+
+    /* CSV Table */
+    .csv-table {
+      width: 100%;
+      border-collapse: collapse;
+      /* Ensures borders don't double up */
+      font-size: 10px;
+      /* Compact font size */
+      font-family: Arial, sans-serif;
+      text-align: left;
+      margin: 0 auto;
+      /* Center the table */
+      line-height: 1.2;
+      /* Reduce line height for a tighter look */
+    }
+
+    .csv-table th,
+    .csv-table td {
+      border: 1px solid #000;
+      /* Dark border for clear visibility */
+      padding: 4px;
+      /* Reduced padding for compactness */
+      white-space: nowrap;
+      /* Prevent text wrapping for a clean appearance */
+    }
+
+    .csv-table th {
+      background-color: #eaeaea;
+      /* Subtle header background color */
+      font-weight: bold;
+      text-align: center;
+      /* Center align headers */
+    }
+
+    .csv-table tr:nth-child(even) {
+      background-color: #f7f7f7;
+      /* Light gray for alternate rows */
+    }
+
+    .csv-table tr:hover {
+      background-color: #f0f0f0;
+      /* Hover effect for row highlighting */
+    }
+
+    .csv-table td {
+      color: #333;
+      /* Neutral text color */
+      text-align: left;
+      /* Align text to the left */
+    }
+
+    /* Preview container with fixed height */
+    #imagePreview,
+    #mapPreview,
+    #tablePreview {
+      height: 80%;
+      /* Full height */
+      overflow: auto;
+      /* Scrollable content if it exceeds the height */
+      border: 1px solid #ccc;
+      /* Optional: border for visual separation */
+      box-sizing: border-box;
+      /* Ensure padding is included in height */
+      background-color: #f9f9f9;
+      /* Light background for better readability */
+    }
   </style>
 </head>
+
 <body>
 
-<header style="display: flex; justify-content: flex-start; align-items: center; padding: 10px; background-color: green; ">
+  <header
+    style="display: flex; justify-content: flex-start; align-items: center; padding: 10px; background-color: green; ">
 
-  <div style="display: flex; align-items: flex-end;">
-    <input type="text" id="mwsIdInput" placeholder="Enter MWS ID" />
-    <button onclick="onEnterButtonClick()">Enter</button>
-  </div>
-  
-  <div style="flex: 1; text-align: center;">
+    <div style="display: flex; align-items: flex-end;">
+      <input type="text" id="mwsIdInput" placeholder="Enter MWS ID" />
+      <button onclick="onEnterButtonClick()">Enter</button>
+    </div>
+
+    <div style="flex: 1; text-align: center;">
       Mini Watershed Data Catalog
-  </div>
-</header>
+    </div>
+  </header>
 
-<main>
-  <div id="file-list">Loading...</div>
-  <div id="preview-panel">
-    <div id="table-preview" style="display: none;"></div>
-    <div id="map"></div>
-    <img id="image-preview" src="" alt="PNG Preview" />
-  </div>
-  <div id="right-panel">
-    <h3>Additional Panel</h3>
-    <p>Here you can add any content, such as additional information, controls, etc.</p>
-  </div>
-  <button id="download-button" onclick="downloadFile()">Download</button>
-</main>
+  <main>
+    <div id="file-list">Enter MWS_ID and click "Enter" to Load Files.</div>
+    <div id="preview-panel">
+      <div id="table-preview" style="display: none;"></div>
+      <div id="map"></div>
+      <img id="image-preview" src="" alt="PNG Preview" />
+    </div>
+    <div id="right-panel">
+      <div id="right-panel-header">
+        <h3 id="right-panel-title">Details Panel</h3>
+      </div>
+      <div id="right-panel-content">
+        <p id="right-panel-placeholder">Select a layer to see its details here.</p>
+      </div>
+      <div id="right-panel-resizer" title="Drag to resize"></div>
+    </div>
+    <button id="download-button" onclick="downloadFile()">Download</button>
+  </main>
 
-<footer>
+  <footer>
 
-</footer>
+  </footer>
 
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<script>
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
     // Global variables
     let csvUrls = [];
     let map;  // Declare the map object globally
 
+    (function enableRightPanelResize() {
+      const main = document.querySelector("main");
+      const rightPanel = document.getElementById("right-panel");
+      const resizer = document.getElementById("right-panel-resizer");
+      let startX = 0;
+      let startWidth = 0;
+      let isResizing = false;
+
+      resizer.addEventListener("mousedown", (event) => {
+        isResizing = true;
+        startX = event.clientX;
+        startWidth = rightPanel.getBoundingClientRect().width;
+        rightPanel.classList.add("resizing");
+        document.body.style.cursor = "ew-resize";
+        event.preventDefault();
+      });
+
+      document.addEventListener("mousemove", (event) => {
+        if (!isResizing) return;
+
+        const mainWidth = main.getBoundingClientRect().width;
+        const deltaX = startX - event.clientX;
+        const minWidth = 240;
+        const maxWidth = Math.max(minWidth, Math.floor(mainWidth * 0.55));
+        const nextWidth = Math.min(maxWidth, Math.max(minWidth, startWidth + deltaX));
+
+        rightPanel.style.width = `${nextWidth}px`;
+        rightPanel.style.flexBasis = `${nextWidth}px`;
+      });
+
+      document.addEventListener("mouseup", () => {
+        if (!isResizing) return;
+        isResizing = false;
+        rightPanel.classList.remove("resizing");
+        document.body.style.cursor = "";
+      });
+    })();
+
     // Initialize the map
     function initializeMap() {
-        if (!map) {
-            map = L.map('map').setView([51.505, -0.09], 13);  // Set initial view of the map
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
-        }
+      if (!map) {
+        map = L.map('map').setView([51.505, -0.09], 13);  // Set initial view of the map
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+      }
     }
 
     function updateUrl() {
-        const mwsId = document.getElementById('mwsIdInput').value;
-        
-        if (mwsId.trim() !== "") {
-            csvUrls = [`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Registry/DBMS_${mwsId}.csv`];
-            console.log(csvUrls);
-        } else {
-            console.log("Please enter a valid MWS ID.");
-        }
+      const mwsId = document.getElementById('mwsIdInput').value;
+
+      if (mwsId.trim() !== "") {
+        csvUrls = [`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Registry/DBMS_${mwsId}.csv`];
+        console.log(csvUrls);
+      } else {
+        console.log("Please enter a valid MWS ID.");
+      }
     }
 
     async function onEnterButtonClick() {
-        updateUrl();
-        const allFiles = await fetchAndMergeCSV(csvUrls);
-        const groupedFiles = groupFiles(allFiles);
-        const tree = createTree(groupedFiles);
+      updateUrl();
+      const allFiles = await fetchAndMergeCSV(csvUrls);
+      const groupedFiles = groupFiles(allFiles);
+      const tree = createTree(groupedFiles);
 
-        const fileList = document.getElementById("file-list");
-        fileList.innerHTML = "";
-        fileList.appendChild(tree);
-        enableCollapsible();
+      const fileList = document.getElementById("file-list");
+      fileList.innerHTML = "";
+      fileList.appendChild(tree);
+      enableCollapsible();
     }
 
     async function fetchAndMergeCSV(urls) {
-        const allFiles = [];
-        for (const url of urls) {
-            const response = await fetch(url);
-            const text = await response.text();
-            const rows = text.trim().split("\n").map(row => row.split(","));
-            const headers = rows[0];
-            const data = rows.slice(1).map(row =>
-                row.reduce((acc, value, index) => {
-                    acc[headers[index]] = value;
-                    return acc;
-                }, {}));
-            allFiles.push(...data);
-        }
-        return allFiles;
+      const allFiles = [];
+      for (const url of urls) {
+        const response = await fetch(url);
+        const text = await response.text();
+        const rows = text.trim().split("\n").map(row => row.split(","));
+        const headers = rows[0];
+        const data = rows.slice(1).map(row =>
+          row.reduce((acc, value, index) => {
+            acc[headers[index]] = value;
+            return acc;
+          }, {}));
+        allFiles.push(...data);
+      }
+      return allFiles;
     }
 
     function groupFiles(files) {
-        const grouped = {};
-        files.forEach(file => {
-            const group = file.Group || "Ungrouped";
-            const database = file.Database || "Undefined";
-            if (!grouped[group]) grouped[group] = {};
-            if (!grouped[group][database]) grouped[group][database] = [];
-            grouped[group][database].push(file);
-        });
-        return grouped;
+      const grouped = {};
+      files.forEach(file => {
+        const group = file.Group || "Ungrouped";
+        const database = file.Database || "Undefined";
+        if (!grouped[group]) grouped[group] = {};
+        if (!grouped[group][database]) grouped[group][database] = [];
+        grouped[group][database].push(file);
+      });
+      return grouped;
     }
 
     function createTree(groupedFiles) {
-        const ul = document.createElement("ul");
-        for (const group in groupedFiles) {
-            const groupLi = document.createElement("li");
-            const groupSpan = document.createElement("span");
-            groupSpan.classList.add("collapsible");
-            groupSpan.textContent = group;
-            groupLi.appendChild(groupSpan);
+      const ul = document.createElement("ul");
+      for (const group in groupedFiles) {
+        const groupLi = document.createElement("li");
+        const groupSpan = document.createElement("span");
+        groupSpan.classList.add("collapsible");
+        groupSpan.textContent = group;
+        groupLi.appendChild(groupSpan);
 
-            const groupUl = document.createElement("ul");
-            groupUl.classList.add("nested");
+        const groupUl = document.createElement("ul");
+        groupUl.classList.add("nested");
 
-            for (const database in groupedFiles[group]) {
-                const dbLi = document.createElement("li");
-                const dbSpan = document.createElement("span");
-                dbSpan.classList.add("collapsible");
-                dbSpan.textContent = database;
-                dbLi.appendChild(dbSpan);
+        for (const database in groupedFiles[group]) {
+          const dbLi = document.createElement("li");
+          const dbSpan = document.createElement("span");
+          dbSpan.classList.add("collapsible");
+          dbSpan.textContent = database;
+          dbLi.appendChild(dbSpan);
 
-                const dbUl = document.createElement("ul");
-                dbUl.classList.add("nested");
+          const dbUl = document.createElement("ul");
+          dbUl.classList.add("nested");
 
-                groupedFiles[group][database].forEach(file => {
-                    const fileLi = document.createElement("li");
-                    const fileButton = document.createElement("button");
-                    fileButton.textContent = `${file.Layer} - ${file.layer}`;
-                    fileButton.style.width = "100%";
-                    fileButton.addEventListener("click", () => loadFile(file));
-                    fileLi.appendChild(fileButton);
-                    dbUl.appendChild(fileLi);
-                });
+          groupedFiles[group][database].forEach(file => {
+            const fileLi = document.createElement("li");
+            const fileButton = document.createElement("button");
+            fileButton.textContent = `${file.Layer} - ${file.layer}`;
+            fileButton.style.width = "100%";
+            fileButton.addEventListener("click", () => loadFile(file));
+            fileLi.appendChild(fileButton);
+            dbUl.appendChild(fileLi);
+          });
 
-                dbLi.appendChild(dbUl);
-                groupUl.appendChild(dbLi);
-            }
-
-            groupLi.appendChild(groupUl);
-            ul.appendChild(groupLi);
+          dbLi.appendChild(dbUl);
+          groupUl.appendChild(dbLi);
         }
-        return ul;
+
+        groupLi.appendChild(groupUl);
+        ul.appendChild(groupLi);
+      }
+      return ul;
     }
 
     function enableCollapsible() {
-        const collapsibles = document.querySelectorAll(".collapsible");
-        collapsibles.forEach(item => {
-            item.addEventListener("click", function () {
-                this.nextElementSibling.classList.toggle("active");
-            });
+      const collapsibles = document.querySelectorAll(".collapsible");
+      collapsibles.forEach(item => {
+        item.addEventListener("click", function () {
+          this.nextElementSibling.classList.toggle("active");
         });
+      });
     }
 
     function showDetailsInRightPanel(file) {
-        const rightPanel = document.getElementById("right-panel");
-        rightPanel.innerHTML = "<h3>Details for Selected Layer</h3>";
+      const rightPanelContent = document.getElementById("right-panel-content");
+      const rightPanelTitle = document.getElementById("right-panel-title");
+      rightPanelTitle.textContent = "Details for Selected Layer";
+      rightPanelContent.innerHTML = "";
 
-        const detailsList = document.createElement("ul");
-        Object.entries(file).forEach(([key, value]) => {
-            const listItem = document.createElement("li");
-            listItem.textContent = `${key}: ${value}`;
-            detailsList.appendChild(listItem);
-        });
+      const table = document.createElement("table");
+      table.style.width = '100%';
+      table.style.borderCollapse = 'collapse';
+      table.style.fontSize = '0.9rem';
+      table.style.lineHeight = '1.4';
 
-        rightPanel.appendChild(detailsList);
+      const thead = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+
+      const th1 = document.createElement("th");
+      th1.textContent = "Attribute";
+      th1.style.border = '1px solid #ddd';
+      th1.style.padding = '8px';
+      th1.style.backgroundColor = '#f2f2f2';
+      th1.style.fontWeight = 'bold';
+      th1.style.textAlign = 'left';
+
+      const th2 = document.createElement("th");
+      th2.textContent = "Value";
+      th2.style.border = '1px solid #ddd';
+      th2.style.padding = '8px';
+      th2.style.backgroundColor = '#f2f2f2';
+      th2.style.fontWeight = 'bold';
+      th2.style.textAlign = 'left';
+
+      headerRow.appendChild(th1);
+      headerRow.appendChild(th2);
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement("tbody");
+
+      Object.entries(file).forEach(([key, value]) => {
+        const row = document.createElement("tr");
+
+        const td1 = document.createElement("td");
+        td1.textContent = key;
+        td1.style.border = '1px solid #ddd';
+        td1.style.padding = '6px 8px';
+        td1.style.fontWeight = '500';
+
+        const td2 = document.createElement("td");
+        td2.textContent = value;
+        td2.style.border = '1px solid #ddd';
+        td2.style.padding = '6px 8px';
+        td2.style.wordWrap = 'break-word';
+
+        row.appendChild(td1);
+        row.appendChild(td2);
+        tbody.appendChild(row);
+      });
+
+      table.appendChild(tbody);
+      rightPanelContent.appendChild(table);
     }
 
     async function loadFile(file) {
-        showDetailsInRightPanel(file);
+      showDetailsInRightPanel(file);
 
-        const path = file.geojson;
-        if (path.endsWith(".csv")) {
-            showTablePreview(path);
-        } else if (path.endsWith(".geojson")) {
-            showMapPreview(path);
-        } else if (path.endsWith(".png") || path.endsWith(".jpg")) {
-            showImagePreview(path);
-        } else if (path.endsWith(".xlsx")) {
-            showTablePreview(path);
-        } else {
-            showNoPreview();
-        }
+      // Resolve the file URL from multiple possible CSV column names
+      function getFileUrl(f) {
+        return f.geojson || f.GeoJSON || f.GeoJson || f['Download'] || f['download'] || f['Download_URL'] || f['download_url'] || f['File'] || f['file'] || f.Path || f.path || f.URL || f.Url || f.url || '';
+      }
 
-        document.getElementById("download-button").style.display = "inline-block";
-        document.getElementById("download-button").onclick = () => downloadFile(file.geojson);
+      const path = getFileUrl(file);
+      if (path.endsWith(".csv")) {
+        showTablePreview(path);
+      } else if (path.endsWith(".geojson")) {
+        showMapPreview(path);
+      } else if (path.endsWith(".png") || path.endsWith(".jpg")) {
+        showImagePreview(path);
+      } else if (path.endsWith(".xlsx")) {
+        showTablePreview(path);
+      } else {
+        showNoPreview();
+      }
+
+      const dlBtn = document.getElementById("download-button");
+      if (path) {
+        dlBtn.style.display = "inline-block";
+        dlBtn.disabled = false;
+        dlBtn.onclick = () => {
+          console.log('Initiating download for:', path);
+          downloadFile(path);
+        };
+      } else {
+        dlBtn.style.display = "none";
+        dlBtn.disabled = true;
+      }
     }
 
     function showNoPreview() {
-        document.getElementById("table-preview").style.display = "none";
-        document.getElementById("map").style.display = "none";
-        document.getElementById("image-preview").style.display = "none";
+      document.getElementById("table-preview").style.display = "none";
+      document.getElementById("map").style.display = "none";
+      document.getElementById("image-preview").style.display = "none";
 
-        const noPreviewMessage = document.createElement('p');
-        noPreviewMessage.textContent = "No preview available for this file.";
-        document.getElementById("table-preview").innerHTML = "";
-        document.getElementById("table-preview").appendChild(noPreviewMessage);
-        document.getElementById("table-preview").style.display = "block";
+      const noPreviewMessage = document.createElement('p');
+      noPreviewMessage.textContent = "No preview available for this file.";
+      document.getElementById("table-preview").innerHTML = "";
+      document.getElementById("table-preview").appendChild(noPreviewMessage);
+      document.getElementById("table-preview").style.display = "block";
     }
 
-    function downloadFile(path) {
+    function toRawGitHubUrl(url) {
+      if (!url) return url;
+      try {
+        const u = url.trim();
+        // If already a raw.githubusercontent URL, return as-is
+        if (u.includes('raw.githubusercontent.com')) return u;
+        // Convert typical GitHub blob URLs to raw URLs
+        // e.g. https://github.com/<owner>/<repo>/blob/<branch>/path -> https://raw.githubusercontent.com/<owner>/<repo>/<branch>/path
+        if (u.includes('github.com') && u.includes('/blob/')) {
+          return u.replace('https://github.com/', 'https://raw.githubusercontent.com/').replace('/blob/', '/');
+        }
+        return u;
+      } catch (e) {
+        return url;
+      }
+    }
+
+    async function downloadFile(path) {
+      if (!path) {
+        alert("No file selected to download.");
+        return;
+      }
+
+      const fetchUrl = toRawGitHubUrl(path);
+      try {
+        const resp = await fetch(fetchUrl);
+        if (!resp.ok) throw new Error(`Network response was not ok (${resp.status})`);
+
+        // If response is HTML (e.g., GitHub page), attempt to convert again or fail
+        const contentType = resp.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) {
+          // If we received HTML, try converting original path to raw URL (again) and refetch
+          if (!fetchUrl.includes('raw.githubusercontent.com') && path.includes('github.com')) {
+            const raw = toRawGitHubUrl(path);
+            if (raw !== fetchUrl) {
+              const retry = await fetch(raw);
+              if (retry.ok) {
+                const blob2 = await retry.blob();
+                const urlObj2 = URL.createObjectURL(blob2);
+                const a2 = document.createElement('a');
+                a2.href = urlObj2;
+                a2.download = (path.split('/').pop() || 'download').split('?')[0];
+                document.body.appendChild(a2);
+                a2.click();
+                a2.remove();
+                setTimeout(() => URL.revokeObjectURL(urlObj2), 1000);
+                return;
+              }
+            }
+          }
+          throw new Error('Fetched resource is HTML, not the expected file content.');
+        }
+
+        const blob = await resp.blob();
+        const urlObj = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = path;
-        a.download = path.split("/").pop();
+        a.href = urlObj;
+        const filename = (path.split("/").pop() || "download").split('?')[0];
+        a.download = filename;
+        document.body.appendChild(a);
         a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(urlObj), 1000);
+      } catch (err) {
+        console.error("Download failed:", err);
+        alert("Download failed: " + err.message + " (see console for details)");
+      }
     }
 
     async function showTablePreview(path) {
-        try {
-            const response = await fetch(path);
-            const arrayBuffer = await response.arrayBuffer();
+      try {
+        const fetchPath = toRawGitHubUrl(path);
+        const response = await fetch(fetchPath, { mode: 'cors' });
+        if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+        const arrayBuffer = await response.arrayBuffer();
 
-            const workbook = XLSX.read(arrayBuffer, { type: "array" });
+        const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
-            let tableHTML = '';
-            workbook.SheetNames.forEach((sheetName, index) => {
-                const sheet = workbook.Sheets[sheetName];
+        let tableHTML = '';
+        workbook.SheetNames.forEach((sheetName, index) => {
+          const sheet = workbook.Sheets[sheetName];
 
-                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+          const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-                tableHTML += `<h3>Sheet: ${sheetName}</h3>`;
-                tableHTML += "<table class='csv-table'><thead><tr>";
+          tableHTML += `<h3>Sheet: ${sheetName}</h3>`;
+          tableHTML += "<table class='csv-table'><thead><tr>";
 
-                const headers = jsonData[0];
-                headers.forEach(header => {
-                    tableHTML += `<th>${header}</th>`;
-                });
-                tableHTML += "</tr></thead><tbody>";
+          const headers = jsonData[0];
+          headers.forEach(header => {
+            tableHTML += `<th>${header}</th>`;
+          });
+          tableHTML += "</tr></thead><tbody>";
 
-                for (let i = 1; i < jsonData.length; i++) {
-                    tableHTML += "<tr>";
-                    const row = jsonData[i];
-                    row.forEach(cell => {
-                        tableHTML += `<td>${cell || ""}</td>`;
-                    });
-                    tableHTML += "</tr>";
-                }
-                tableHTML += "</tbody></table><hr>";
+          for (let i = 1; i < jsonData.length; i++) {
+            tableHTML += "<tr>";
+            const row = jsonData[i];
+            row.forEach(cell => {
+              tableHTML += `<td>${cell || ""}</td>`;
             });
+            tableHTML += "</tr>";
+          }
+          tableHTML += "</tbody></table><hr>";
+        });
 
-            document.getElementById("table-preview").innerHTML = tableHTML;
+        document.getElementById("table-preview").innerHTML = tableHTML;
 
-            document.getElementById("table-preview").style.display = "block";
-            document.getElementById("map").style.display = "none";
-            document.getElementById("image-preview").style.display = "none";
-        } catch (error) {
-            console.error("Error loading Excel file:", error);
-            showNoPreview();
-        }
+        document.getElementById("table-preview").style.display = "block";
+        document.getElementById("map").style.display = "none";
+        document.getElementById("image-preview").style.display = "none";
+      } catch (error) {
+        console.error("Error loading Excel file:", error);
+        showNoPreview();
+      }
     }
 
     async function showMapPreview(path) {
-        // Initialize the map if not done already
-        initializeMap();
+      // Initialize the map if not done already
+      initializeMap();
 
-        const response = await fetch(path);
+      try {
+        const fetchPath = toRawGitHubUrl(path);
+        const response = await fetch(fetchPath, { mode: 'cors' });
+        if (!response.ok) throw new Error(`Network response was not ok (${response.status})`);
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/html')) throw new Error('Received HTML instead of GeoJSON');
         const geojsonData = await response.json();
-        
+
         // Remove previous GeoJSON layers
         map.eachLayer(layer => {
-            if (layer instanceof L.GeoJSON) map.removeLayer(layer);
+          if (layer instanceof L.GeoJSON) map.removeLayer(layer);
         });
 
         const geojsonLayer = L.geoJSON(geojsonData).addTo(map);
-        map.fitBounds(geojsonLayer.getBounds());
+        try { map.fitBounds(geojsonLayer.getBounds()); } catch (e) { console.warn('Could not fit bounds:', e); }
+      } catch (err) {
+        console.error('Failed to load GeoJSON for preview:', err);
+        alert('Could not load GeoJSON preview. If this page is being viewed inside a sandboxed iframe or preview pane, open the catalog page directly in a browser tab.\nIf you need the raw file, copy this URL:\n' + toRawGitHubUrl(path));
+        showNoPreview();
+        return;
+      }
 
-        document.getElementById("map").style.display = "block";
-        document.getElementById("table-preview").style.display = "none";
-        document.getElementById("image-preview").style.display = "none";
+      document.getElementById("map").style.display = "block";
+      document.getElementById("table-preview").style.display = "none";
+      document.getElementById("image-preview").style.display = "none";
     }
 
     function showImagePreview(path) {
-        document.getElementById("image-preview").src = path;
-        document.getElementById("image-preview").style.display = "block";
-        document.getElementById("map").style.display = "none";
-        document.getElementById("table-preview").style.display = "none";
+      document.getElementById("image-preview").src = path;
+      document.getElementById("image-preview").style.display = "block";
+      document.getElementById("map").style.display = "none";
+      document.getElementById("table-preview").style.display = "none";
     }
-</script>
+  </script>
 </body>
-</html>
 
+</html>
