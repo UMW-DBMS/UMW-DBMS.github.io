@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MWS ID Interface</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script>
+    let githubToken = '';
+
+    async function fetchCSV(mwsID) {
+      const url = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${mwsID}/PropLayers_${mwsID}.csv`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        alert('Error fetching CSV file. Check MWS ID or network connection.');
+        return null;
+      }
+      const text = await response.text();
+      return text;
+    }
+
+    function parseCSV(csvText) {
+      const rows = csvText.split('\n').map(row => row.split(','));
+      const headers = rows[0];
+      const data = rows.slice(1).map(row => Object.fromEntries(row.map((cell, i) => [headers[i], cell])));
+      return { headers, data };
+    }
+
+    async function fetchGeoJSON(geojsonURL) {
+      const response = await fetch(geojsonURL);
+      if (!response.ok) {
+        alert('Error fetching GeoJSON file.');
+        return null;
+      }
+      const data = await response.json();
+      return data;
+    }
+
+    function displayTable(geojson, mwsID) {
+      const table = document.getElementById('dataTable');
+      table.innerHTML = '';
+
+      const headers = Object.keys(geojson.features[0].properties);
+      if (!headers.includes('photopath')) {
+        geojson.features.forEach(feature => (feature.properties.photopath = ''));
+        headers.push('photopath');
+      }
+
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      headerRow.appendChild(document.createElement('th')).textContent = 'Action';
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      geojson.features.forEach((feature, rowIndex) => {
+        const row = document.createElement('tr');
+        headers.forEach(header => {
+          const cell = document.createElement('td');
+          cell.textContent = feature.properties[header] || '';
+          row.appendChild(cell);
+        });
+
+        const actionCell = document.createElement('td');
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Add Photo';
+        addButton.onclick = async () => {
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/jpeg';
+          fileInput.onchange = async () => {
+            const file = fileInput.files[0];
+            const resizedFile = await resizeImage(file, 200);
+            const photoPath = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/200_photo/MWS_${mwsID}/${file.name}`;
+            feature.properties.photopath = photoPath;
+            await uploadPhoto(mwsID, resizedFile, file.name);
+            await saveGeoJSON(geojson, mwsID);
+            alert('Photo uploaded and GeoJSON updated.');
+            displayTable(geojson, mwsID);
+          };
+          fileInput.click();
+        };
+        actionCell.appendChild(addButton);
+        row.appendChild(actionCell);
+
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+    }
+
+    async function resizeImage(file, width) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const aspectRatio = img.height / img.width;
+            canvas.width = width;
+            canvas.height = width * aspectRatio;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            canvas.toBlob(blob => resolve(new File([blob], file.name, { type: 'image/jpeg' })), 'image/jpeg');
+          };
+          img.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadPhoto(mwsID, file, fileName) {
+      const url = `https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/contents/IWWRMP/Data/EXD/200_photo/MWS_${mwsID}/${fileName}`;
+      const content = await file.arrayBuffer();
+      const base64Content = btoa(String.fromCharCode(...new Uint8Array(content)));
+      await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: `Add photo ${fileName}`,
+          content: base64Content
+        })
+      });
+    }
+
+    async function getFileSHA(path) {
+      const response = await fetch(`https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/contents/${path}`);
+      const fileData = await response.json();
+      return fileData.sha;
+    }
+
+    async function saveGeoJSON(geojson, mwsID) {
+      const geojsonUrl = document.getElementById('layerSelect').value; // Correctly get the geojson URL
+      const apiUrl = geojsonUrl.replace("https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main", "https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/contents");
+      const path = apiUrl.split("/contents/")[1];
+
+      const content = btoa(JSON.stringify(geojson, null, 2)); // Ensure it's base64 encoded
+      const sha = await getFileSHA(path); // Get the sha of the existing file
+
+      await fetch(`https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          message: 'Update GeoJSON with photopath',
+          content: content,
+          sha: sha, // Pass the sha to overwrite the file
+        })
+      });
+    }
+
+    async function startProcess() {
+      githubToken = document.getElementById('githubToken').value;
+      const mwsID = document.getElementById('mwsID').value;
+
+      if (!githubToken || !mwsID) {
+        alert('Please provide GitHub token and MWS ID.');
+        return;
+      }
+
+      const csvText = await fetchCSV(mwsID);
+      if (!csvText) return;
+
+      const { data } = parseCSV(csvText);
+      const layerSelect = document.getElementById('layerSelect');
+      layerSelect.innerHTML = '<option value="">Select Layer</option>';
+
+      data.forEach(row => {
+        const option = document.createElement('option');
+        option.value = row.geojson;
+        option.textContent = row.Layer;
+        layerSelect.appendChild(option);
+      });
+    }
+
+    async function loadGeoJSON() {
+      const geojsonURL = document.getElementById('layerSelect').value;
+      const mwsID = document.getElementById('mwsID').value;
+      if (!geojsonURL) {
+        alert('Please select a layer.');
+        return;
+      }
+      const geojson = await fetchGeoJSON(geojsonURL);
+      if (!geojson) return;
+      displayTable(geojson, mwsID);
+    }
+	
+	
+	
+  </script>
+</head>
+<body>
+  <h1>MWS ID Interface</h1>
+  <label for="githubToken">GitHub Token:</label>
+  <input type="password" id="githubToken" placeholder="Enter GitHub token">
+  <br><br>
+  <label for="mwsID">MWS ID:</label>
+  <input type="text" id="mwsID" placeholder="Enter MWS ID">
+  <button onclick="startProcess()">Fetch Layers</button>
+  <br><br>
+  <select id="layerSelect" onchange="loadGeoJSON()">
+    <option value="">Select Layer</option>
+  </select>
+  <br><br>
+  <table id="dataTable" border="1"></table>
+</body>
+</html>

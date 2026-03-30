@@ -1,0 +1,41 @@
+.modal {
+    display: flex; /* Show modal by default for testing; update to 'none' for production */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+	font-size: 10px; /* Smaller font for panels */
+    z-index: 999; /* Ensure modal appears above the map */
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 600px;
+    text-align: left;
+    overflow-y: auto;
+    max-height: 80%;
+}
+
+button {
+    padding: 4px 10px;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: green;
+}
+
+#map {
+    width: 100%;
+    height: 600px;
+}

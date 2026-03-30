@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MWS Data Catalog</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+/* Global styles */
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+}
+
+/* Header style */
+header {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 0;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Footer style */
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 10px 0;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  left: 0;
+  z-index: 10;
+}
+
+/* Main content layout */
+main {
+  display: flex;
+  flex: 1;
+  overflow: hidden; /* Prevent overflow */
+  padding-bottom: 50px; /* Prevent content from being hidden behind the footer */
+}
+
+/* File list panel */
+#file-list {
+  width: 25%;
+  border-right: 1px solid #ccc;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+ul {
+  list-style: none;
+  padding-left: 20px;
+}
+
+.collapsible {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.nested {
+  display: none;
+}
+
+.active {
+  display: block;
+}
+
+/* Preview panel */
+#preview-panel {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+}
+
+#table-preview {
+  flex: 1;
+  overflow: auto;
+}
+
+#map {
+  flex: 1;
+  height: 100%;
+  z-index: 0;
+}
+
+#image-preview {
+  max-height: 100%;
+  object-fit: contain;
+  display: none; /* Initially hidden */
+}
+
+/* Right panel */
+#right-panel {
+  width: 25%;
+  border-left: 1px solid #ccc;
+  padding: 10px;
+  background-color: #f4f4f4;
+  overflow-y: auto;
+  font-size: 9px;
+  position: relative; /* Makes it a positioning context for absolute children */
+}
+
+/* Download button */
+#download-button {
+  display: block;
+  position: absolute; /* Positioned within the right panel */
+  top: 10px;
+  right: 10px;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#download-button:hover {
+  background-color: #45a049;
+}
+
+/* CSV Table */
+.csv-table {
+  width: 100%;
+  border-collapse: collapse; /* Ensures borders don't double up */
+  font-size: 12px; /* Compact font size */
+  font-family: Arial, sans-serif;
+  text-align: left;
+  margin: 0 auto; /* Center the table */
+  line-height: 1.2; /* Reduce line height for a tighter look */
+}
+
+.csv-table th,
+.csv-table td {
+  border: 1px solid #000; /* Dark border for clear visibility */
+  padding: 4px; /* Reduced padding for compactness */
+  white-space: nowrap; /* Prevent text wrapping for a clean appearance */
+}
+
+.csv-table th {
+  background-color: #eaeaea; /* Subtle header background color */
+  font-weight: bold;
+  text-align: center; /* Center align headers */
+}
+
+.csv-table tr:nth-child(even) {
+  background-color: #f7f7f7; /* Light gray for alternate rows */
+}
+
+.csv-table tr:hover {
+  background-color: #f0f0f0; /* Hover effect for row highlighting */
+}
+
+.csv-table td {
+  color: #333; /* Neutral text color */
+  text-align: left; /* Align text to the left */
+}
+
+/* Preview container with fixed height */
+#imagePreview,
+#mapPreview,
+#tablePreview {
+  height: 80%; /* Full height */
+  overflow: auto; /* Scrollable content if it exceeds the height */
+  border: 1px solid #ccc; /* Optional: border for visual separation */
+  box-sizing: border-box; /* Ensure padding is included in height */
+  background-color: #f9f9f9; /* Light background for better readability */
+}
+
+  </style>
+</head>
+<body>
+
+<header style="display: flex; justify-content: flex-start; align-items: center; padding: 10px; background-color: green; ">
+
+  <div style="display: flex; align-items: flex-end;">
+    <input type="text" id="mwsIdInput" placeholder="Enter MWS ID" />
+    <button onclick="onEnterButtonClick()">Enter</button>
+  </div>
+  
+  <div style="flex: 1; text-align: center;">
+      Mini Watershed Data Catalog
+  </div>
+</header>
+
+<main>
+  <div id="file-list">Loading...</div>
+  <div id="preview-panel">
+    <div id="table-preview" style="display: none;"></div>
+    <div id="map"></div>
+    <img id="image-preview" src="" alt="PNG Preview" />
+  </div>
+  <div id="right-panel">
+    <h3>Additional Panel</h3>
+    <p>Here you can add any content, such as additional information, controls, etc.</p>
+  </div>
+  <button id="download-button" onclick="downloadFile()">Download</button>
+</main>
+
+<footer>
+
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    // Global variables
+    let csvUrls = [];
+    let map;  // Declare the map object globally
+
+    // Initialize the map
+    function initializeMap() {
+        if (!map) {
+            map = L.map('map').setView([51.505, -0.09], 13);  // Set initial view of the map
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+        }
+    }
+
+    function updateUrl() {
+        const mwsId = document.getElementById('mwsIdInput').value;
+        
+        if (mwsId.trim() !== "") {
+            csvUrls = [`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Registry/DBMS_${mwsId}.csv`];
+            console.log(csvUrls);
+        } else {
+            console.log("Please enter a valid MWS ID.");
+        }
+    }
+
+    async function onEnterButtonClick() {
+        updateUrl();
+        const allFiles = await fetchAndMergeCSV(csvUrls);
+        const groupedFiles = groupFiles(allFiles);
+        const tree = createTree(groupedFiles);
+
+        const fileList = document.getElementById("file-list");
+        fileList.innerHTML = "";
+        fileList.appendChild(tree);
+        enableCollapsible();
+    }
+
+    async function fetchAndMergeCSV(urls) {
+        const allFiles = [];
+        for (const url of urls) {
+            const response = await fetch(url);
+            const text = await response.text();
+            const rows = text.trim().split("\n").map(row => row.split(","));
+            const headers = rows[0];
+            const data = rows.slice(1).map(row =>
+                row.reduce((acc, value, index) => {
+                    acc[headers[index]] = value;
+                    return acc;
+                }, {}));
+            allFiles.push(...data);
+        }
+        return allFiles;
+    }
+
+    function groupFiles(files) {
+        const grouped = {};
+        files.forEach(file => {
+            const group = file.Group || "Ungrouped";
+            const database = file.Database || "Undefined";
+            if (!grouped[group]) grouped[group] = {};
+            if (!grouped[group][database]) grouped[group][database] = [];
+            grouped[group][database].push(file);
+        });
+        return grouped;
+    }
+
+    function createTree(groupedFiles) {
+        const ul = document.createElement("ul");
+        for (const group in groupedFiles) {
+            const groupLi = document.createElement("li");
+            const groupSpan = document.createElement("span");
+            groupSpan.classList.add("collapsible");
+            groupSpan.textContent = group;
+            groupLi.appendChild(groupSpan);
+
+            const groupUl = document.createElement("ul");
+            groupUl.classList.add("nested");
+
+            for (const database in groupedFiles[group]) {
+                const dbLi = document.createElement("li");
+                const dbSpan = document.createElement("span");
+                dbSpan.classList.add("collapsible");
+                dbSpan.textContent = database;
+                dbLi.appendChild(dbSpan);
+
+                const dbUl = document.createElement("ul");
+                dbUl.classList.add("nested");
+
+                groupedFiles[group][database].forEach(file => {
+                    const fileLi = document.createElement("li");
+                    const fileButton = document.createElement("button");
+                    fileButton.textContent = `${file.Layer} - ${file.layer}`;
+                    fileButton.style.width = "100%";
+                    fileButton.addEventListener("click", () => loadFile(file));
+                    fileLi.appendChild(fileButton);
+                    dbUl.appendChild(fileLi);
+                });
+
+                dbLi.appendChild(dbUl);
+                groupUl.appendChild(dbLi);
+            }
+
+            groupLi.appendChild(groupUl);
+            ul.appendChild(groupLi);
+        }
+        return ul;
+    }
+
+    function enableCollapsible() {
+        const collapsibles = document.querySelectorAll(".collapsible");
+        collapsibles.forEach(item => {
+            item.addEventListener("click", function () {
+                this.nextElementSibling.classList.toggle("active");
+            });
+        });
+    }
+
+    function showDetailsInRightPanel(file) {
+        const rightPanel = document.getElementById("right-panel");
+        rightPanel.innerHTML = "<h3>Details for Selected Layer</h3>";
+
+        const detailsList = document.createElement("ul");
+        Object.entries(file).forEach(([key, value]) => {
+            const listItem = document.createElement("li");
+            listItem.textContent = `${key}: ${value}`;
+            detailsList.appendChild(listItem);
+        });
+
+        rightPanel.appendChild(detailsList);
+    }
+
+    async function loadFile(file) {
+        showDetailsInRightPanel(file);
+
+        const path = file.geojson;
+        if (path.endsWith(".csv")) {
+            showTablePreview(path);
+        } else if (path.endsWith(".geojson")) {
+            showMapPreview(path);
+        } else if (path.endsWith(".png") || path.endsWith(".jpg")) {
+            showImagePreview(path);
+        } else if (path.endsWith(".xlsx")) {
+            showTablePreview(path);
+        } else {
+            showNoPreview();
+        }
+
+        document.getElementById("download-button").style.display = "inline-block";
+        document.getElementById("download-button").onclick = () => downloadFile(file.geojson);
+    }
+
+    function showNoPreview() {
+        document.getElementById("table-preview").style.display = "none";
+        document.getElementById("map").style.display = "none";
+        document.getElementById("image-preview").style.display = "none";
+
+        const noPreviewMessage = document.createElement('p');
+        noPreviewMessage.textContent = "No preview available for this file.";
+        document.getElementById("table-preview").innerHTML = "";
+        document.getElementById("table-preview").appendChild(noPreviewMessage);
+        document.getElementById("table-preview").style.display = "block";
+    }
+
+    function downloadFile(path) {
+        const a = document.createElement("a");
+        a.href = path;
+        a.download = path.split("/").pop();
+        a.click();
+    }
+
+    async function showTablePreview(path) {
+        try {
+            const response = await fetch(path);
+            const arrayBuffer = await response.arrayBuffer();
+
+            const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+            let tableHTML = '';
+            workbook.SheetNames.forEach((sheetName, index) => {
+                const sheet = workbook.Sheets[sheetName];
+
+                const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+
+                tableHTML += `<h3>Sheet: ${sheetName}</h3>`;
+                tableHTML += "<table class='csv-table'><thead><tr>";
+
+                const headers = jsonData[0];
+                headers.forEach(header => {
+                    tableHTML += `<th>${header}</th>`;
+                });
+                tableHTML += "</tr></thead><tbody>";
+
+                for (let i = 1; i < jsonData.length; i++) {
+                    tableHTML += "<tr>";
+                    const row = jsonData[i];
+                    row.forEach(cell => {
+                        tableHTML += `<td>${cell || ""}</td>`;
+                    });
+                    tableHTML += "</tr>";
+                }
+                tableHTML += "</tbody></table><hr>";
+            });
+
+            document.getElementById("table-preview").innerHTML = tableHTML;
+
+            document.getElementById("table-preview").style.display = "block";
+            document.getElementById("map").style.display = "none";
+            document.getElementById("image-preview").style.display = "none";
+        } catch (error) {
+            console.error("Error loading Excel file:", error);
+            showNoPreview();
+        }
+    }
+
+    async function showMapPreview(path) {
+        // Initialize the map if not done already
+        initializeMap();
+
+        const response = await fetch(path);
+        const geojsonData = await response.json();
+        
+        // Remove previous GeoJSON layers
+        map.eachLayer(layer => {
+            if (layer instanceof L.GeoJSON) map.removeLayer(layer);
+        });
+
+        const geojsonLayer = L.geoJSON(geojsonData).addTo(map);
+        map.fitBounds(geojsonLayer.getBounds());
+
+        document.getElementById("map").style.display = "block";
+        document.getElementById("table-preview").style.display = "none";
+        document.getElementById("image-preview").style.display = "none";
+    }
+
+    function showImagePreview(path) {
+        document.getElementById("image-preview").src = path;
+        document.getElementById("image-preview").style.display = "block";
+        document.getElementById("map").style.display = "none";
+        document.getElementById("table-preview").style.display = "none";
+    }
+</script>
+</body>
+</html>
+
