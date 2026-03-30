@@ -2482,16 +2482,7 @@
                     event.target.classList.add('active');
                 }
 
-                // Map click event to show popup with coordinates (disabled as per user request)
-                map.on('click', function (e) {
-                    if (typeof window.isMeasureModeActive === 'function' && window.isMeasureModeActive()) {
-                        return;
-                    }
-                    const infoPopup = document.getElementById('infoPopupPanel');
-                    if (!infoPopup) return;
-                    infoPopup.style.display = 'block';
-                    infoPopup.textContent = `Coordinates: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-                });
+                // Coordinate popup intentionally disabled to avoid the empty right-side white box.
 
 
                 // Change base layer function
