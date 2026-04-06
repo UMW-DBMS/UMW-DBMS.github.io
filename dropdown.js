@@ -209,7 +209,7 @@ function filterFeaturesByMWS_ID(selectedValue) {
     // Create a new GeoJSON layer with the filtered features
     geojsonLayer = L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
         style: function (feature) {
-            return { color: "#FF00FF", weight: 5, fillOpacity: 0.1 }; // Light magenta
+            return { color: "#FF00FF", weight: 5, fillOpacity: 0, fill: false }; // Magenta boundary only
         }
     }).addTo(map);
 
