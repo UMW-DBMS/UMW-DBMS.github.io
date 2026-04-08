@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>LULC Data</title>
+  <title>LULC Data Update</title>
   <style>
     body {
       margin: 0;
@@ -150,7 +150,7 @@
 </head>
 <body>
   <header>
-    <div class="header-title">LULC Data</div>
+    <div class="header-title">LULC Data </div>
     <button class="header-btn" type="button" onclick="window.location.href='UserInput.html'">Back To User Input</button>
   </header>
 
@@ -277,6 +277,43 @@
           normalizedFileName.includes(`mws_${normalizedMwsId}`) ||
           normalizedFileName.includes(normalizedMwsId)
         );
+    }
+
+    function stripGeojsonExtension(fileName) {
+      return String(fileName || '').replace(/\.geojson$/i, '');
+    }
+
+    function stripBrowserDuplicateSuffix(fileName) {
+      return stripGeojsonExtension(fileName).replace(/\(\d+\)$/i, '');
+    }
+
+    async function listLulcFiles(token) {
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${LULC_BASE}`;
+      const response = await fetch(apiUrl, {
+        headers: { 'Authorization': `token ${token}` }
+      });
+
+      if (response.status === 404) return [];
+      if (!response.ok) throw new Error(`Failed to fetch files (${response.status})`);
+
+      const files = await response.json();
+      return Array.isArray(files) ? files.filter((f) => f.name && f.name.toLowerCase().endsWith('.geojson')) : [];
+    }
+
+    async function resolveLulcUploadTargetName(token, mwsId, localFileName) {
+      const lulcFiles = await listLulcFiles(token);
+      const matchingFiles = lulcFiles.filter((file) => fileMatchesMws(file.name, mwsId));
+
+      if (matchingFiles.length === 1) {
+        return matchingFiles[0].name;
+      }
+
+      const normalizedLocalName = normalizeForFileMatch(stripBrowserDuplicateSuffix(localFileName));
+      const exactMatch = matchingFiles.find((file) =>
+        normalizeForFileMatch(stripBrowserDuplicateSuffix(file.name)) === normalizedLocalName
+      );
+
+      return exactMatch ? exactMatch.name : localFileName;
     }
 
     function resetSelect(selectEl, placeholder) {
@@ -465,49 +502,31 @@
 
       try {
         statusEl.textContent = 'Fetching LULC files...';
-        const path = `${LULC_BASE}`;
-        const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
+        const files = await listLulcFiles(token);
+        const lulcFiles = files.filter((f) => fileMatchesMws(f.name, mwsId));
 
-        const response = await fetch(apiUrl, {
-          headers: { 'Authorization': `token ${token}` }
-        });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            statusEl.textContent = `No LULC files found in ${LULC_BASE}.`;
-            fileListEl.innerHTML = '<p>No files available yet.</p>';
-          } else {
-            throw new Error(`Failed to fetch files (${response.status})`);
-          }
+        if (lulcFiles.length === 0) {
+          fileListEl.innerHTML = `<p>No LULC GeoJSON files found for MWS ${mwsId}.</p>`;
         } else {
-          const files = await response.json();
-          const lulcFiles = Array.isArray(files) 
-            ? files.filter((f) => f.name && f.name.toLowerCase().endsWith('.geojson') && fileMatchesMws(f.name, mwsId))
-            : [];
-
-          if (lulcFiles.length === 0) {
-            fileListEl.innerHTML = `<p>No LULC GeoJSON files found for MWS ${mwsId}.</p>`;
-          } else {
-            fileListEl.innerHTML = '';
-            lulcFiles.forEach(file => {
-              const item = document.createElement('div');
-              item.className = 'file-item';
-              const link = document.createElement('a');
-              link.className = 'file-link';
-              link.href = '#';
-              link.textContent = file.name;
-              link.addEventListener('click', (e) => {
-                e.preventDefault();
-                downloadFile(file.download_url);
-              });
-              item.appendChild(link);
-              fileListEl.appendChild(item);
+          fileListEl.innerHTML = '';
+          lulcFiles.forEach(file => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            const link = document.createElement('a');
+            link.className = 'file-link';
+            link.href = '#';
+            link.textContent = file.name;
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              downloadFile(file.download_url);
             });
-          }
-
-          fileListEl.style.display = 'block';
-          statusEl.textContent = `Found ${lulcFiles.length} LULC file(s) for MWS ${mwsId}.`;
+            item.appendChild(link);
+            fileListEl.appendChild(item);
+          });
         }
+
+        fileListEl.style.display = 'block';
+        statusEl.textContent = `Found ${lulcFiles.length} LULC file(s) for MWS ${mwsId}.`;
       } catch (error) {
         statusEl.textContent = `Error: ${error.message}`;
         fileListEl.style.display = 'none';
@@ -560,7 +579,8 @@
       try {
         statusEl.textContent = 'Uploading GeoJSON file...';
 
-        const filePath = `${LULC_BASE}/${file.name}`;
+        const targetFileName = await resolveLulcUploadTargetName(token, mwsId, file.name);
+        const filePath = `${LULC_BASE}/${targetFileName}`;
         const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${filePath}`;
 
         const contentBuffer = await file.arrayBuffer();
@@ -574,7 +594,7 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            message: `Upload LULC file: ${file.name}`,
+            message: `Upload LULC file: ${targetFileName}`,
             content,
             sha: sha || undefined
           })
@@ -585,7 +605,9 @@
           throw new Error(`GitHub upload failed (${resp.status}): ${text}`);
         }
 
-        statusEl.textContent = `Successfully uploaded ${file.name}!`;
+        statusEl.textContent = targetFileName === file.name
+          ? `Successfully uploaded ${targetFileName}!`
+          : `Successfully replaced ${targetFileName} using ${file.name}.`;
         geojsonFileInput.value = '';
         updateButtonStates();
 
