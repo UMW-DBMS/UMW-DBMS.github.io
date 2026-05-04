@@ -901,7 +901,7 @@
             <textarea id="dwsDescription" rows="2"></textarea>
           </div>
           <div>
-            <label for="dwsAmount">Amount (Rs.)</label>
+            <label for="dwsAmount">Estimated Cost</label>
             <input id="dwsAmount" type="text" />
           </div>
           <div>
@@ -1250,7 +1250,7 @@
             <input id="lsGn" type="text" />
           </div>
           <div>
-            <label for="lsLandSlides">Land Slides</label>
+            <label for="lsLandSlides">Landslides</label>
             <input id="lsLandSlides" type="text" />
           </div>
           <div>
@@ -1423,8 +1423,12 @@
       formPanel.innerHTML = `
         <h3>MT (Minor Tanks)- New Entry</h3>
         <div class="form-grid">
-          <div class="full">
-            <label for="mtCustodian">Name_of_Custodian</label>
+          <div>
+            <label for="mtTank">Name_of_Tank</label>
+            <input id="mtTank" type="text" />
+          </div>
+          <div>
+            <label for="mtCustodian">Custodians</label>
             <input id="mtCustodian" type="text" />
           </div>
           <div>
@@ -1622,11 +1626,11 @@
             <input id="swcQty" type="text" />
           </div>
           <div>
-            <label for="swcMeasures">Proposed</label>
+            <label for="swcMeasures">Proposed measure/s</label>
             <input id="swcMeasures" type="text" />
           </div>
           <div>
-            <label for="swcUnitCost">Unit Cost (Rs.)</label>
+            <label for="swcUnitCost">Uniti_Cost</label>
             <input id="swcUnitCost" type="text" />
           </div>
           <div>
@@ -1740,7 +1744,7 @@
             <input id="swcoffQty" type="text" />
           </div>
           <div>
-            <label for="swcoffMeasures">Proposed</label>
+            <label for="swcoffMeasures">Proposed measure/s</label>
             <input id="swcoffMeasures" type="text" />
           </div>
           <div>
@@ -1873,7 +1877,7 @@
             <textarea id="wpContribution" rows="2"></textarea>
           </div>
           <div class="full">
-            <label for="wpTimeFrame">Time frame to implement</label>
+            <label for="wpTimeFrame">Time frame for the implementation</label>
             <input id="wpTimeFrame" type="text" />
           </div>
           <div>
