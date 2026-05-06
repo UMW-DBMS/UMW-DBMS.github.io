@@ -57,31 +57,33 @@ function filterFeaturesByDistrict(selectedValue) {
 
     // If no value is selected, return all features
     if (!selectedValue) {
-        geojsonLayer = L.geoJSON(originalData, {
-            style: function (feature) {
-                return { color: "#FF00FF", weight: 1, fillOpacity: 0.5 }; // Light magenta
-            }
-        }).addTo(map);
-        populateSelectDSDDropdown(originalData.features); // Populate SelectDSD dropdown with all features
-        map.fitBounds(geojsonLayer.getBounds()); // Fit map to bounds of original data
+        geojsonLayer = createGeoJSONLayer(originalData.features, {
+            color: "#FF00FF",
+            weight: 1,
+            fillOpacity: 0.5
+        });
+        geojsonLayer.addTo(map);
+        populateSelectDSDDropdown(originalData.features);
+        map.fitBounds(geojsonLayer.getBounds());
         return;
     }
 
     // Filter features based on selected District value
-    var filteredFeatures = originalData.features.filter(feature => feature.properties.District === selectedValue);
+    const filteredFeatures = originalData.features.filter(feature => feature.properties.District === selectedValue);
 
     // Create a new GeoJSON layer with the filtered features
-    geojsonLayer = L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
-        style: function (feature) {
-            return { color: "#FF00FF", weight: 1, fillOpacity: 0.5 }; // Light magenta
-        }
-    }).addTo(map);
+    geojsonLayer = createGeoJSONLayer(filteredFeatures, {
+        color: "#FF00FF",
+        weight: 1,
+        fillOpacity: 0.5
+    });
+    geojsonLayer.addTo(map);
 
     if (filteredFeatures.length > 0) {
-        map.fitBounds(geojsonLayer.getBounds()); // Fit map to bounds of filtered data
+        map.fitBounds(geojsonLayer.getBounds());
     }
 
-    populateSelectDSDDropdown(filteredFeatures); // Populate SelectDSD dropdown based on filtered features
+    populateSelectDSDDropdown(filteredFeatures);
 }
 
 // Function to populate the SelectDSD dropdown based on the remaining features
@@ -136,17 +138,18 @@ function filterFeaturesByMainDSD(selectedValue) {
     }
 
     // Filter features based on selected MainDSD value
-    var filteredFeatures = originalData.features.filter(feature => feature.properties.MainDSD === selectedValue);
+    const filteredFeatures = originalData.features.filter(feature => feature.properties.MainDSD === selectedValue);
 
     // Create a new GeoJSON layer with the filtered features
-    geojsonLayer = L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
-        style: function (feature) {
-            return { color: "#FF00FF", weight: 5, fillOpacity: 0.1 }; // Light magenta
-        }
-    }).addTo(map);
+    geojsonLayer = createGeoJSONLayer(filteredFeatures, {
+        color: "#FF00FF",
+        weight: 5,
+        fillOpacity: 0.1
+    });
+    geojsonLayer.addTo(map);
 
     if (filteredFeatures.length > 0) {
-        map.fitBounds(geojsonLayer.getBounds()); // Fit map to bounds of filtered data
+        map.fitBounds(geojsonLayer.getBounds());
     }
 
     populateSelectMWSIDDropdown(filteredFeatures); // Populate MWS_ID dropdown based on filtered features
@@ -204,17 +207,160 @@ function filterFeaturesByMWS_ID(selectedValue) {
     }
 
     // Filter features based on selected MWS_ID value
-    var filteredFeatures = originalData.features.filter(feature => feature.properties.MWS_ID === selectedValue);
+    const filteredFeatures = originalData.features.filter(feature => feature.properties.MWS_ID === selectedValue);
 
     // Create a new GeoJSON layer with the filtered features
-    geojsonLayer = L.geoJSON({ type: "FeatureCollection", features: filteredFeatures }, {
-        style: function (feature) {
-            return { color: "#FF00FF", weight: 5, fillOpacity: 0, fill: false }; // Magenta boundary only
-        }
-    }).addTo(map);
+    geojsonLayer = createGeoJSONLayer(filteredFeatures, {
+        color: "#FF00FF",
+        weight: 5,
+        fillOpacity: 0,
+        fill: false
+    });
+    geojsonLayer.addTo(map);
 
     if (filteredFeatures.length > 0) {
-        map.fitBounds(geojsonLayer.getBounds()); // Fit map to bounds of filtered data
+        map.fitBounds(geojsonLayer.getBounds());
+    }
+}
+
+// Function to display details of a clicked feature
+function displayFeatureDetails(feature) {
+    const properties = feature.properties;
+    console.log("Feature clicked:", properties); // Debug log to verify feature properties
+
+    if (properties) {
+        const details = `MWS_ID: ${properties.MWS_ID || 'N/A'}, DSD: ${properties.MainDSD || 'N/A'}, District: ${properties.District || 'N/A'}`;
+        alert(details); // Display details in an alert (can be replaced with a UI update)
+    } else {
+        console.error("No properties found for the clicked feature.");
+    }
+}
+
+// Attach click event listener to GeoJSON layer
+function attachClickListenerToLayer(layer) {
+    layer.on('click', function (e) {
+        console.log("Layer clicked:", e.layer.feature); // Debug log to verify click event
+        displayFeatureDetails(e.layer.feature);
+    });
+}
+
+// Create a custom pane for the pink layer with a lower z-index
+map.createPane('pinkLayerPane');
+map.getPane('pinkLayerPane').style.zIndex = 400; // Set lower z-index for pink layer
+
+// Update GeoJSON layer creation to ensure the top layer is non-interactive
+function createGeoJSONLayer(features, style) {
+    return L.geoJSON({ type: "FeatureCollection", features: features }, {
+        style: style,
+        pane: 'pinkLayerPane', // Use the custom pane for the pink layer
+        interactive: false, // Ensure the pink layer is non-interactive
+        onEachFeature: function (feature, layer) {
+            console.log("Attaching click listener to feature:", feature); // Debug log to verify listener attachment
+            attachClickListenerToLayer(layer);
+        }
+    });
+}
+
+// Function to display details of a clicked feature
+function displayFeatureDetails(feature) {
+    const properties = feature.properties;
+    console.log("Feature clicked:", properties); // Debug log to verify feature properties
+
+    if (properties) {
+        const details = `MWS_ID: ${properties.MWS_ID || 'N/A'}, DSD: ${properties.MainDSD || 'N/A'}, District: ${properties.District || 'N/A'}`;
+        alert(details); // Display details in an alert (can be replaced with a UI update)
+    } else {
+        console.error("No properties found for the clicked feature.");
+    }
+}
+
+// Attach click event listener to GeoJSON layer
+function attachClickListenerToLayer(layer) {
+    layer.on('click', function (e) {
+        console.log("Layer clicked:", e.layer.feature); // Debug log to verify click event
+        displayFeatureDetails(e.layer.feature);
+    });
+}
+
+// Update filterFeaturesByDistrict to use createGeoJSONLayer
+function filterFeaturesByDistrict(selectedValue) {
+    if (geojsonLayer) {
+        map.removeLayer(geojsonLayer);
+    }
+
+    if (!selectedValue) {
+        geojsonLayer = createGeoJSONLayer(originalData.features, {
+            color: "#FF00FF",
+            weight: 1,
+            fillOpacity: 0.5
+        });
+        geojsonLayer.addTo(map);
+        populateSelectDSDDropdown(originalData.features);
+        map.fitBounds(geojsonLayer.getBounds());
+        return;
+    }
+
+    const filteredFeatures = originalData.features.filter(feature => feature.properties.District === selectedValue);
+    geojsonLayer = createGeoJSONLayer(filteredFeatures, {
+        color: "#FF00FF",
+        weight: 1,
+        fillOpacity: 0.5
+    });
+    geojsonLayer.addTo(map);
+
+    if (filteredFeatures.length > 0) {
+        map.fitBounds(geojsonLayer.getBounds());
+    }
+
+    populateSelectDSDDropdown(filteredFeatures);
+}
+
+// Update filterFeaturesByMainDSD to use createGeoJSONLayer
+function filterFeaturesByMainDSD(selectedValue) {
+    if (geojsonLayer) {
+        map.removeLayer(geojsonLayer);
+    }
+
+    if (!selectedValue) {
+        return;
+    }
+
+    const filteredFeatures = originalData.features.filter(feature => feature.properties.MainDSD === selectedValue);
+    geojsonLayer = createGeoJSONLayer(filteredFeatures, {
+        color: "#FF00FF",
+        weight: 5,
+        fillOpacity: 0.1
+    });
+    geojsonLayer.addTo(map);
+
+    if (filteredFeatures.length > 0) {
+        map.fitBounds(geojsonLayer.getBounds());
+    }
+
+    populateSelectMWSIDDropdown(filteredFeatures);
+}
+
+// Update filterFeaturesByMWS_ID to use createGeoJSONLayer
+function filterFeaturesByMWS_ID(selectedValue) {
+    if (geojsonLayer) {
+        map.removeLayer(geojsonLayer);
+    }
+
+    if (!selectedValue) {
+        return;
+    }
+
+    const filteredFeatures = originalData.features.filter(feature => feature.properties.MWS_ID === selectedValue);
+    geojsonLayer = createGeoJSONLayer(filteredFeatures, {
+        color: "#FF00FF",
+        weight: 5,
+        fillOpacity: 0,
+        fill: false
+    });
+    geojsonLayer.addTo(map);
+
+    if (filteredFeatures.length > 0) {
+        map.fitBounds(geojsonLayer.getBounds());
     }
 }
 
