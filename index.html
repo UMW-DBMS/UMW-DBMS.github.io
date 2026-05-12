@@ -1713,7 +1713,9 @@
                     panel.innerHTML = `
                         <strong>Station:</strong> ${titleName}<br>
                         <strong>Type:</strong> ${sourceName}<br><br>
-                        <canvas id="monthlyStationChart" style="width:800px; height:110px;"></canvas>
+                        <div style="position:relative;width:100%;height:320px;">
+                            <canvas id="monthlyStationChart"></canvas>
+                        </div>
                         <div id="monthlyPointValue" style="margin-top:8px;font-size:12px;color:#1d1d1d;">Click a point to view the value.</div>
                         <br>
                         <button id="downloadMonthlyChartBtn" class="button" type="button">Download Chart</button>
@@ -1753,6 +1755,7 @@
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             interaction: {
                                 mode: 'nearest',
                                 intersect: true
