@@ -27,6 +27,7 @@ fetch(geojsonURL1)
     .then(data => {
         // Add GeoJSON layer to the map with outlines in magenta and no fill
         var geojsonLayer1 = L.geoJSON(data, {
+            interactive: false,
             style: function (feature) {
                 return {color: "#FF00FF", weight: 1, fillOpacity: 0}; // Outline in magenta with no fill
             },
@@ -43,10 +44,7 @@ fetch(geojsonURL1)
                 mwsIdSelect.appendChild(option);
                 }
 
-                // Add popup for MWS_ID
-                //layer.bindPopup(mwsId);
-            var popupContent = "MWS ID: " + mwsId + "<br>DSD: " + dsdName+ "<br>District: " + distName; // Customize the content as needed
-            layer.bindPopup(popupContent);				
+                // Keep this overview boundary non-interactive so loaded data layers receive clicks.
             }
         }).addTo(map);
 

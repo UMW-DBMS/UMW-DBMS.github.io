@@ -679,7 +679,7 @@
     async function updateGeojsonOnGitHub(payload, token) {
       const folder = normalizeMwsFolder(payload.mws_id);
       if (!folder) throw new Error('Missing MWS_ID');
-      const path = `${folder}/${payload.proposal_type}.geojson`;
+      const path = `${GEOJSON_BASE}/${folder}/${payload.proposal_type}.geojson`;
       const contentsApi = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
       let geojson = null;
@@ -866,6 +866,8 @@
         const text = await putResp.text();
         throw new Error(`GitHub update failed (${putResp.status}): ${text}`);
       }
+
+      return path;
     }
 
     function renderDwsForm() {
@@ -1190,6 +1192,8 @@
           const text = await putResp.text();
           throw new Error(`GitHub update failed (${putResp.status}): ${text}`);
         }
+
+        return path;
       }
 
       document.getElementById('dwsSubmit').addEventListener('click', async () => {
@@ -1225,8 +1229,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1318,8 +1322,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1411,8 +1415,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1488,8 +1492,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1581,8 +1585,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1699,8 +1703,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1812,8 +1816,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1937,8 +1941,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -2030,8 +2034,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }

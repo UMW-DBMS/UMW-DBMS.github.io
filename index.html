@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMW Watershed Management Plan</title>
+    <meta name="description" content="Upper Mahaweli Watershed Management Plan database with GIS maps, station data, climate layers, watershed information, data catalog, and statistics for UMW planning.">
+    <meta name="keywords" content="UMW, Upper Mahaweli Watershed, Watershed Management Plan, watershed management database, GIS watershed map, Sri Lanka watershed, mini watershed, station data, climate layer, water quality data">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="UMW Watershed Management Plan">
+    <meta property="og:description" content="GIS-based Upper Mahaweli Watershed Management Plan database for maps, station data, climate layers, water quality, and watershed statistics.">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -15,7 +21,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <!-- Include the dropdown.js file-->
-    <script src="scripts.js" defer></script>
+    <script src="scripts.js?v=popclick1" defer></script>
     <script src="dropdown.js" defer></script>
 
 
@@ -2485,7 +2491,24 @@
                     event.target.classList.add('active');
                 }
 
-                // Coordinate popup intentionally disabled to avoid the empty right-side white box.
+                // Show coordinates in the bottom bar when the user clicks on the map.
+                function showClickCoordinates(latlng) {
+                    if (!latlng) return;
+                    const infoPopup = document.getElementById('infoPopupPanel');
+                    if (!infoPopup) return;
+                    infoPopup.style.display = 'block';
+                    infoPopup.innerHTML = `Coordinates: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                }
+
+                window.showClickCoordinates = showClickCoordinates;
+
+                map.on('click', function (e) {
+                    if (typeof window.isMeasureModeActive === 'function' && window.isMeasureModeActive()) {
+                        return;
+                    }
+                    if (!e || !e.latlng) return;
+                    showClickCoordinates(e.latlng);
+                });
 
 
                 // Change base layer function
@@ -2664,6 +2687,9 @@
                                         if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
                                             return;
                                         }
+                                        if (typeof window.showClickCoordinates === 'function') {
+                                            window.showClickCoordinates(clickLatLng);
+                                        }
                                         if (src === 'CEA' || src === 'MASL' || src === 'NWSDB') {
                                             if (stationName) showCSVForStation(stationName);
                                             else alert("No station name found in attributes.");
@@ -2741,7 +2767,7 @@
 
 
 
-            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-epa9" defer> </script>
+            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-popclick2" defer> </script>
             <script src="proposal_all7a_dbtree.js"></script>
             <script src="table4.js"></script>
 
