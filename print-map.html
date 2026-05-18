@@ -78,12 +78,6 @@
             border-radius: 4px;
             overflow: hidden;
         }
-        /* Add/Update this in your <style> block */
-        .leaflet-tile-container {
-            left: 0 !important;
-            top: 0 !important;
-        }
-
         /* Keep map panes in their normal positions so Leaflet can handle panning/zooming correctly. */
         #printMap {
             position: absolute;
@@ -93,17 +87,6 @@
             bottom: 0;
         }
 
-        /* Normalize the tile container so it doesn't drift due to rounding differences */
-        .leaflet-tile-container {
-            left: 0 !important;
-            top: 0 !important;
-        }
-
-        /* Ensure images don't get clipped or misaligned */
-        .leaflet-image-layer {
-            top: 0 !important;
-            left: 0 !important;
-        }
         #snapshotImage {
             display: none;
             position: absolute;
@@ -545,6 +528,58 @@
       });
     }
 
+      function capturePrintAreaAsCanvas(capture) {
+          return html2canvas(capture, {
+              useCORS: true,
+              scale: 2,
+              backgroundColor: '#ffffff',
+              // Leaflet positions tiles, panes, and vector overlays with CSS transforms.
+              // Apply those offsets as left/top in the cloned DOM so downloads match the live map.
+              onclone: (clonedDoc) => {
+                const clonedMap = clonedDoc.getElementById('printMap');
+                if (!clonedMap) return;
+
+                clonedMap.style.width = '100%';
+                clonedMap.style.height = '100%';
+
+                const toPixels = (value) => (typeof value === 'number' ? value : parseFloat(value) || 0);
+
+                const getTransformOffset = (el) => {
+                  const style = window.getComputedStyle(el);
+                  const transform = style.transform || style.webkitTransform;
+                  if (!transform || transform === 'none') return { x: 0, y: 0 };
+                  const matrix = transform.match(/matrix\(([^)]+)\)/);
+                  if (matrix) {
+                    const parts = matrix[1].split(',').map((v) => parseFloat(v.trim()));
+                    return { x: parts[4] || 0, y: parts[5] || 0 };
+                  }
+                  const matrix3d = transform.match(/matrix3d\(([^)]+)\)/);
+                  if (matrix3d) {
+                    const parts = matrix3d[1].split(',').map((v) => parseFloat(v.trim()));
+                    return { x: parts[12] || 0, y: parts[13] || 0 };
+                  }
+                  return { x: 0, y: 0 };
+                };
+
+                const fixPaneTransforms = (pane) => {
+                  if (!pane) return;
+                  const offset = getTransformOffset(pane);
+                  const curLeft = toPixels(pane.style.left || 0);
+                  const curTop = toPixels(pane.style.top || 0);
+                  pane.style.transform = 'none';
+                  pane.style.left = `${curLeft + offset.x}px`;
+                  pane.style.top = `${curTop + offset.y}px`;
+                };
+
+                const panes = clonedMap.querySelectorAll('.leaflet-pane, .leaflet-map-pane, .leaflet-tile-pane, .leaflet-zoom-animated, .leaflet-tile-container');
+                panes.forEach(fixPaneTransforms);
+
+                const svg = clonedMap.querySelector('svg');
+                if (svg) fixPaneTransforms(svg);
+              }
+          });
+      }
+
       function generateSnapshot() {
           const capture = document.getElementById('CaptureArea');
           if (!capture) return;
@@ -558,62 +593,7 @@
 
           waitForTilesReady(5000)
               .then(() => waitForMapReady(1500))
-              .then(() => {
-                  return html2canvas(capture, {
-                      useCORS: true,
-                      scale: 2,
-                      backgroundColor: '#ffffff',
-                      // Note: the cloned DOM should retain its map transforms so the overlay alignment is correct.
-                      // Avoid forcing transforms to 0, as this can shift tiled/geojson layers.
-                      onclone: (clonedDoc) => {
-                        const clonedMap = clonedDoc.getElementById('printMap');
-                        if (!clonedMap) return;
-
-                        // Ensure the cloned map container is fully sized before rendering.
-                        clonedMap.style.width = '100%';
-                        clonedMap.style.height = '100%';
-
-                        // Leaflet uses CSS transforms to position tiles/overlays.
-                        // html2canvas can lose these transforms, so convert them into explicit left/top offsets.
-                        const toPixels = (value) => (typeof value === 'number' ? value : parseFloat(value) || 0);
-
-                        const getTransformOffset = (el) => {
-                          const style = window.getComputedStyle(el);
-                          const transform = style.transform || style.webkitTransform;
-                          if (!transform || transform === 'none') return { x: 0, y: 0 };
-                          const matrix = transform.match(/matrix\(([^)]+)\)/);
-                          if (matrix) {
-                            const parts = matrix[1].split(',').map((v) => parseFloat(v.trim()));
-                            // matrix(a, b, c, d, tx, ty)
-                            return { x: parts[4] || 0, y: parts[5] || 0 };
-                          }
-                          const matrix3d = transform.match(/matrix3d\(([^)]+)\)/);
-                          if (matrix3d) {
-                            const parts = matrix3d[1].split(',').map((v) => parseFloat(v.trim()));
-                            return { x: parts[12] || 0, y: parts[13] || 0 };
-                          }
-                          return { x: 0, y: 0 };
-                        };
-
-                        const fixPaneTransforms = (pane) => {
-                          if (!pane) return;
-                          const offset = getTransformOffset(pane);
-                          // Preserve any existing left/top values, but apply the transform offset.
-                          const curLeft = toPixels(pane.style.left || 0);
-                          const curTop = toPixels(pane.style.top || 0);
-                          pane.style.transform = 'none';
-                          pane.style.left = `${curLeft + offset.x}px`;
-                          pane.style.top = `${curTop + offset.y}px`;
-                        };
-
-                        const panes = clonedMap.querySelectorAll('.leaflet-pane, .leaflet-map-pane, .leaflet-tile-pane, .leaflet-zoom-animated, .leaflet-tile-container');
-                        panes.forEach(fixPaneTransforms);
-
-                        const svg = clonedMap.querySelector('svg');
-                        if (svg) fixPaneTransforms(svg);
-                      }
-                  });
-              })
+              .then(() => capturePrintAreaAsCanvas(capture))
               .then((canvas) => {
                   snapshotImage.src = canvas.toDataURL('image/png');
                   document.body.classList.add('snapshot-ready');
@@ -635,11 +615,7 @@
 
           return waitForTilesReady(5000)
               .then(() => waitForMapReady(1500))
-              .then(() => html2canvas(capture, {
-                  useCORS: true,
-                  scale: 2,
-                  backgroundColor: '#ffffff'
-              }))
+              .then(() => capturePrintAreaAsCanvas(capture))
               .then((canvas) => {
                   const dataUrl = canvas.toDataURL('image/png');
                   snapshotImage.src = dataUrl;
