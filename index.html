@@ -2367,6 +2367,9 @@
 
                     // Hide open panels/popups when location context changes
                     function refreshForLocationChange() {
+                        if (typeof window.resetLayersForMwsChange === 'function') {
+                            window.resetLayersForMwsChange();
+                        }
                         clearLayerSelections();
                         const panelIds = ['basePanel', 'proposalPanel', 'infoPanel', 'climPanel', 'waterPanel', 'attributePanel', 'tablePanel', 'catalogPanel', 'statPanel', 'waterQualityStationPanel'];
                         panelIds.forEach((id) => {
