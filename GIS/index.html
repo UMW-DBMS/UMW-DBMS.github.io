@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UMW Watershed Management Plan</title>
+    <meta name="description" content="Upper Mahaweli Watershed Management Plan database with GIS maps, station data, climate layers, watershed information, data catalog, and statistics for UMW planning.">
+    <meta name="keywords" content="UMW, Upper Mahaweli Watershed, Watershed Management Plan, watershed management database, GIS watershed map, Sri Lanka watershed, mini watershed, station data, climate layer, water quality data">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="UMW Watershed Management Plan">
+    <meta property="og:description" content="GIS-based Upper Mahaweli Watershed Management Plan database for maps, station data, climate layers, water quality, and watershed statistics.">
+    <meta property="og:type" content="website">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -15,7 +21,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <!-- Include the dropdown.js file-->
-    <script src="scripts.js" defer></script>
+    <script src="scripts.js?v=popclick1" defer></script>
     <script src="dropdown.js" defer></script>
 
 
@@ -69,12 +75,28 @@
             display: flex;
             align-items: center;
             flex-wrap: nowrap;
-            gap: 0.35vw;
+            gap: 0.2vw;
             white-space: nowrap;
         }
 
         header>div:last-child {
             justify-content: flex-end;
+        }
+
+        .brand-search {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.45vh;
+        }
+
+        .brand-title {
+            font-weight: 600;
+        }
+
+        .search-row {
+            display: flex;
+            align-items: center;
+            gap: 0.35vw;
         }
 
         footer {
@@ -120,7 +142,7 @@
             color: white;
             padding: 0.8vh 0.9vw;
             cursor: pointer;
-            margin: 0 1px;
+            margin: 0;
             border-radius: 4px;
             transition: background-color 0.3s;
             font-size: clamp(0.68rem, 0.8vw, 0.85rem);
@@ -130,6 +152,34 @@
         header select {
             white-space: nowrap;
             flex: 0 0 auto;
+        }
+
+        .mws-search {
+            width: clamp(8.8rem, 14.4vw, 14.4rem);
+            padding: 0.65vh 0.6vw;
+            border: 1px solid rgba(255, 255, 255, 0.75);
+            border-radius: 4px;
+            font-size: clamp(0.68rem, 0.8vw, 0.85rem);
+        }
+
+        .search-icon-btn {
+            min-width: 2.2rem;
+            padding-left: 0.65rem;
+            padding-right: 0.65rem;
+            font-size: 1rem;
+            line-height: 1;
+        }
+
+        .gn-search-label {
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(255, 140, 0, 0.75);
+            border-radius: 3px;
+            color: #5f3300;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 2px 4px;
+            box-shadow: none;
+            pointer-events: none;
         }
 
         .button.active {
@@ -240,16 +290,22 @@
 
         #infoPopupPanel {
             position: static;
-            font-size: 10px;
+            font-size: 12px;
             color: #333;
-            background-color: #f9f9f9;
-            padding: 8px 10px;
-            border: 1px solid #ccc;
+            background-color: #f0f8ff;
+            padding: 10px 15px;
+            border: 2px solid #007bff;
             border-radius: 4px;
-            display: none;
-            min-width: 220px;
+            display: none !important;
+            min-width: 250px;
             margin-right: auto;
             white-space: nowrap;
+            font-weight: 500;
+            z-index: 100;
+        }
+        
+        #infoPopupPanel[style*="display: block"] {
+            display: block !important;
         }
 
         #catalogPanel {
@@ -836,7 +892,7 @@
     <!-- README Modal -->
     <div id="readme-modal" class="modal">
         <div class="modal-content">
-            <h2>Welcome to UMW Watershed Management Plan</h2>
+            <h2>Welcome to Upper Mahaweli Watershed Management Database</h2>
             <div class="flowchart">
                 <div class="flow-node">
                     <div class="flow-title">Step 1</div>
@@ -910,7 +966,16 @@
 
     <header>
 
-        <div>Watershed Management Plan</div>
+        <div class="brand-search">
+            <div class="brand-title">Watershed Management Plan</div>
+            <div class="search-row">
+                <input id="mwsSearchInput" class="mws-search" type="search" list="mwsSearchOptions"
+                    placeholder="Search GN, DSD, District">
+                <datalist id="mwsSearchOptions"></datalist>
+                <button id="mwsSearchBtn" class="button search-icon-btn" type="button" title="Search"
+                    aria-label="Search">&#128269;</button>
+            </div>
+        </div>
 
         <div>
 
@@ -1586,7 +1651,7 @@
                     }
 
                     const link = document.createElement('a');
-                    const stamp = new Date().toISOString().slice(0, 10);
+                    const stamp = new Date
                     link.href = chartCanvas.toDataURL('image/png');
                     link.download = `statistics_chart_${stamp}.png`;
                     document.body.appendChild(link);
@@ -1713,7 +1778,9 @@
                     panel.innerHTML = `
                         <strong>Station:</strong> ${titleName}<br>
                         <strong>Type:</strong> ${sourceName}<br><br>
-                        <canvas id="monthlyStationChart" style="width:800px; height:110px;"></canvas>
+                        <div style="position:relative;width:100%;height:320px;">
+                            <canvas id="monthlyStationChart"></canvas>
+                        </div>
                         <div id="monthlyPointValue" style="margin-top:8px;font-size:12px;color:#1d1d1d;">Click a point to view the value.</div>
                         <br>
                         <button id="downloadMonthlyChartBtn" class="button" type="button">Download Chart</button>
@@ -1753,6 +1820,7 @@
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             interaction: {
                                 mode: 'nearest',
                                 intersect: true
@@ -2358,6 +2426,9 @@
 
                     // Hide open panels/popups when location context changes
                     function refreshForLocationChange() {
+                        if (typeof window.resetLayersForMwsChange === 'function') {
+                            window.resetLayersForMwsChange();
+                        }
                         clearLayerSelections();
                         const panelIds = ['basePanel', 'proposalPanel', 'infoPanel', 'climPanel', 'waterPanel', 'attributePanel', 'tablePanel', 'catalogPanel', 'statPanel', 'waterQualityStationPanel'];
                         panelIds.forEach((id) => {
@@ -2482,7 +2553,27 @@
                     event.target.classList.add('active');
                 }
 
-                // Coordinate popup intentionally disabled to avoid the empty right-side white box.
+                // Show coordinates in the bottom bar when the user clicks on the map.
+                function showClickCoordinates(latlng) {
+                    if (!latlng) return;
+                    const infoPopup = document.getElementById('infoPopupPanel');
+                    if (!infoPopup) return;
+                    infoPopup.style.display = 'block';
+                    infoPopup.style.visibility = 'visible';
+                    infoPopup.innerHTML = ` Coordinates:N ${latlng.lat.toFixed(6)},E ${latlng.lng.toFixed(6)}`;
+                    console.log('Coordinates displayed:', latlng.lat, latlng.lng);
+                }
+
+                window.showClickCoordinates = showClickCoordinates;
+
+                map.on('click', function (e) {
+                    if (typeof window.isMeasureModeActive === 'function' && window.isMeasureModeActive()) {
+                        return;
+                    }
+                    if (!e || !e.latlng) return;
+                    console.log('Map clicked at:', e.latlng);
+                    showClickCoordinates(e.latlng);
+                });
 
 
                 // Change base layer function
@@ -2661,6 +2752,9 @@
                                         if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
                                             return;
                                         }
+                                        if (typeof window.showClickCoordinates === 'function') {
+                                            window.showClickCoordinates(clickLatLng);
+                                        }
                                         if (src === 'CEA' || src === 'MASL' || src === 'NWSDB') {
                                             if (stationName) showCSVForStation(stationName);
                                             else alert("No station name found in attributes.");
@@ -2738,7 +2832,7 @@
 
 
 
-            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-epa9" defer> </script>
+            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-popclick2" defer> </script>
             <script src="proposal_all7a_dbtree.js"></script>
             <script src="table4.js"></script>
 

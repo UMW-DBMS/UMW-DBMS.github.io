@@ -36,6 +36,90 @@ let miniWatershedLinkedEnvironmentalArea = false;
 // Temporarily hidden from the Base Layers panel.
 // Remove entries above to show these layers again later.
 
+function isGeoJsonUrl(url) {
+    return /\.geojson(?:[?#].*)?$/i.test(String(url || '').trim());
+}
+
+let populationClickFallbackHandler = null;
+
+function pointInRing(point, ring) {
+    let inside = false;
+    const x = point.lng;
+    const y = point.lat;
+
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0];
+        const yi = ring[i][1];
+        const xj = ring[j][0];
+        const yj = ring[j][1];
+        const intersects = ((yi > y) !== (yj > y)) &&
+            (x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi);
+        if (intersects) inside = !inside;
+    }
+
+    return inside;
+}
+
+function pointInPolygonCoordinates(point, polygonCoordinates) {
+    if (!Array.isArray(polygonCoordinates) || !polygonCoordinates.length) return false;
+    if (!pointInRing(point, polygonCoordinates[0])) return false;
+
+    for (let i = 1; i < polygonCoordinates.length; i++) {
+        if (pointInRing(point, polygonCoordinates[i])) return false;
+    }
+
+    return true;
+}
+
+function pointInFeatureGeometry(point, geometry) {
+    if (!geometry || !Array.isArray(geometry.coordinates)) return false;
+    if (geometry.type === 'Polygon') {
+        return pointInPolygonCoordinates(point, geometry.coordinates);
+    }
+    if (geometry.type === 'MultiPolygon') {
+        return geometry.coordinates.some((polygonCoordinates) =>
+            pointInPolygonCoordinates(point, polygonCoordinates)
+        );
+    }
+    return false;
+}
+
+function findLayerForFeature(geoJsonLayer, feature) {
+    let matchedLayer = null;
+    geoJsonLayer.eachLayer((layer) => {
+        if (!matchedLayer && layer.feature === feature) {
+            matchedLayer = layer;
+        }
+    });
+    return matchedLayer || geoJsonLayer;
+}
+
+function enablePopulationClickFallback(layerName, data, geoJsonLayer) {
+    if (String(layerName || '').trim().toLowerCase() !== 'population') return;
+    if (populationClickFallbackHandler) {
+        map.off('click', populationClickFallbackHandler);
+    }
+
+    const features = Array.isArray(data && data.features) ? data.features : [];
+    populationClickFallbackHandler = function (event) {
+        if (!event || !event.latlng || !map.hasLayer(geoJsonLayer)) return;
+
+        const matchedFeature = features.find((feature) =>
+            pointInFeatureGeometry(event.latlng, feature && feature.geometry)
+        );
+        if (!matchedFeature) return;
+
+        if (typeof window.showClickCoordinates === 'function') {
+            window.showClickCoordinates(event.latlng);
+        }
+        const targetLayer = findLayerForFeature(geoJsonLayer, matchedFeature);
+        updateInfoPanel(matchedFeature.properties || {}, layerName, targetLayer);
+        highlightFeature(targetLayer);
+    };
+
+    map.on('click', populationClickFallbackHandler);
+}
+
 function parseAmount(value) {
     if (value === null || value === undefined) return null;
     const str = String(value).replace(/[, ]+/g, '');
@@ -436,7 +520,10 @@ function updateBasePanel(databaseLayers) {
                 if (isChecked) {
                     // Add the layer
                     const rasterOverrideUrl = getRasterOverrideUrl(Layer, geojson);
-                    if ((Group === 'Raster' && geojson) || (rasterOverrideUrl && rasterOverrideUrl !== geojson)) {
+                    const shouldLoadAsGeoJson = isGeoJsonUrl(geojson);
+                    if (shouldLoadAsGeoJson) {
+                        loadGeoJsonLayer(geojson, Layer);
+                    } else if ((Group === 'Raster' && geojson) || (rasterOverrideUrl && rasterOverrideUrl !== geojson)) {
                         loadPngOverlay(rasterOverrideUrl || geojson, Layer);
                     } else if (Group === 'Base' && geojson) {
                         loadGeoJsonLayer(geojson, Layer);
@@ -1235,6 +1322,9 @@ function loadGeoJsonLayerP(url, layerName) {
                             if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
                                 return;
                             }
+                            if (typeof window.showClickCoordinates === 'function') {
+                                window.showClickCoordinates(clickLatLng);
+                            }
                             updateInfoPanel(feature.properties, layerName, targetLayer);
                             highlightFeature(targetLayer);
                         };
@@ -1938,6 +2028,9 @@ function loadGeoJsonLayer(url, layerName) {
                             if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) {
                                 return;
                             }
+                            if (typeof window.showClickCoordinates === 'function') {
+                                window.showClickCoordinates(clickLatLng);
+                            }
                             updateInfoPanel(feature.properties, layerName, targetLayer);
                             highlightFeature(targetLayer);
                         };
@@ -1954,6 +2047,10 @@ function loadGeoJsonLayer(url, layerName) {
 
             // Store and add the GeoJSON layer to the map
             geoJsonLayers[layerName] = geoJsonLayer.addTo(map);
+            if (String(layerName || '').trim().toLowerCase() === 'population' && geoJsonLayer.bringToFront) {
+                geoJsonLayer.bringToFront();
+            }
+            enablePopulationClickFallback(layerName, data, geoJsonLayer);
 
             if (hasRoadCategories(data)) {
                 addRailwayDecorations(layerName, geoJsonLayer);
@@ -2299,6 +2396,7 @@ function removeLayerAndLegend(layerName) {
 // Function to update the attribute panel with properties of the clicked feature
 // Function to update the attribute panel with properties of the clicked feature
 function updateInfoPanel(properties, layerName, featureLayer) {
+    properties = properties || {};
     //const attributePanel = document.getElementById('attributePanel');
     //attributePanel.innerHTML = ''; // Clear previous content
     const attributePanel = document.getElementById('attributePanel');
@@ -2447,6 +2545,27 @@ document.getElementById('climateLayerBtn').addEventListener('click', activateCli
 
 function resetLayersForMwsChange() {
     clearFeatureSelection();
+
+    document.querySelectorAll([
+        '#basePanel input[type="checkbox"]',
+        '#proposalPanel input[type="checkbox"]',
+        '#climPanel input[type="checkbox"]'
+    ].join(',')).forEach((checkbox) => {
+        checkbox.checked = false;
+    });
+
+    if (populationClickFallbackHandler) {
+        try { map.off('click', populationClickFallbackHandler); } catch (e) { /* ignore */ }
+        populationClickFallbackHandler = null;
+    }
+
+    if (window.currentLayer) {
+        try { map.removeLayer(window.currentLayer); } catch (e) { /* ignore */ }
+        window.currentLayer = null;
+    }
+
+    miniWatershedLinkedEnvironmentalArea = false;
+
     // Remove all loaded raster overlays
     Object.keys(pngOverlays).forEach((layerName) => {
         try { map.removeLayer(pngOverlays[layerName]); } catch (e) { /* ignore */ }
@@ -2480,8 +2599,9 @@ function resetLayersForMwsChange() {
     activeBottomLegendLayer = '';
 }
 
+window.resetLayersForMwsChange = resetLayersForMwsChange;
+
 const mwsSelectElement = document.getElementById('selectMWSID');
 if (mwsSelectElement) {
     mwsSelectElement.addEventListener('change', resetLayersForMwsChange);
 }
-

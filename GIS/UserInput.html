@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>User Input</title>
+  <title>New Proposal Update</title>
   <style>
     body {
       margin: 0;
@@ -230,7 +230,7 @@
   </header>
   <main>
     <div class="card">
-      <h2>Select Location</h2>
+      <h2>New Proposals Update</h2>
       <p class="hint">Select District and DSD, sign in with Supabase email/password, verify login, and choose MWS_ID.</p>
 
       <div class="form-row">
@@ -679,7 +679,7 @@
     async function updateGeojsonOnGitHub(payload, token) {
       const folder = normalizeMwsFolder(payload.mws_id);
       if (!folder) throw new Error('Missing MWS_ID');
-      const path = `${folder}/${payload.proposal_type}.geojson`;
+      const path = `${GEOJSON_BASE}/${folder}/${payload.proposal_type}.geojson`;
       const contentsApi = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`;
 
       let geojson = null;
@@ -866,6 +866,8 @@
         const text = await putResp.text();
         throw new Error(`GitHub update failed (${putResp.status}): ${text}`);
       }
+
+      return path;
     }
 
     function renderDwsForm() {
@@ -901,7 +903,7 @@
             <textarea id="dwsDescription" rows="2"></textarea>
           </div>
           <div>
-            <label for="dwsAmount">Amount (Rs.)</label>
+            <label for="dwsAmount">Estimated Cost</label>
             <input id="dwsAmount" type="text" />
           </div>
           <div>
@@ -1190,6 +1192,8 @@
           const text = await putResp.text();
           throw new Error(`GitHub update failed (${putResp.status}): ${text}`);
         }
+
+        return path;
       }
 
       document.getElementById('dwsSubmit').addEventListener('click', async () => {
@@ -1225,8 +1229,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1250,7 +1254,7 @@
             <input id="lsGn" type="text" />
           </div>
           <div>
-            <label for="lsLandSlides">Land Slides</label>
+            <label for="lsLandSlides">Landslides</label>
             <input id="lsLandSlides" type="text" />
           </div>
           <div>
@@ -1318,8 +1322,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1411,8 +1415,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1423,8 +1427,12 @@
       formPanel.innerHTML = `
         <h3>MT (Minor Tanks)- New Entry</h3>
         <div class="form-grid">
-          <div class="full">
-            <label for="mtCustodian">Name_of_Custodian</label>
+          <div>
+            <label for="mtTank">Name_of_Tank</label>
+            <input id="mtTank" type="text" />
+          </div>
+          <div>
+            <label for="mtCustodian">Custodians</label>
             <input id="mtCustodian" type="text" />
           </div>
           <div>
@@ -1484,8 +1492,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1577,8 +1585,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1622,11 +1630,11 @@
             <input id="swcQty" type="text" />
           </div>
           <div>
-            <label for="swcMeasures">Proposed</label>
+            <label for="swcMeasures">Proposed measure/s</label>
             <input id="swcMeasures" type="text" />
           </div>
           <div>
-            <label for="swcUnitCost">Unit Cost (Rs.)</label>
+            <label for="swcUnitCost">Uniti_Cost</label>
             <input id="swcUnitCost" type="text" />
           </div>
           <div>
@@ -1695,8 +1703,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1740,7 +1748,7 @@
             <input id="swcoffQty" type="text" />
           </div>
           <div>
-            <label for="swcoffMeasures">Proposed</label>
+            <label for="swcoffMeasures">Proposed measure/s</label>
             <input id="swcoffMeasures" type="text" />
           </div>
           <div>
@@ -1808,8 +1816,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -1873,7 +1881,7 @@
             <textarea id="wpContribution" rows="2"></textarea>
           </div>
           <div class="full">
-            <label for="wpTimeFrame">Time frame to implement</label>
+            <label for="wpTimeFrame">Time frame for the implementation</label>
             <input id="wpTimeFrame" type="text" />
           </div>
           <div>
@@ -1933,8 +1941,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
@@ -2026,8 +2034,8 @@
             const uploadedPath = await uploadPhotoToGitHub(token, payload.mws_id, photoFile);
             payload.photopath = uploadedPath;
           }
-          await updateGeojsonOnGitHub(payload, token);
-          status.textContent = 'Saved to GitHub.';
+          const savedPath = await updateGeojsonOnGitHub(payload, token);
+          status.textContent = `Saved to GitHub: ${savedPath}`;
         } catch (error) {
           status.textContent = `Error: ${error.message}`;
         }
