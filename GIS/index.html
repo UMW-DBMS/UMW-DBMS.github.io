@@ -95,8 +95,19 @@
 
         .search-row {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 0.35vw;
+        }
+
+        .search-buttons-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35vw;
+        }
+
+        .search-clear-btn {
+            width: auto;
+            white-space: nowrap;
         }
 
         footer {
@@ -972,8 +983,12 @@
                 <input id="mwsSearchInput" class="mws-search" type="search" list="mwsSearchOptions"
                     placeholder="Search GN, DSD, District">
                 <datalist id="mwsSearchOptions"></datalist>
-                <button id="mwsSearchBtn" class="button search-icon-btn" type="button" title="Search"
-                    aria-label="Search">&#128269;</button>
+                <div class="search-buttons-column">
+                    <button id="mwsSearchBtn" class="button search-icon-btn" type="button" title="Search"
+                        aria-label="Search">&#128269;</button>
+                    <button id="clearGndSearchBtn" class="button search-clear-btn" type="button" title="Clear GN selection"
+                        aria-label="Clear GN selection" style="display:none;">Clear</button>
+                </div>
             </div>
         </div>
 
@@ -2382,8 +2397,8 @@
                     const dsdSelect = document.getElementById('selectDSD');
                     const mwsIdSelect = document.getElementById('selectMWSID');
                     const goButton = document.getElementById('goBtn');
-                    // Only disable MWSInfo button 
-                    /*const otherButtons = Array.from(document.querySelectorAll('header .button:not(#goBtn):not(#baseLayersBtn)'))*/
+                    const otherButtons = Array.from(document.querySelectorAll('header .button:not(#goBtn):not(#baseLayersBtn)'));
+
                     // Function to check if all three dropdowns are selected
                     function checkDropdowns() {
                         if (distSelect.value && dsdSelect.value && mwsIdSelect.value) {
@@ -2524,6 +2539,10 @@
                             const ready = distSelect.value && dsdSelect.value && mwsIdSelect.value;
                             label.style.display = ready ? 'block' : 'none';
                         }
+                    }
+
+                    if (panelId === 'catalogPanel' && typeof window.loadDataCatalogForCurrentMwsID === 'function') {
+                        window.loadDataCatalogForCurrentMwsID();
                     }
 
                     activePanel = panel;
@@ -2816,26 +2835,14 @@
             </script>
 
 
-            <!-- 
-						<script src="baselayerPop.js" > </script>
-
-			<script src="baselayer.js"></script>		
-			<script src="proposal.js"></script>	
-	
-			<script src="clim.js"></script>				
-
-
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>		
-			-->
-
-
-
-
-
-            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-popclick2" defer> </script>
+            <script src="baselayerPop.js"></script>
+            <script src="baselayer.js"></script>
+            <script src="proposal.js"></script>
+            <script src="clim.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+            <script src="all5m1_v3_photo_legend_highlight.js?v=20260323-popclick2" defer></script>
             <script src="proposal_all7a_dbtree.js"></script>
             <script src="table4.js"></script>
-
 
             <!-- Panel to display the table -->
             <!-- 

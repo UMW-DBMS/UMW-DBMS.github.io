@@ -1,80 +1,158 @@
 // Get the select element
 const selectElement = document.getElementById('selectMWSID');
-let allData = []; 
-// Add an event listener to detect when the user selects a new MWS ID
-selectElement.addEventListener('change', function() {
-    const mwsID = selectElement.value.replace(/-/g, '_');  // Clean up the selected mwsID
+let allData = [];
+let currentMwsID = '';
 
-    // Check if a valid mwsID is selected
-    if (!mwsID) {
-        alert('Invalid mwsID: Please select a valid option from the dropdown.');
-        return; // Exit if no valid option is selected
+const CSV_FIELD_KEYS = {
+    mws: ['MWS', 'MWS_ID', 'mws', 'mws_id'],
+    database: ['Database', 'database', 'DB', 'db'],
+    layer: ['Layer', 'layer'],
+    provider: ['Provider', 'provider'],
+    download: ['Download-SHP', 'Download', 'download', 'geojson', 'GeoJSON', 'Download_URL', 'download_url', 'File', 'file']
+};
+
+function getField(row, keys) {
+    if (!row || typeof row !== 'object') return '';
+    for (const key of keys) {
+        if (Object.prototype.hasOwnProperty.call(row, key) && row[key] !== undefined && row[key] !== null) {
+            return String(row[key]).trim();
+        }
+    }
+    return '';
+}
+
+// Fallback: scan all fields in a CSV row to find a URL-like value
+function findUrlInRow(row) {
+    if (!row || typeof row !== 'object') return '';
+    const urlPatterns = [/https?:\/\//i, /\.geojson$/i, /\.zip$/i, /\.shp$/i, /raw\.githubusercontent/i];
+    for (const val of Object.values(row)) {
+        if (typeof val !== 'string') continue;
+        const s = val.trim();
+        if (!s) continue;
+        for (const p of urlPatterns) {
+            if (p.test(s)) return s;
+        }
+    }
+    return '';
+}
+
+function fetchCsvFile(filePath) {
+    return fetch(filePath)
+        .then(response => {
+            if (!response.ok) {
+                console.warn(`CSV file not available: ${filePath} (${response.status})`);
+                return '';
+            }
+            return response.text();
+        })
+        .then(csvText => {
+            if (!csvText) return [];
+            return new Promise(resolve => {
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function (results) {
+                        resolve(results.data || []);
+                    },
+                    error: function (err) {
+                        console.warn('PapaParse error for', filePath, err);
+                        resolve([]);
+                    }
+                });
+            });
+        })
+        .catch(error => {
+            console.warn(`Error fetching or parsing CSV file ${filePath}:`, error);
+            return [];
+        });
+}
+
+function clearCatalogDisplay() {
+    allData = [];
+    displayData([]);
+    updateDropdownOptions([]);
+}
+
+function loadDataCatalogForMwsID(mwsID) {
+    const normalizedMwsID = String(mwsID || '').replace(/-/g, '_').trim();
+    if (!normalizedMwsID) {
+        clearCatalogDisplay();
+        currentMwsID = '';
+        return;
     }
 
-    // Define the CSV file paths based on the selected mwsID
+    if (normalizedMwsID === currentMwsID && allData.length) {
+        return;
+    }
+
+    currentMwsID = normalizedMwsID;
     const csvFilePaths = [
-        //`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${mwsID}/datalayer_${mwsID}.csv`,
-        `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${mwsID}/AllDataLayer_${mwsID}.csv`,
-        `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${mwsID}/PropLayers_${mwsID}.csv`,
-		`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/Proposal/MWS_${mwsID}/MWS_${mwsID}_table.csv`
+        `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${normalizedMwsID}/AllDataLayer_${normalizedMwsID}.csv`,
+        `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/MWS_${normalizedMwsID}/PropLayers_${normalizedMwsID}.csv`,
+        `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/Proposal/MWS_${normalizedMwsID}/MWS_${normalizedMwsID}_table.csv`
     ];
 
-    //let allData = []; // Store all parsed CSV data
+    Promise.allSettled(csvFilePaths.map(fetchCsvFile))
+        .then(results => {
+            const parsedResults = results
+                .filter(result => result.status === 'fulfilled')
+                .map(result => result.value || [])
+                .flat();
 
-    // Fetch and parse all CSV files
-    Promise.all(
-        csvFilePaths.map(filePath =>
-            fetch(filePath)
-                .then(response => response.text())
-                .then(csvText =>
-                    new Promise(resolve => {
-                        Papa.parse(csvText, {
-                            header: true,
-                            complete: function(results) {
-                                resolve(results.data);
-                            }
-                        });
-                    })
-                )
-        )
-    )
-    .then(results => {
-        // Combine data from all files
-        allData = results.flat(); 
-        displayData(allData); // Display combined data
-        updateDropdownOptions(allData); // Populate dropdowns based on combined data
-    })
-    .catch(error => {
-        console.error("Error fetching or parsing CSV files:", error);
+            allData = parsedResults.filter(Boolean);
+            displayData(allData);
+            updateDropdownOptions(allData);
+        })
+        .catch(error => {
+            console.error('Error fetching or parsing CSV files:', error);
+            clearCatalogDisplay();
+        });
+}
+
+function loadDataCatalogForCurrentMwsID() {
+    if (!selectElement) {
+        console.error('Data Catalog MWS dropdown not found: selectMWSID');
+        return;
+    }
+    loadDataCatalogForMwsID(selectElement.value);
+}
+
+window.loadDataCatalogForCurrentMwsID = loadDataCatalogForCurrentMwsID;
+
+if (selectElement) {
+    selectElement.addEventListener('change', function () {
+        loadDataCatalogForMwsID(this.value);
     });
-});
+} else {
+    console.error('Data Catalog MWS dropdown not found: selectMWSID');
+}
 
 // Function to populate dropdowns with unique values from the entire dataset
 function updateDropdownOptions(data) {
-    updateDropdownWithSelected('filterID', getUniqueValues(data, 'MWS'));
-    updateDropdownWithSelected('filterDatabase', getUniqueValues(data, 'Database'));
-    updateDropdownWithSelected('filterLayer', getUniqueValues(data, 'Layer'));
-    updateDropdownWithSelected('filterProvider', getUniqueValues(data, 'Provider'));
+    updateDropdownWithSelected('filterID', getUniqueValues(data, CSV_FIELD_KEYS.mws));
+    updateDropdownWithSelected('filterDatabase', getUniqueValues(data, CSV_FIELD_KEYS.database));
+    updateDropdownWithSelected('filterLayer', getUniqueValues(data, CSV_FIELD_KEYS.layer));
+    updateDropdownWithSelected('filterProvider', getUniqueValues(data, CSV_FIELD_KEYS.provider));
 }
 
 // Helper function to get unique values from a column
-function getUniqueValues(data, column) {
-    return Array.from(new Set(data.map(row => row[column]).filter(Boolean)));
+function getUniqueValues(data, keys) {
+    return Array.from(new Set(data.map(row => getField(row, keys)).filter(Boolean)));
 }
 
 // Helper function to populate a dropdown and retain the selected value
 function updateDropdownWithSelected(dropdownID, values) {
     const dropdown = document.getElementById(dropdownID);
+    if (!dropdown) return;
+
     const selectedValue = dropdown.value; // Store the currently selected value
     dropdown.innerHTML = ''; // Clear existing options
 
-    // Add an "Any" option at the top of the list
     const defaultOption = document.createElement('option');
     defaultOption.value = '';
     defaultOption.textContent = 'Any';
     dropdown.appendChild(defaultOption);
 
-    // Populate dropdown with the filtered unique values
     values.forEach(value => {
         const option = document.createElement('option');
         option.value = value;
@@ -82,29 +160,34 @@ function updateDropdownWithSelected(dropdownID, values) {
         dropdown.appendChild(option);
     });
 
-    // Reapply the previously selected value (if it exists in the new options)
     dropdown.value = values.includes(selectedValue) ? selectedValue : '';
 }
 
 // Function to display the CSV data in the table
 function displayData(data) {
     const tableBody = document.querySelector('#csvTable tbody');
+    if (!tableBody) return;
     tableBody.innerHTML = ''; // Clear the table body
 
     data.forEach(row => {
         const tr = document.createElement('tr');
-        const colsToShow = [row.MWS, row.Database, row.Layer, row['Provider']];
+        const colsToShow = [
+            getField(row, CSV_FIELD_KEYS.mws),
+            getField(row, CSV_FIELD_KEYS.database),
+            getField(row, CSV_FIELD_KEYS.layer),
+            getField(row, CSV_FIELD_KEYS.provider)
+        ];
+
         colsToShow.forEach(col => {
             const td = document.createElement('td');
             td.textContent = col;
             tr.appendChild(td);
         });
 
-        // Add a download button in the last column (robustly handle different field names)
         const td = document.createElement('td');
         const button = document.createElement('button');
-        // try several common column names for download URL
-        const url = row['Download-SHP'] || row['Download'] || row['download'] || row['geojson'] || row['GeoJSON'] || row['Download_URL'] || row['download_url'] || row['File'] || row['file'];
+        let url = getField(row, CSV_FIELD_KEYS.download);
+        if (!url) url = findUrlInRow(row);
         if (!url) {
             button.textContent = 'Not available';
             button.disabled = true;
@@ -112,7 +195,6 @@ function displayData(data) {
         } else {
             button.textContent = 'Download';
             button.addEventListener('click', async () => {
-                // Helper to convert GitHub blob URLs to raw.githubusercontent URLs
                 function toRawGitHubUrl(u) {
                     try {
                         const gh = u.match(/https?:\/\/github.com\/(.+?)\/blob\/(.+)/);
@@ -127,14 +209,12 @@ function displayData(data) {
                     const resp = await fetch(u, { mode: 'cors' });
                     if (!resp.ok) throw new Error(`Network response was not ok (${resp.status})`);
                     const ct = resp.headers.get('content-type') || '';
-                    // If server returned an HTML page, don't try to download that
                     if (ct.includes('text/html')) throw new Error('Received HTML response instead of file');
                     const blob = await resp.blob();
                     const objectUrl = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = objectUrl;
-                    const filename = (u.split('/').pop() || 'download').split('?')[0];
-                    a.download = filename;
+                    a.download = (u.split('/').pop() || 'download').split('?')[0];
                     document.body.appendChild(a);
                     a.click();
                     a.remove();
@@ -145,7 +225,6 @@ function displayData(data) {
                     await tryFetchAndDownload(url);
                 } catch (err) {
                     console.warn('Initial fetch/download failed:', err);
-                    // Try converting GitHub blob URL to raw URL and retry
                     const raw = toRawGitHubUrl(url);
                     if (raw !== url) {
                         try {
@@ -156,10 +235,8 @@ function displayData(data) {
                         }
                     }
 
-                    // Final fallback: provide user with the direct URL to open or copy
                     const userChoice = confirm('Automatic download failed (CORS or sandboxed frame).\nClick OK to open the file URL in a new tab, or Cancel to copy the URL to clipboard.');
                     if (userChoice) {
-                        // Attempt to open in a new tab — note this can fail if the page is inside a sandboxed iframe.
                         try { window.open(url, '_blank', 'noopener'); }
                         catch (e) { console.error('Could not open new tab:', e); alert('Unable to open new tab. URL:\n' + url); }
                     } else {
@@ -167,7 +244,6 @@ function displayData(data) {
                             await navigator.clipboard.writeText(url);
                             alert('Download URL copied to clipboard. Paste it in your browser address bar to open.');
                         } catch (e) {
-                            // As a last resort, show the URL so the user can copy it manually
                             alert('Could not copy to clipboard. Please copy this URL manually:\n' + url);
                         }
                     }
@@ -176,7 +252,6 @@ function displayData(data) {
         }
         td.appendChild(button);
         tr.appendChild(td);
-        
         tableBody.appendChild(tr);
     });
 }
@@ -188,21 +263,18 @@ function filterTable() {
     const filterLayer = document.getElementById('filterLayer').value;
     const filterProvider = document.getElementById('filterProvider').value;
 
-    // Apply selected filters to data
     const filteredData = allData.filter(row =>
-        (!filterID || row.MWS === filterID) &&
-        (!filterDatabase || row.Database === filterDatabase) &&
-        (!filterLayer || row.Layer === filterLayer) &&
-        (!filterProvider || row['Provider'] === filterProvider)
+        (!filterID || getField(row, CSV_FIELD_KEYS.mws) === filterID) &&
+        (!filterDatabase || getField(row, CSV_FIELD_KEYS.database) === filterDatabase) &&
+        (!filterLayer || getField(row, CSV_FIELD_KEYS.layer) === filterLayer) &&
+        (!filterProvider || getField(row, CSV_FIELD_KEYS.provider) === filterProvider)
     );
 
-    displayData(filteredData); // Update displayed data based on filtered data
-    
-    // Update dropdown options based on currently filtered data
+    displayData(filteredData);
     updateDropdownOptions(filteredData);
 }
 
-// Add event listeners to dropdowns
 ['filterID', 'filterDatabase', 'filterLayer', 'filterProvider'].forEach(id => {
-    document.getElementById(id).addEventListener('change', filterTable);
+    const dropdown = document.getElementById(id);
+    if (dropdown) dropdown.addEventListener('change', filterTable);
 });

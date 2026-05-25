@@ -2,6 +2,9 @@
 let geojsonLayer; // To store the GeoJSON layer
 let originalData; // To store the original GeoJSON data
 let selectedMwsFeature = null;
+let selectedGndMatch = null;
+let selectedGndSuggestion = null;
+let currentGndSearchSuggestions = [];
 let mwsPopupLayer = null;
 const gndGeojsonCache = {};
 let gndSuggestionTimer = null;
@@ -230,6 +233,68 @@ function clearLocationDropdownValues() {
     refreshGoButtonState();
 }
 
+function clearGndSearchSelection() {
+    const input = document.getElementById('mwsSearchInput');
+    if (input) {
+        input.value = '';
+    }
+
+    if (gndSuggestionTimer) {
+        clearTimeout(gndSuggestionTimer);
+        gndSuggestionTimer = null;
+    }
+
+    if (geojsonLayer) {
+        map.removeLayer(geojsonLayer);
+        geojsonLayer = null;
+    }
+
+    selectedGndMatch = null;
+    selectedGndSuggestion = null;
+    updateGndClearButtonState();
+
+    const selectedMws = selectedMwsFeature || getSelectedMwsFeature();
+    if (selectedMws) {
+        geojsonLayer = createMwsBoundaryLayer([selectedMws]);
+        geojsonLayer.addTo(map);
+        if (geojsonLayer.getBounds && geojsonLayer.getBounds().isValid()) {
+            map.fitBounds(geojsonLayer.getBounds());
+        }
+    } else if (originalData && Array.isArray(originalData.features)) {
+        geojsonLayer = createGeoJSONLayer(originalData.features, {
+            color: "#FF00FF",
+            weight: 1,
+            fillOpacity: 0.04
+        });
+        geojsonLayer.addTo(map);
+        if (geojsonLayer.getBounds && geojsonLayer.getBounds().isValid()) {
+            map.fitBounds(geojsonLayer.getBounds());
+        }
+    }
+
+    refreshGoButtonState();
+}
+
+function findSelectedGndSuggestion(value) {
+    if (!value) return null;
+    const normalizedValue = normalizeSearchText(value);
+    const matches = currentGndSearchSuggestions.filter(item => normalizeSearchText(item.value) === normalizedValue);
+    return matches.length === 1 ? matches[0] : null;
+}
+
+function updateGndClearButtonState() {
+    const clearButton = document.getElementById('clearGndSearchBtn');
+    if (!clearButton) return;
+    if (selectedGndMatch) {
+        clearButton.style.display = 'inline-flex';
+        clearButton.textContent = 'Clear';
+        clearButton.title = 'Clear selected GN';
+        clearButton.setAttribute('aria-label', 'Clear selected GN');
+    } else {
+        clearButton.style.display = 'none';
+    }
+}
+
 function buildMwsSearchOptions(features) {
     const datalist = document.getElementById('mwsSearchOptions');
     if (!datalist) return;
@@ -266,6 +331,8 @@ async function updateGndSearchSuggestions(query) {
     const normalizedQuery = normalizeSearchText(query);
     const selectedMwsValue = (document.getElementById('selectMWSID') || {}).value || '';
     if (!normalizedQuery.length) {
+        currentGndSearchSuggestions = [];
+        selectedGndSuggestion = null;
         buildMwsSearchOptions(originalData && Array.isArray(originalData.features) ? originalData.features : []);
         return;
     }
@@ -274,6 +341,7 @@ async function updateGndSearchSuggestions(query) {
     const seen = new Set();
     const options = [];
 
+    currentGndSearchSuggestions = [];
     const settled = await Promise.allSettled(candidateMwsFeatures.map(async mwsFeature => {
         const mwsProps = mwsFeature.properties || {};
         const data = await fetchGndGeojsonForMws(mwsProps.MWS_ID);
@@ -288,26 +356,34 @@ async function updateGndSearchSuggestions(query) {
             if (seen.has(key)) return;
             seen.add(key);
 
-            options.push({
+            const suggestion = {
                 value: gnName,
-                label: [mwsProps.MWS_ID, mwsProps.MainDSD, mwsProps.District].filter(Boolean).join(' | ')
-            });
+                label: [mwsProps.MWS_ID, mwsProps.MainDSD, mwsProps.District].filter(Boolean).join(' | '),
+                match: { mwsFeature, gndFeature, score: 0 }
+            };
+            options.push(suggestion);
         });
     }));
 
-    if (!settled.some(result => result.status === 'fulfilled') || !options.length) return;
+    if (!settled.some(result => result.status === 'fulfilled') || !options.length) {
+        currentGndSearchSuggestions = [];
+        selectedGndSuggestion = null;
+        return;
+    }
 
     datalist.innerHTML = '';
-    options
+    currentGndSearchSuggestions = options
         .sort((a, b) => a.value.localeCompare(b.value, undefined, { numeric: true, sensitivity: 'base' }))
-        .slice(0, 80)
-        .forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.value;
-            option.label = item.label;
-            datalist.appendChild(option);
-        });
+        .slice(0, 80);
+
+    currentGndSearchSuggestions.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.value;
+        option.label = item.label;
+        datalist.appendChild(option);
+    });
 }
+
 
 function scheduleGndSearchSuggestions(query) {
     if (gndSuggestionTimer) {
@@ -397,8 +473,17 @@ function showGndSearchMatchedFeatures(matches, mwsFeatures = []) {
                     className: 'gn-search-label'
                 });
             }
+            layer.on('click', function () {
+                selectedGndMatch = match;
+                updateGndClearButtonState();
+            });
         }
     });
+
+    if (matches.length === 1) {
+        selectedGndMatch = matches[0];
+        updateGndClearButtonState();
+    }
 
     if (mwsFeatures.length) {
         geojsonLayer = L.layerGroup([createMwsBoundaryLayer(mwsFeatures), gndLayer]).addTo(map);
@@ -478,7 +563,9 @@ function selectGndSearchMatch(match) {
     populateSelectMWSIDDropdown(dsdFeatures.length ? dsdFeatures : districtFeatures);
 
     setSelectValueWithOption(mwsSelect, props.MWS_ID);
+    selectedGndMatch = match;
     showGndSearchMatchedFeatures([match]);
+    updateGndClearButtonState();
     refreshGoButtonState();
 }
 
@@ -501,6 +588,11 @@ async function handleMwsSearch() {
     }
 
     try {
+        if (selectedGndSuggestion && normalizeSearchText(selectedGndSuggestion.value) === normalizeSearchText(query)) {
+            selectGndSearchMatch(selectedGndSuggestion.match);
+            return;
+        }
+
         const gndMatches = await findGndSearchMatches(query, searchScope);
         if (gndMatches.length) {
             const topScore = gndMatches[0].score;
@@ -554,10 +646,18 @@ function setupMwsSearch(features) {
     buildMwsSearchOptions(features);
     const input = document.getElementById('mwsSearchInput');
     const button = document.getElementById('mwsSearchBtn');
+    const clearButton = document.getElementById('clearGndSearchBtn');
     if (button) button.addEventListener('click', handleMwsSearch);
+    if (clearButton) clearButton.addEventListener('click', clearGndSearchSelection);
     if (input) {
         input.addEventListener('input', function () {
+            selectedGndMatch = null;
+            selectedGndSuggestion = findSelectedGndSuggestion(this.value);
+            updateGndClearButtonState();
             scheduleGndSearchSuggestions(input.value);
+        });
+        input.addEventListener('change', function () {
+            selectedGndSuggestion = findSelectedGndSuggestion(this.value);
         });
         input.addEventListener('keydown', function (event) {
             if (event.key === 'Enter') {
