@@ -1234,11 +1234,12 @@
 	-->
 
             <script>
-                const map = L.map('map').setView([7.8731, 80.7718], 8); // Centered on Sri Lanka
+                // Make map global so measure.js and other scripts can access it
+                window.map = L.map('map').setView([7.8731, 80.7718], 8); // Centered on Sri Lanka
                 window.addEventListener('resize', () => {
-                    setTimeout(() => map.invalidateSize(), 50);
+                    setTimeout(() => window.map.invalidateSize(), 50);
                 });
-                setTimeout(() => map.invalidateSize(), 250);
+                setTimeout(() => window.map.invalidateSize(), 250);
                 let waterQualityLayer = null; // holds current water-quality GeoJSON layer
                 let cachedClimateStationMws = '';
                 let cachedClimateStationUrls = {};
@@ -2856,6 +2857,10 @@
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <!-- Include Turf.js for area calculation -->
             <script src="https://cdnjs.cloudflare.com/ajax/libs/turf/6.5.0/turf.min.js"></script>
+            <!-- Leaflet Draw library for measurement tool -->
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet-draw/1.0.4/leaflet.draw.css" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-draw/1.0.4/leaflet.draw.js"></script>
+            <script src="measure.js"></script>
 
             <script src="paichart13.js"></script>
             <script src="paichart_gnd13.js"></script>
