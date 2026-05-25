@@ -265,7 +265,7 @@ async function updateGndSearchSuggestions(query) {
 
     const normalizedQuery = normalizeSearchText(query);
     const selectedMwsValue = (document.getElementById('selectMWSID') || {}).value || '';
-    if (normalizedQuery.length < 2 && !selectedMwsValue) {
+    if (!normalizedQuery.length) {
         buildMwsSearchOptions(originalData && Array.isArray(originalData.features) ? originalData.features : []);
         return;
     }
@@ -282,7 +282,7 @@ async function updateGndSearchSuggestions(query) {
         gndFeatures.forEach(gndFeature => {
             const gnName = String(getGndDisplayName(gndFeature) || '').trim();
             if (!gnName) return;
-            if (normalizedQuery.length >= 2 && !normalizeSearchText(gnName).includes(normalizedQuery)) return;
+            if (!normalizeSearchText(gnName).startsWith(normalizedQuery)) return;
 
             const key = `${normalizeSearchText(gnName)}|${mwsProps.MWS_ID || ''}`;
             if (seen.has(key)) return;
