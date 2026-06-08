@@ -80,6 +80,55 @@ function getBoundaryPopupHtml(properties) {
     ].join('<br>');
 }
 
+function dropdownPointInRing(point, ring) {
+    let inside = false;
+    const x = point.lng;
+    const y = point.lat;
+
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0];
+        const yi = ring[i][1];
+        const xj = ring[j][0];
+        const yj = ring[j][1];
+        const intersects = ((yi > y) !== (yj > y)) &&
+            (x < ((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON) + xi);
+        if (intersects) inside = !inside;
+    }
+
+    return inside;
+}
+
+function dropdownPointInPolygon(point, polygonCoordinates) {
+    if (!Array.isArray(polygonCoordinates) || !polygonCoordinates.length) return false;
+    if (!dropdownPointInRing(point, polygonCoordinates[0])) return false;
+
+    for (let i = 1; i < polygonCoordinates.length; i++) {
+        if (dropdownPointInRing(point, polygonCoordinates[i])) return false;
+    }
+
+    return true;
+}
+
+function dropdownPointInGeometry(point, geometry) {
+    if (!point || !geometry || !Array.isArray(geometry.coordinates)) return false;
+    if (geometry.type === 'Polygon') {
+        return dropdownPointInPolygon(point, geometry.coordinates);
+    }
+    if (geometry.type === 'MultiPolygon') {
+        return geometry.coordinates.some(polygonCoordinates =>
+            dropdownPointInPolygon(point, polygonCoordinates)
+        );
+    }
+    return false;
+}
+
+function findMwsFeatureAtLatLng(latlng) {
+    const features = originalData && Array.isArray(originalData.features) ? originalData.features : [];
+    return features.find(feature => dropdownPointInGeometry(latlng, feature && feature.geometry)) || null;
+}
+
+window.findMwsFeatureAtLatLng = findMwsFeatureAtLatLng;
+
 function ensureMwsPopupLayer(features) {
     if (mwsPopupLayer) {
         map.removeLayer(mwsPopupLayer);
@@ -93,6 +142,7 @@ function ensureMwsPopupLayer(features) {
             fillOpacity: 0.01
         },
         pane: map.getPane('pinkLayerPane') ? 'pinkLayerPane' : undefined,
+        interactive: false,
         onEachFeature: function (feature, layer) {
             layer.bindPopup(getBoundaryPopupHtml(feature.properties));
         }
@@ -676,6 +726,7 @@ function populateDropdowns() {
         .then(response => response.json())
         .then(data => {
             originalData = data; // Store the original GeoJSON data
+            window.originalMwsBoundaryData = data;
             setupMwsSearch(data.features || []);
             ensureMwsPopupLayer(data.features || []);
             if (!geojsonLayer && Array.isArray(data.features)) {

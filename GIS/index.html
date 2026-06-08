@@ -143,6 +143,13 @@
             overflow: hidden;
         }
 
+        #map,
+        #map .leaflet-interactive,
+        #map .leaflet-grab,
+        #map .leaflet-dragging .leaflet-grab {
+            cursor: pointer;
+        }
+
         .leaflet-top.leaflet-left {
             top: 25px;
         }
@@ -310,7 +317,9 @@
             display: none !important;
             min-width: 250px;
             margin-right: auto;
-            white-space: nowrap;
+            max-width: 100%;
+            white-space: normal;
+            overflow-wrap: anywhere;
             font-weight: 500;
             z-index: 100;
         }
@@ -2573,15 +2582,66 @@
                     event.target.classList.add('active');
                 }
 
-                // Show coordinates in the bottom bar when the user clicks on the map.
-                function showClickCoordinates(latlng) {
+                function getClickedBoundaryProperties(latlng) {
+                    if (!latlng || typeof window.findMwsFeatureAtLatLng !== 'function') return null;
+                    const matchedFeature = window.findMwsFeatureAtLatLng(latlng);
+                    return matchedFeature && matchedFeature.properties ? matchedFeature.properties : null;
+                }
+
+                function escapePopupText(value) {
+                    return String(value ?? 'N/A')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                }
+
+                function showBoundaryPopup(latlng, props) {
+                    const mwsId = props.MWS_ID || props.MWD_ID || props.MWSID || 'N/A';
+                    const dsd = props.DSD || props.MainDSD || props.DS_Divisio || 'N/A';
+                    const district = props.District || props.DISTRICT || 'N/A';
+                    const popupHtml = [
+                        `<strong>MWS_ID:</strong> ${escapePopupText(mwsId)}`,
+                        `<strong>District:</strong> ${escapePopupText(district)}`,
+                        `<strong>DSD:</strong> ${escapePopupText(dsd)}`
+                    ].join('<br>');
+
+                    L.popup()
+                        .setLatLng(latlng)
+                        .setContent(popupHtml)
+                        .openOn(map);
+                }
+
+                function normalizeMwsIdForPopup(value) {
+                    return String(value || '').replace(/-/g, '_').trim().toLowerCase();
+                }
+
+                function shouldShowBoundaryPopup(props) {
+                    if (!props) return false;
+                    const selectMWSID = document.getElementById('selectMWSID');
+                    const selectedMwsId = selectMWSID ? normalizeMwsIdForPopup(selectMWSID.value) : '';
+                    if (!selectedMwsId) return true;
+
+                    const clickedMwsId = normalizeMwsIdForPopup(props.MWS_ID || props.MWD_ID || props.MWSID);
+                    return clickedMwsId !== selectedMwsId;
+                }
+
+                function updateCoordinateBar(latlng) {
                     if (!latlng) return;
                     const infoPopup = document.getElementById('infoPopupPanel');
                     if (!infoPopup) return;
                     infoPopup.style.display = 'block';
                     infoPopup.style.visibility = 'visible';
-                    infoPopup.innerHTML = ` Coordinates:N ${latlng.lat.toFixed(6)},E ${latlng.lng.toFixed(6)}`;
-                    console.log('Coordinates displayed:', latlng.lat, latlng.lng);
+                    infoPopup.innerHTML = `Coordinates: ${latlng.lat.toFixed(6)}, ${latlng.lng.toFixed(6)}`;
+                }
+
+                // Show boundary details as a popup when the user clicks inside an MWS boundary.
+                function showClickCoordinates(latlng) {
+                    if (!latlng) return;
+                    updateCoordinateBar(latlng);
+                    const props = getClickedBoundaryProperties(latlng);
+                    if (shouldShowBoundaryPopup(props)) showBoundaryPopup(latlng, props);
                 }
 
                 window.showClickCoordinates = showClickCoordinates;
@@ -2591,7 +2651,6 @@
                         return;
                     }
                     if (!e || !e.latlng) return;
-                    console.log('Map clicked at:', e.latlng);
                     showClickCoordinates(e.latlng);
                 });
 
