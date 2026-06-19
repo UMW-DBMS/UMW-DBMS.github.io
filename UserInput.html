@@ -632,6 +632,28 @@
       return head.concat(tail).join('\n');
     }
 
+        function cleanMojibakeText(value) {
+      if (typeof value !== 'string') return value;
+      return value
+        .replace(/\u00C3\u0082\u00C2\u00A0/g, ' ')
+        .replace(/\u00C3\u0082/g, '')
+        .replace(/\u00C2\u00A0/g, ' ')
+        .replace(/\u00A0/g, ' ')
+        .replace(/[ \t]{2,}/g, ' ')
+        .trim();
+    }
+
+    function cleanObjectStrings(value) {
+      if (typeof value === 'string') return cleanMojibakeText(value);
+      if (Array.isArray(value)) return value.map(cleanObjectStrings);
+      if (value && typeof value === 'object') {
+        Object.keys(value).forEach((key) => {
+          value[key] = cleanObjectStrings(value[key]);
+        });
+      }
+      return value;
+    }
+
     async function getFileSha(path, token) {
       const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
         headers: { 'Authorization': `token ${token}` }
@@ -677,6 +699,8 @@
     }
 
     async function updateGeojsonOnGitHub(payload, token) {
+
+      payload = cleanObjectStrings(payload);
       const folder = normalizeMwsFolder(payload.mws_id);
       if (!folder) throw new Error('Missing MWS_ID');
       const path = `${GEOJSON_BASE}/${folder}/${payload.proposal_type}.geojson`;
@@ -690,8 +714,21 @@
       if (getResp.ok) {
         const fileData = await getResp.json();
         sha = fileData.sha || null;
-        const decoded = atob((fileData.content || '').replace(/\n/g, ''));
-        geojson = JSON.parse(decoded);
+        const encoded = (fileData.content || '').replace(/\s/g, '');
+        const decoded = encoded ? atob(encoded) : '';
+        if (decoded.trim()) {
+          try {
+            geojson = JSON.parse(decoded);
+          } catch (error) {
+            throw new Error(`Existing GeoJSON file is not valid JSON: ${path}. ${error.message}`);
+          }
+        } else {
+          geojson = {
+            type: 'FeatureCollection',
+            name: payload.proposal_type,
+            features: []
+          };
+        }
       } else if (getResp.status === 404) {
         geojson = {
           type: 'FeatureCollection',
@@ -847,6 +884,8 @@
       };
       geojson.features.push(feature);
 
+      geojson = cleanObjectStrings(geojson);
+
       const content = toBase64Utf8(formatGeojsonOneFeaturePerLine(geojson));
       const body = {
         message: `Append ${payload.proposal_type} feature`,
@@ -957,6 +996,28 @@
         return head.concat(tail).join('\n');
       }
 
+          function cleanMojibakeText(value) {
+      if (typeof value !== 'string') return value;
+      return value
+        .replace(/\u00C3\u0082\u00C2\u00A0/g, ' ')
+        .replace(/\u00C3\u0082/g, '')
+        .replace(/\u00C2\u00A0/g, ' ')
+        .replace(/\u00A0/g, ' ')
+        .replace(/[ \t]{2,}/g, ' ')
+        .trim();
+    }
+
+    function cleanObjectStrings(value) {
+      if (typeof value === 'string') return cleanMojibakeText(value);
+      if (Array.isArray(value)) return value.map(cleanObjectStrings);
+      if (value && typeof value === 'object') {
+        Object.keys(value).forEach((key) => {
+          value[key] = cleanObjectStrings(value[key]);
+        });
+      }
+      return value;
+    }
+
       async function getFileSha(path, token) {
         const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${path}`, {
           headers: { 'Authorization': `token ${token}` }
@@ -1002,6 +1063,8 @@
       }
 
       async function updateGeojsonOnGitHub(payload, token) {
+
+        payload = cleanObjectStrings(payload);
         const folder = normalizeMwsFolder(payload.mws_id);
         if (!folder) throw new Error('Missing MWS_ID');
         const path = `${GEOJSON_BASE}/${folder}/${payload.proposal_type}.geojson`;
@@ -1015,8 +1078,21 @@
         if (getResp.ok) {
           const fileData = await getResp.json();
           sha = fileData.sha || null;
-          const decoded = atob((fileData.content || '').replace(/\n/g, ''));
-          geojson = JSON.parse(decoded);
+          const encoded = (fileData.content || '').replace(/\s/g, '');
+          const decoded = encoded ? atob(encoded) : '';
+          if (decoded.trim()) {
+            try {
+              geojson = JSON.parse(decoded);
+            } catch (error) {
+              throw new Error(`Existing GeoJSON file is not valid JSON: ${path}. ${error.message}`);
+            }
+          } else {
+            geojson = {
+              type: 'FeatureCollection',
+              name: payload.proposal_type,
+              features: []
+            };
+          }
         } else if (getResp.status === 404) {
           // Create a new GeoJSON file when it does not exist
           geojson = {
@@ -1172,6 +1248,8 @@
           geometry: { type: 'Point', coordinates: [payload.e, payload.n] }
         };
         geojson.features.push(feature);
+
+        geojson = cleanObjectStrings(geojson);
 
         const content = toBase64Utf8(formatGeojsonOneFeaturePerLine(geojson));
         const body = {
