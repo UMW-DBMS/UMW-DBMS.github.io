@@ -782,6 +782,7 @@
         };
       } else if (payload.proposal_type === 'MT') {
         properties = {
+          'Name_of_Tank': payload.name_of_tank || '',
           'Name_of_Custodian': payload.name_of_custodian || '',
           'N': payload.n,
           'E': payload.e,
@@ -1147,6 +1148,7 @@
           };
         } else if (payload.proposal_type === 'MT') {
           properties = {
+            'Name_of_Tank': payload.name_of_tank || '',
             'Name_of_Custodian': payload.name_of_custodian || '',
             'N': payload.n,
             'E': payload.e,
@@ -1558,6 +1560,7 @@
         const payload = {
           mws_id: selectMWSID.value,
           proposal_type: 'MT',
+          name_of_tank: document.getElementById('mtTank').value || '',
           name_of_custodian: document.getElementById('mtCustodian').value || '',
           n: nVal,
           e: eVal,
