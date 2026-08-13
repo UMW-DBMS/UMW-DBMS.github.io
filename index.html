@@ -1427,7 +1427,9 @@
                         panel.innerHTML = `
                             <strong>Station:</strong> ${stationName}<br><br>
                             <div id="paramButtons"></div>
-                            <canvas id="csvChart" style="width:800px; height:100px;"></canvas>
+                            <div style="position:relative;width:100%;height:320px;">
+                                <canvas id="csvChart" style="width:100%; height:100%;"></canvas>
+                            </div>
                             <br>
                             <button id="downloadCsvChartBtn" class="button" type="button">Download Chart</button>
                             <br><br>
@@ -1449,6 +1451,9 @@
                             btn.onclick = () => drawChart(param);
                             btnContainer.appendChild(btn);
                         });
+                        if (params.length) {
+                            drawChart(params[0]);
+                        }
 
                         // Draw chart for selected parameter
                         function drawChart(param) {
@@ -1493,6 +1498,7 @@
                                 },
                                 options: {
                                     responsive: true,
+                                    maintainAspectRatio: false,
                                     plugins: {
                                         title: {
                                             display: true,
@@ -1508,12 +1514,24 @@
                                     }
                                 }
                             });
+                            if (window.csvChartInstance && typeof window.csvChartInstance.resize === 'function') {
+                                window.csvChartInstance.resize();
+                            }
                         }
 
                         return true;
                     } catch (err) {
-                        if (!suppressError) alert(`CSV file not found for station: ${stationName}`);
-                        console.error(err);
+                        const panel = document.getElementById('waterQualityStationPanel');
+                        if (panel) {
+                            setStationPanelSize(panel, true);
+                            panel.innerHTML = `
+                                <strong>Station:</strong> ${stationName || 'Unknown'}<br><br>
+                                <div style="font-weight:bold;color:#aa0000;">DATA IS NOT AVAILABLE</div>
+                                <br>
+                                <button class="hide-btn" onclick="hidePanel('waterQualityStationPanel')">Close</button>
+                            `;
+                        }
+                        if (!suppressError) console.warn(`CSV file not found for station: ${stationName}`, err);
                         return false;
                     }
                 }

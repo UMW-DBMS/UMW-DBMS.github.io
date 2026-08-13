@@ -11,7 +11,7 @@ var areaTotals22D = {};
 var chartInstance22 = null;
 
 function getPopulationValue(properties) {
-    var rawValue = properties.Total_Pop ?? properties.TotalPop ?? properties.Total ?? properties.Tot_Pop;
+    var rawValue = properties.Total_pop ?? properties.Total_Pop ?? properties.TotalPop ?? properties.Total ?? properties.Tot_Pop;
     if (typeof rawValue === 'string') {
         rawValue = rawValue.replace(/,/g, '').trim();
     }
