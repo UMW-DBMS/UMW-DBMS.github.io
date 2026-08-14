@@ -2426,10 +2426,24 @@ function updateInfoPanel(properties, layerName, featureLayer) {
 
     // Loop through properties and display each attribute
     for (const [key, value] of Object.entries(properties)) {
-        if (key === 'photopath' && value && String(value).trim().toLowerCase() !== 'not_available') {
-            // Create an image element if the key is 'photopath'
+        const photoPath = key === 'photopath' && value ? String(value).trim() : '';
+        if (photoPath && photoPath.toLowerCase() !== 'not_available') {
+            // If the referenced .jpg file is not found, retry its .JPG counterpart (and vice versa).
             const imageItem = document.createElement('li');
-            imageItem.innerHTML = `<strong style="color: black;">${key}:</strong><br><img src="${value}" alt="Photo" style="max-width: 100%; height: auto;">`;
+            imageItem.innerHTML = `<strong style="color: black;">${key}:</strong><br>`;
+            const image = document.createElement('img');
+            image.alt = 'Photo';
+            image.style.cssText = 'max-width: 100%; height: auto;';
+            image.addEventListener('error', function () {
+                const fallbackPhotoPath = photoPath.replace(/\.jpg(?=([?#].*)?$)/i, (extension) =>
+                    extension === '.jpg' ? '.JPG' : '.jpg'
+                );
+                if (fallbackPhotoPath !== photoPath) {
+                    image.src = fallbackPhotoPath;
+                }
+            }, { once: true });
+            image.src = photoPath;
+            imageItem.appendChild(image);
             list.appendChild(imageItem);
         } else {
             // For other properties, add them as text
