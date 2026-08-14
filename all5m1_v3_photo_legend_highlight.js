@@ -2426,7 +2426,7 @@ function updateInfoPanel(properties, layerName, featureLayer) {
 
     // Loop through properties and display each attribute
     for (const [key, value] of Object.entries(properties)) {
-        if (key === 'photopath' && value) {
+        if (key === 'photopath' && value && String(value).trim().toLowerCase() !== 'not_available') {
             // Create an image element if the key is 'photopath'
             const imageItem = document.createElement('li');
             imageItem.innerHTML = `<strong style="color: black;">${key}:</strong><br><img src="${value}" alt="Photo" style="max-width: 100%; height: auto;">`;
