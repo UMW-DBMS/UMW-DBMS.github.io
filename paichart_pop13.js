@@ -93,14 +93,16 @@ function renderPieChart2(ids, areas, totalArea, showChart = true) {
     // Get the chart context
     var ctx = document.getElementById('areaPieChart').getContext('2d');
 
-    if (window.Chart && typeof Chart.getChart === 'function') {
-        const existingChart = Chart.getChart('areaPieChart');
-        if (existingChart) existingChart.destroy();
-    }
+    if (showChart) {
+        if (window.Chart && typeof Chart.getChart === 'function') {
+            const existingChart = Chart.getChart('areaPieChart');
+            if (existingChart) existingChart.destroy();
+        }
 
-    // Destroy the old chart instance if it exists
-    if (chartInstance22 !== null) {
-        chartInstance22.destroy();
+        // Destroy the old chart instance if it exists
+        if (chartInstance22 !== null) {
+            chartInstance22.destroy();
+        }
     }
 
     if (showChart) {
@@ -119,12 +121,10 @@ function renderPieChart2(ids, areas, totalArea, showChart = true) {
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { display: false },
                     title: {
                         display: true,
-                        text: 'Polygon Areas'
+                        text: 'Population Density (per sqkm)'
                     },
                     tooltip: {
                         callbacks: {
@@ -138,6 +138,7 @@ function renderPieChart2(ids, areas, totalArea, showChart = true) {
                 }
             }
         });
+        renderStatisticsLegend(ids.map(id => ({ label: id, color: getDemographyColor(id) })));
     }
 }
 

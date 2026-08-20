@@ -1,5 +1,5 @@
 // Define a color map for unique classes
-var colorMap = {
+var adminColorMap = {
     "Forest": "#006400",
     "Forest Plantation": "#228B22",
     "AG": "#3CB371",
@@ -53,12 +53,12 @@ function updateData3(selectMWSID) {
                     var className = feature.properties.GND_N;
 					var fillColor;
         // Check if the GND value is already in the colorMap
-        if (colorMap[className]) {
-            fillColor = colorMap[className];
+        if (adminColorMap[className]) {
+            fillColor = adminColorMap[className];
         } else {
             // If not, generate a random color and add it to the colorMap
             fillColor = generateRandomColor();
-            colorMap[className] = fillColor; // Cache the new color
+            adminColorMap[className] = fillColor; // Cache the new color
         }
 
         return {
@@ -100,14 +100,16 @@ function renderPieChart3(ids, areas, totalArea, showChart = true) {
     // Get the chart context
     var ctx = document.getElementById('areaPieChart').getContext('2d');
 
-    if (window.Chart && typeof Chart.getChart === 'function') {
-        const existingChart = Chart.getChart('areaPieChart');
-        if (existingChart) existingChart.destroy();
-    }
+    if (showChart) {
+        if (window.Chart && typeof Chart.getChart === 'function') {
+            const existingChart = Chart.getChart('areaPieChart');
+            if (existingChart) existingChart.destroy();
+        }
 
-    // Destroy the old chart instance if it exists
-    if (chartInstance21 !== null) {
-        chartInstance21.destroy();
+        // Destroy the old chart instance if it exists
+        if (chartInstance21 !== null) {
+            chartInstance21.destroy();
+        }
     }
 
     if (showChart) {
@@ -119,19 +121,17 @@ function renderPieChart3(ids, areas, totalArea, showChart = true) {
                 datasets: [{
                     label: 'Polygon Areas',
                     data: areas,
-                    backgroundColor: ids.map(id => colorMap[id] || '#808080'),
+                    backgroundColor: ids.map(id => adminColorMap[id] || '#808080'),
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { display: false },
                     title: {
                         display: true,
-                        text: 'Polygon Areas'
+                        text: 'GND Area (Ha)'
                     },
                     tooltip: {
                         callbacks: {
@@ -145,6 +145,7 @@ function renderPieChart3(ids, areas, totalArea, showChart = true) {
                 }
             }
         });
+        renderStatisticsLegend(ids.map(id => ({ label: id, color: adminColorMap[id] || '#808080' })));
     }
 }
 

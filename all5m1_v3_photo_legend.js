@@ -1304,6 +1304,136 @@ function removeLayerAndLegend(layerName) {
 }
 
 
+function normalizePhotoUrl(value) {
+    if (!value || typeof value !== 'string') return '';
+    let url = value.trim();
+    if (!url) return '';
+    if (/^https?:\/\/(github\.com|www\.github\.com)\//i.test(url) && /\/blob\//i.test(url)) {
+        url = url.replace(/^https?:\/\/github\.com\//i, 'https://raw.githubusercontent.com/').replace(/\/blob\//i, '/');
+    }
+    if (url.includes('raw.githubusercontent.com')) return url;
+    if (/^https?:\/\/github\.com\//i.test(url)) {
+        url = url.replace(/^https?:\/\/github\.com\//i, 'https://raw.githubusercontent.com/');
+        url = url.replace(/\/blob\//i, '/');
+    }
+    return url;
+}
+
+function getPropertyValue(properties, keys) {
+    if (!properties || typeof properties !== 'object') return '';
+    for (const key of keys) {
+        const value = properties[key];
+        if (value !== undefined && value !== null && String(value).trim() !== '') {
+            return value;
+        }
+    }
+    return '';
+}
+
+function getFeatureNumber(properties) {
+    const value = getPropertyValue(properties, ['No.', 'No_', 'No', 'NO', 'Feature No', 'feature_no']);
+    return value !== '' ? String(value).trim() : '';
+}
+
+function getFeatureGndName(properties) {
+    const value = getPropertyValue(properties, ['GND Name', 'GND_Name', 'GND', 'Name', 'Village', 'Village Name', 'Location']);
+    return value !== '' ? String(value).trim() : '';
+}
+
+function getFeatureMwsCode(properties) {
+    const value = getPropertyValue(properties, ['MWS_ID', 'MWS ID', 'MWS', 'mws_id']);
+    let code = value !== '' ? String(value).trim() : '';
+    if (!code) {
+        const selectElement = document.getElementById('selectMWSID');
+        code = selectElement ? String(selectElement.value || '').trim() : '';
+    }
+    return code.replace(/-/g, '_');
+}
+
+function buildPhotoCandidates(properties) {
+    const candidates = [];
+    const directValue = [
+        properties && (properties.photopath || properties.photo || properties.Photo || properties['Photo URL'] || properties['Photo URL '] || properties['photoPath'] || properties['Photo Path'] || properties['Photo path']),
+        getPropertyValue(properties, ['photopath', 'photo', 'Photo', 'Photo URL', 'photoPath', 'Photo Path'])
+    ].find(v => typeof v === 'string' && v.trim());
+
+    if (directValue) {
+        const directUrl = normalizePhotoUrl(directValue);
+        if (directUrl) candidates.push(directUrl);
+    }
+
+    const mwsCode = getFeatureMwsCode(properties);
+    const no = getFeatureNumber(properties).replace(/[^0-9]/g, '');
+    const gndName = getFeatureGndName(properties)
+        .replace(/[^a-zA-Z0-9\s_-]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    if (mwsCode) {
+        const folderCandidates = [];
+        if (gndName) folderCandidates.push(gndName);
+        if (gndName && !/\bMWS\b/i.test(gndName)) folderCandidates.push(gndName);
+        if (folderCandidates.length) {
+            folderCandidates.forEach(folder => {
+                const safeFolder = folder.replace(/\s+/g, '_').replace(/_+/g, '_');
+                const baseFolder = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/200_photo/MWS_${mwsCode}/${safeFolder}/`;
+                const numbers = [];
+                if (no) {
+                    numbers.push(no, `w${no}`, `W${no}`, `w${no}.1`, `W${no}.1`, `w${no}_1`, `W${no}_1`);
+                    numbers.push(String(no).replace(/^0+/, ''));
+                }
+                const fileExts = ['jpg', 'jpeg', 'png'];
+                numbers.forEach(num => {
+                    fileExts.forEach(ext => {
+                        candidates.push(`${baseFolder}${num}.${ext}`);
+                    });
+                });
+            });
+        }
+    }
+
+    return [...new Set(candidates.filter(Boolean))];
+}
+
+function loadFeaturePhoto(photoItem, properties) {
+    const candidates = buildPhotoCandidates(properties);
+    if (!candidates.length) return;
+
+    const image = document.createElement('img');
+    image.alt = 'Photo';
+    image.style.maxWidth = '100%';
+    image.style.height = 'auto';
+    image.style.display = 'block';
+    image.style.marginTop = '6px';
+
+    let index = 0;
+    const tryNext = () => {
+        const url = candidates[index];
+        if (!url) {
+            image.remove();
+            const text = document.createElement('span');
+            text.style.color = '#666';
+            text.textContent = 'Photo not available';
+            photoItem.appendChild(text);
+            return;
+        }
+        const imgTest = new Image();
+        imgTest.onload = () => {
+            image.src = url;
+            image.setAttribute('src', url);
+            photoItem.appendChild(image);
+        };
+        imgTest.onerror = () => {
+            index += 1;
+            tryNext();
+        };
+        imgTest.src = url;
+    };
+
+    photoItem.appendChild(image);
+    tryNext();
+}
+
 // Function to update the attribute panel with properties of the clicked feature
 // Function to update the attribute panel with properties of the clicked feature
 function updateInfoPanel(properties, layerName) {
@@ -1318,19 +1448,27 @@ function updateInfoPanel(properties, layerName) {
     layerNameItem.innerHTML = `<strong style="color: black;">Layer:</strong> <span style="color: blue;">${layerName}</span>`;
     list.appendChild(layerNameItem);
 
+    const photoCandidates = buildPhotoCandidates(properties || {});
+    if (photoCandidates.length) {
+        const imageItem = document.createElement('li');
+        const label = document.createElement('strong');
+        label.style.color = 'black';
+        label.textContent = 'photopath:';
+        imageItem.appendChild(label);
+        imageItem.appendChild(document.createElement('br'));
+        loadFeaturePhoto(imageItem, properties || {});
+        list.appendChild(imageItem);
+    }
+
     // Loop through properties and display each attribute
-    for (const [key, value] of Object.entries(properties)) {
-        if (key === 'photopath' && value) {
-            // Create an image element if the key is 'photopath'
-            const imageItem = document.createElement('li');
-            imageItem.innerHTML = `<strong style="color: black;">${key}:</strong><br><img src="${value}" alt="Photo" style="max-width: 100%; height: auto;">`;
-            list.appendChild(imageItem);
-        } else {
-            // For other properties, add them as text
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `<strong style="color: black;">${key}:</strong> <span style="color: black;">${value}</span>`;
-            list.appendChild(listItem);
+    for (const [key, value] of Object.entries(properties || {})) {
+        if (['photopath', 'photo', 'Photo', 'Photo URL', 'photoPath', 'Photo Path', 'Photo path'].includes(key)) {
+            continue;
         }
+        // For other properties, add them as text
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<strong style="color: black;">${key}:</strong> <span style="color: black;">${value}</span>`;
+        list.appendChild(listItem);
     }
 
     attributePanel.appendChild(list); // Append list to the attribute panel

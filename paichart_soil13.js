@@ -1,5 +1,5 @@
 // Define a color map for unique classes
-var colorMap = {
+var soilColorMap = {
   "Forest": "#006400",
   "Forest Plantation": "#228B22",
   "AG": "#3CB371",
@@ -57,7 +57,7 @@ function updateData40(selectMWSID) {
             window.currentLayer = L.geoJSON(data, {
                 style: function(feature) {
                     var className = feature.properties.NAME;
-                    var fillColor = colorMap[className] || '#808080'; // Default to grey if class not found
+                    var fillColor = soilColorMap[className] || '#808080'; // Default to grey if class not found
                     return {
                         color: fillColor,
                         fillColor: fillColor,
@@ -97,14 +97,16 @@ function renderPieChart40(ids, areas, totalArea, showChart = true) {
     // Get the chart context
     var ctx = document.getElementById('areaPieChart').getContext('2d');
 
-    if (window.Chart && typeof Chart.getChart === 'function') {
-        const existingChart = Chart.getChart('areaPieChart');
-        if (existingChart) existingChart.destroy();
-    }
+    if (showChart) {
+        if (window.Chart && typeof Chart.getChart === 'function') {
+            const existingChart = Chart.getChart('areaPieChart');
+            if (existingChart) existingChart.destroy();
+        }
 
-    // Destroy the old chart instance if it exists
-    if (chartInstance40 !== null) {
-        chartInstance40.destroy();
+        // Destroy the old chart instance if it exists
+        if (chartInstance40 !== null) {
+            chartInstance40.destroy();
+        }
     }
 
     if (showChart) {
@@ -116,19 +118,17 @@ function renderPieChart40(ids, areas, totalArea, showChart = true) {
                 datasets: [{
                     label: 'Polygon Areas',
                     data: areas,
-                    backgroundColor: ids.map(id => colorMap[id] || '#808080'),
+                    backgroundColor: ids.map(id => soilColorMap[id] || '#808080'),
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { display: false },
                     title: {
                         display: true,
-                        text: 'Polygon Areas'
+                        text: 'Soil Type Area (Ha)'
                     },
                     tooltip: {
                         callbacks: {
@@ -142,6 +142,10 @@ function renderPieChart40(ids, areas, totalArea, showChart = true) {
                 }
             }
         });
+    }
+
+    if (showChart) {
+        renderStatisticsLegend(ids.map((id) => ({ label: id, color: soilColorMap[id] || '#808080' })));
     }
 }
 

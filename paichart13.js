@@ -1,5 +1,5 @@
 // Define a color map for unique classes
-var colorMap = {
+var lulcColorMap = {
     "Tea": { color: "rgb(163, 255, 115)", fillOpacity: 0.6, weight: 0.1 },              // Light green for Tea
     "Perennials": { color: "rgb(255, 211, 127)", fillOpacity: 0.6, weight: 0.1 },         // Light yellow for Perennials
     "Paddy": { color: "rgb(85, 255, 0)", fillOpacity: 0.6, weight: 0.1 },                // Bright green for Paddy
@@ -49,7 +49,7 @@ function updateData1(selectMWSID) {
             window.currentLayer = L.geoJSON(data, {
                 style: function(feature) {
                     var className = feature.properties.classLULC;
-                    var fillColor = colorMap[className] || '#808080'; // Default to grey if class not found
+                    var fillColor = (lulcColorMap[className] && lulcColorMap[className].color) || '#808080';
                     return {
                         color: fillColor,
                         fillColor: fillColor,
@@ -89,14 +89,16 @@ function renderPieChart1(ids, areas, totalArea, showChart = true) {
     // Get the chart context
     var ctx = document.getElementById('areaPieChart').getContext('2d');
 
-    if (window.Chart && typeof Chart.getChart === 'function') {
-        const existingChart = Chart.getChart('areaPieChart');
-        if (existingChart) existingChart.destroy();
-    }
+    if (showChart) {
+        if (window.Chart && typeof Chart.getChart === 'function') {
+            const existingChart = Chart.getChart('areaPieChart');
+            if (existingChart) existingChart.destroy();
+        }
 
-    // Destroy the old chart instance if it exists
-    if (chartInstance !== null) {
-        chartInstance.destroy();
+        // Destroy the old chart instance if it exists
+        if (chartInstance !== null) {
+            chartInstance.destroy();
+        }
     }
 
     if (showChart) {
@@ -108,19 +110,17 @@ function renderPieChart1(ids, areas, totalArea, showChart = true) {
                 datasets: [{
                     label: 'Polygon Areas',
                     data: areas,
-                    backgroundColor: ids.map(id => colorMap[id] || '#808080'),
+                    backgroundColor: ids.map(id => (lulcColorMap[id] && lulcColorMap[id].color) || '#808080'),
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { display: false },
                     title: {
                         display: true,
-                        text: 'Polygon Areas'
+                        text: 'Landuse Landcover Area (ha)'
                     },
                     tooltip: {
                         callbacks: {
@@ -134,6 +134,10 @@ function renderPieChart1(ids, areas, totalArea, showChart = true) {
                 }
             }
         });
+        renderStatisticsLegend(ids.map(id => ({
+            label: id,
+            color: (lulcColorMap[id] && lulcColorMap[id].color) || '#808080'
+        })));
     }
 }
 

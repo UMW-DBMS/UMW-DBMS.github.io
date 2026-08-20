@@ -1,5 +1,5 @@
 // Define a color map for unique classes
-var colorMap = {
+var hazardColorMap = {
   "Tea": "#A3FF73",              // Light green for Tea
   "Perennials": "#FFD37F",       // Light yellow for Perennials
   "Paddy": "#55FF00",            // Bright green for Paddy
@@ -51,41 +51,31 @@ function updateData50(selectMWSID) {
     var geojsonUrl = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/11_HZR/HZR/ED_11_HZR_MWS_${selectMWSID}.geojson`;	
 
     // Fetch the GeoJSON data from the constructed URL
-    fetch(geojsonUrl)
-        .then(response => response.json())
+    return fetch(geojsonUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Hazard layer request failed (${response.status})`);
+            }
+            return response.json();
+        })
         .then(data => {
             areaTotals50 = {}; // Reset the area totals
 
-            // Clear existing layers from the map if needed
-            if (window.currentLayer) {
-                map.removeLayer(window.currentLayer);
-            }
-
-            // Add new data to the map
-            window.currentLayer = L.geoJSON(data, {
-                style: function(feature) {
-                    var className = feature.properties.level;
-                    var fillColor = colorMap[className] || '#808080'; // Default to grey if class not found
-                    return {
-                        color: fillColor,
-                        fillColor: fillColor,
-                        fillOpacity: 0.6
-                    };
-                },
-                onEachFeature: function(feature, layer) {
-                    var className = feature.properties.level;
-                    var area = feature.properties.Shape_Area;
-                    //var Tarea = feature.features[0].properties.AREA;     
-                    // Aggregate area by class
-                    if (!areaTotals50[className]) {
-                        areaTotals50[className] = 0;
-                    }
-                    areaTotals50[className] += area;
-
-                    // Optionally add a popup with area info
-                    layer.bindPopup('<strong>Class:</strong> ' + className + '<br><strong>Area:</strong> ' + area + ' ha');
+            // Statistics only needs the feature attributes. The Base Layers
+            // workflow is responsible for displaying the hazard polygons.
+            (data.features || []).forEach(function (feature) {
+                var properties = feature.properties || {};
+                var className = properties.level || 'Unknown';
+                var area = Number(properties.Area_Ha);
+                if (!Number.isFinite(area)) {
+                    area = Number(properties.Shape_Area);
                 }
-            })//.addTo(map);
+                if (!Number.isFinite(area)) return;
+                if (!areaTotals50[className]) {
+                    areaTotals50[className] = 0;
+                }
+                areaTotals50[className] += area;
+            });
 
             // Calculate the total area of all polygons for percentage calculation
             var totalArea = Object.values(areaTotals50).reduce((a, b) => a + b, 0);
@@ -106,14 +96,16 @@ function renderPieChart50(ids, areas, totalArea, showChart = true) {
     // Get the chart context
     var ctx = document.getElementById('areaPieChart').getContext('2d');
 
-    if (window.Chart && typeof Chart.getChart === 'function') {
-        const existingChart = Chart.getChart('areaPieChart');
-        if (existingChart) existingChart.destroy();
-    }
+    if (showChart) {
+        if (window.Chart && typeof Chart.getChart === 'function') {
+            const existingChart = Chart.getChart('areaPieChart');
+            if (existingChart) existingChart.destroy();
+        }
 
-    // Destroy the old chart instance if it exists
-    if (chartInstance50 !== null) {
-        chartInstance50.destroy();
+        // Destroy the old chart instance if it exists
+        if (chartInstance50 !== null) {
+            chartInstance50.destroy();
+        }
     }
 
     if (showChart) {
@@ -125,19 +117,17 @@ function renderPieChart50(ids, areas, totalArea, showChart = true) {
                 datasets: [{
                     label: 'Polygon Areas',
                     data: areas,
-                    backgroundColor: ids.map(id => colorMap[id] || '#808080'),
+                    backgroundColor: ids.map(id => hazardColorMap[id] || '#808080'),
                     hoverOffset: 4
                 }]
             },
             options: {
                 responsive: true,
                 plugins: {
-                    legend: {
-                        position: 'top',
-                    },
+                    legend: { display: false },
                     title: {
                         display: true,
-                        text: 'Landslide Hazard'
+                        text: 'Landslide Hazard Area (Ha)'
                     },
                     tooltip: {
                         callbacks: {
@@ -148,9 +138,11 @@ function renderPieChart50(ids, areas, totalArea, showChart = true) {
                             }
                         }
                     }
-                }
+                },
+                animation: false
             }
         });
+        renderStatisticsLegend(ids.map(id => ({ label: id, color: hazardColorMap[id] || '#808080' })));
     }
 }
 
@@ -162,6 +154,21 @@ function setupToggleButton50() {
     toggleButton.addEventListener('click', function () {
         // Ensure the panel stays open
         sidePanel.classList.add('open');
+
+        // The MWS can already be selected when the statistics panel is opened.
+        // Load the hazard totals on demand in that case.
+        if (Object.keys(areaTotals50).length === 0) {
+            var selectedMwsID = document.getElementById('selectMWSID').value;
+            if (selectedMwsID) {
+                updateData50(selectedMwsID.replace(/-/g, '_')).then(function () {
+                    var ids = Object.keys(areaTotals50);
+                    var areas = Object.values(areaTotals50);
+                    var totalArea = areas.reduce((a, b) => a + b, 0);
+                    renderPieChart50(ids, areas, totalArea, true);
+                });
+                return;
+            }
+        }
 
         // Render the chart with the stored data
         var ids = Object.keys(areaTotals50);
