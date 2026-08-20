@@ -124,7 +124,7 @@ function renderPieChart2(ids, areas, totalArea, showChart = true) {
                     legend: { display: false },
                     title: {
                         display: true,
-                        text: 'Population Density (per sqkm)'
+                        text: 'Total Population'
                     },
                     tooltip: {
                         callbacks: {
