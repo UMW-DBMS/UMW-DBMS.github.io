@@ -1245,6 +1245,11 @@
                     primaryGroup.appendChild(primaryTitle);
 
                     const primarySources = ['CEA', 'MASL', 'NWSDB'];
+                    const primarySourceLabels = {
+                        CEA: 'Central Environment Authority (CEA)',
+                        MASL: 'Mahaweli Authority of Sri Lanka (MASL)',
+                        NWSDB: 'National Water Supply and Drainage Board'
+                    };
                     primarySources.forEach((source, index) => {
                         const row = document.createElement('div');
                         const checkbox = document.createElement('input');
@@ -1256,7 +1261,7 @@
 
                         const label = document.createElement('label');
                         label.htmlFor = checkbox.id;
-                        label.textContent = source;
+                        label.textContent = primarySourceLabels[source];
 
                         row.appendChild(checkbox);
                         row.appendChild(label);
@@ -1265,8 +1270,10 @@
                     waterPanel.appendChild(primaryGroup);
 
                     const otherGroup = document.createElement('div');
+                    otherGroup.style.marginTop = '10px';
                     const otherTitle = document.createElement('h3');
                     otherTitle.textContent = 'Other Stations';
+                    otherTitle.style.marginTop = '0';
                     otherGroup.appendChild(otherTitle);
 
                     const otherSources = ['Evaporation', 'Rainfall', 'Temperature'];

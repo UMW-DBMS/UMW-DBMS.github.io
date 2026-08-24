@@ -158,7 +158,7 @@
     #right-panel {
       width: 25%;
       flex: 0 0 25%;
-      min-width: 240px;
+      min-width: 500px;
       max-width: 55%;
       border-left: 1px solid #ccc;
       padding: 5px 5px 5px 14px;
@@ -317,33 +317,188 @@
       background-color: #f9f9f9;
       /* Light background for better readability */
     }
+
+    /* Catalog visual refresh */
+    :root {
+      --catalog-navy: #163d5a;
+      --catalog-blue: #1d6d91;
+      --catalog-green: #18735a;
+      --catalog-mist: #f3f8fb;
+      --catalog-line: #d7e3ea;
+      --catalog-text: #203444;
+    }
+
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--catalog-text);
+      background: #e8f1f5;
+    }
+
+    .catalog-header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      min-height: 62px;
+      padding: 10px 22px;
+      box-sizing: border-box;
+      background: linear-gradient(110deg, var(--catalog-navy), #145b72 58%, var(--catalog-green));
+      box-shadow: 0 3px 14px rgba(15, 52, 74, 0.24);
+    }
+
+    .catalog-selectors {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .catalog-header select {
+      min-width: 132px;
+      padding: 8px 29px 8px 10px;
+      color: #244454;
+      font: 600 13px "Segoe UI", Arial, sans-serif;
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      border-radius: 7px;
+      background: rgba(255, 255, 255, 0.96);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .catalog-header select:disabled { opacity: 0.65; cursor: not-allowed; }
+    .catalog-header select:focus { box-shadow: 0 0 0 3px rgba(170, 231, 218, 0.4); }
+
+    .catalog-title {
+      flex: 1;
+      color: white;
+      font-size: clamp(20px, 2vw, 27px);
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+    }
+
+    main { gap: 12px; padding: 12px; position: relative; background: var(--catalog-mist); }
+
+    #file-list,
+    #right-panel,
+    #preview-panel {
+      border: 1px solid var(--catalog-line);
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(31, 70, 91, 0.08);
+    }
+
+    #file-list {
+      box-sizing: border-box;
+      width: 290px;
+      min-width: 290px;
+      max-width: 360px;
+      padding: 14px;
+      color: #58707d;
+      background: #fff;
+      box-shadow: 0 4px 16px rgba(31, 70, 91, 0.08);
+    }
+
+    #file-list:hover { width: 290px; transform: none; }
+    #file-list ul { margin: 0; padding-left: 0; }
+    #file-list li { margin: 5px 0; }
+    #file-list .nested { margin: 6px 0 8px 11px; padding-left: 10px; border-left: 2px solid #d8e7ed; }
+
+    .collapsible { display: block; font-size: 14px; font-weight: 600; color: #2d5267; padding: 7px 9px; }
+    .collapsible:hover { color: #0d5e78; background: #edf7fa; }
+    .catalog-topic { color: var(--catalog-navy); font-size: 16px; font-weight: 700; background: #e9f4f7; }
+    .catalog-topic::before { content: "›"; display: inline-block; margin-right: 7px; color: var(--catalog-green); font-size: 21px; line-height: 10px; vertical-align: -1px; }
+    .catalog-category { font-size: 13px; color: #38708a; }
+
+    .layer-button {
+      width: 100%;
+      padding: 8px 10px;
+      color: #284759;
+      font: 600 13px "Segoe UI", Arial, sans-serif;
+      text-align: left;
+      border: 1px solid #d7e4e9;
+      border-radius: 7px;
+      background: #fff;
+      cursor: pointer;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+
+    .layer-button:hover { border-color: #68a9b9; background: #f0faf9; transform: translateX(2px); }
+
+    #preview-panel { width: auto; overflow: hidden; background: #fff; }
+    #map { background: #dfecef; }
+    #table-preview { padding: 14px; box-sizing: border-box; background: #fff; }
+
+    #right-panel {
+      box-sizing: border-box;
+      width: 300px;
+      flex: 0 0 300px;
+      padding: 16px;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    #right-panel.maximized {
+      position: fixed;
+      inset: 12px;
+      width: auto;
+      max-width: none;
+      height: calc(100vh - 24px);
+      flex: none;
+      z-index: 2000;
+      overflow-y: auto;
+    }
+
+    #right-panel-header { padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid var(--catalog-line); }
+    #right-panel-title { color: var(--catalog-navy); font-size: 17px; }
+    #right-panel-placeholder { padding: 12px; border-radius: 8px; color: #52707f; background: #f2f8fa; }
+    #download-button { position: absolute; top: auto; right: 28px; bottom: 26px; z-index: 1100; padding: 9px 14px; border-radius: 7px; background: var(--catalog-green); font: 600 13px "Segoe UI", Arial, sans-serif; box-shadow: 0 2px 5px rgba(16, 90, 67, .2); }
+    #download-button:hover { background: #105d49; }
+    .csv-table { font-size: 12px; }
+    .csv-table th, .csv-table td { border-color: #d4e0e6; padding: 7px; }
+    .csv-table th { color: var(--catalog-navy); background: #e9f3f7; }
+
+    @media (max-width: 900px) {
+      body { height: auto; min-height: 100vh; }
+      .catalog-header { align-items: stretch; flex-direction: column; gap: 8px; }
+      .catalog-title { text-align: left; }
+      main { flex-direction: column; overflow: visible; }
+      #file-list, #right-panel, #preview-panel { width: 100%; max-width: none; min-width: 0; flex-basis: auto; }
+      #file-list { max-height: 310px; }
+      #preview-panel { min-height: 420px; }
+    }
   </style>
 </head>
 
 <body>
 
-  <header
-    style="display: flex; justify-content: flex-start; align-items: center; padding: 10px; background-color: green; ">
+  <header class="catalog-header">
 
-    <div style="display: flex; align-items: flex-end;">
-      <input type="text" id="mwsIdInput" placeholder="Enter MWS ID" />
-      <button onclick="onEnterButtonClick()">Enter</button>
+    <div class="catalog-selectors">
+      <select id="catalogDistSelect" aria-label="Select District">
+        <option value="">--Select Dist--</option>
+      </select>
+      <select id="catalogDsdSelect" aria-label="Select DSD" disabled>
+        <option value="">--Select DSD--</option>
+      </select>
+      <select id="catalogMwsSelect" aria-label="Select MWS ID" disabled>
+        <option value="">--Select MWS_ID--</option>
+      </select>
     </div>
 
-    <div style="flex: 1; text-align: center;">
+    <div class="catalog-title">
       Mini Watershed Data Catalog
     </div>
   </header>
 
   <main>
-    <div id="file-list">Enter MWS_ID and click "Enter" to Load Files.</div>
+    <div id="file-list">Select District, DSD, and MWS ID to load files.</div>
     <div id="preview-panel">
       <div id="table-preview" style="display: none;"></div>
       <div id="map"></div>
       <img id="image-preview" src="" alt="PNG Preview" />
     </div>
     <div id="right-panel">
-      <div id="right-panel-header">
+      <div id="right-panel-header" title="Double-click to maximize or restore">
         <h3 id="right-panel-title">Details Panel</h3>
       </div>
       <div id="right-panel-content">
@@ -359,14 +514,158 @@
     // Global variables
     let csvUrls = [];
     let map;  // Declare the map object globally
+    let catalogBoundaryData = null;
+    let catalogLoadRequest = 0;
+
+    // Only these proposal layers are shown in the proposal section of the catalog.
+    // Keeping the display category here also makes the tree consistent when registry
+    // files use slightly different database/category names.
+    const proposalLayerCategories = new Map([
+      ['soil and water conservation - on site', 'Soil and Water Conservation'],
+      ['soil and water conservation - off site', 'Soil and Water Conservation'],
+      ['lanslides', 'Soil and Water Conservation'],
+      ['landslides', 'Soil and Water Conservation'],
+      ['water source protection', 'Water Resource Management'],
+      ['domestic water supply', 'Water Resource Management'],
+      ['minor irrigation related proposals', 'Water Resource Management'],
+      ['water quality improvement', 'Water Quality Improvement'],
+      ['stream reservation', 'Stream Reservation'],
+      ['minor tanks', 'Minor Tanks Restoration'],
+      ['developments', 'Product and Entrepreneurships'],
+      ['pecoe trail', 'Product and Entrepreneurships'],
+      ['tourist attract places', 'Product and Entrepreneurships']
+    ]);
+
+    const catalogCategoryOrder = {
+      base: ['Administration', 'Land cover', 'Reservation', 'Soil', 'Risk and Hazard', 'Demography', 'Hydrology', 'Location', 'Water features', 'Transportation'],
+      raster: ['Topography', 'Risk and Hazard', 'Location'],
+      proposal: ['Water Resource Management', 'Water Quality Improvement', 'Stream Reservation', 'Soil and Water Conservation', 'Minor Tanks Restoration', 'Product and Entrepreneurships'],
+      proposals: ['Water Resource Management', 'Water Quality Improvement', 'Stream Reservation', 'Soil and Water Conservation', 'Minor Tanks Restoration', 'Product and Entrepreneurships'],
+      'environmental indicators': ['Station', 'Rainfall', 'Temperature - Max', 'Temperature - Min', 'Evaporation', 'NDVI'],
+      product: ['Map', 'Report', 'Annex', 'Statistic', 'Photo']
+    };
+
+    const catalogTopicOrder = ['Base', 'Detail', 'Raster', 'Proposal', 'Environmental Indicators', 'Product', 'Administration'];
+
+    function normalizeCatalogText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim()
+        .replace(/\s+/g, ' ');
+    }
+
+    function getProposalLayerCategory(file) {
+      return proposalLayerCategories.get(normalizeCatalogText(file.Layer));
+    }
+
+    function sortCategoryNames(group, categoryNames) {
+      const order = catalogCategoryOrder[normalizeCatalogText(group)] || [];
+      return [...categoryNames].sort((first, second) => {
+        const firstIndex = order.findIndex(name => normalizeCatalogText(name) === normalizeCatalogText(first));
+        const secondIndex = order.findIndex(name => normalizeCatalogText(name) === normalizeCatalogText(second));
+        const firstRank = firstIndex === -1 ? Number.MAX_SAFE_INTEGER : firstIndex;
+        const secondRank = secondIndex === -1 ? Number.MAX_SAFE_INTEGER : secondIndex;
+        return firstRank - secondRank || String(first).localeCompare(String(second));
+      });
+    }
+
+    function sortTopicNames(topicNames) {
+      return [...topicNames].sort((first, second) => {
+        const firstIndex = catalogTopicOrder.findIndex(name => normalizeCatalogText(name) === normalizeCatalogText(first));
+        const secondIndex = catalogTopicOrder.findIndex(name => normalizeCatalogText(name) === normalizeCatalogText(second));
+        const firstRank = firstIndex === -1 ? Number.MAX_SAFE_INTEGER : firstIndex;
+        const secondRank = secondIndex === -1 ? Number.MAX_SAFE_INTEGER : secondIndex;
+        return firstRank - secondRank || String(first).localeCompare(String(second));
+      });
+    }
+
+    function hasApprovedProposal(files) {
+      return files.some(file =>
+        isProposalFile(file) &&
+        getProposalLayerCategory(file)
+      );
+    }
+
+    function isProposalFile(file) {
+      return ['proposal', 'proposals'].includes(normalizeCatalogText(file.Group));
+    }
+
+    function isHiddenCatalogLayer(file) {
+      const group = normalizeCatalogText(file.Group);
+      const database = normalizeCatalogText(file.Database);
+      const layer = normalizeCatalogText(file.Layer);
+
+      return (group === 'base' && database === 'risk and hazard' && layer === 'flood') ||
+        (group === 'product' && database === 'map' && layer.startsWith('proposal'));
+    }
+
+    function formatMwsId(mwsId) {
+      return /^mws[-_]?/i.test(String(mwsId || '').trim())
+        ? String(mwsId).trim().replace(/^mws[-_]?/i, 'MWS-')
+        : `MWS-${String(mwsId || '').trim()}`;
+    }
+
+    function showNoProposalMessage(mwsId) {
+      const title = document.getElementById("right-panel-title");
+      const content = document.getElementById("right-panel-content");
+      title.textContent = 'Proposal';
+      content.replaceChildren();
+
+      const message = document.createElement('p');
+      message.id = 'right-panel-placeholder';
+      message.textContent = `There is no 'Proposal' in '${formatMwsId(mwsId)}'.`;
+      content.appendChild(message);
+    }
+
+    function showUnavailableProposalMessage(file, mwsId) {
+      const title = document.getElementById("right-panel-title");
+      const content = document.getElementById("right-panel-content");
+      title.textContent = 'Proposal';
+      content.replaceChildren();
+
+      const message = document.createElement('p');
+      message.id = 'right-panel-placeholder';
+      message.textContent = `The selected proposal '${file.Layer}' is not available in '${formatMwsId(mwsId)}'.`;
+      content.appendChild(message);
+    }
+
+    function showPreviewErrorMessage() {
+      const title = document.getElementById("right-panel-title");
+      const content = document.getElementById("right-panel-content");
+      title.textContent = 'Preview unavailable';
+      content.replaceChildren();
+
+      const message = document.createElement('p');
+      message.id = 'right-panel-placeholder';
+      message.textContent = 'The selected file could not be previewed.';
+      content.appendChild(message);
+    }
+
+    function showCatalogPrompt() {
+      const title = document.getElementById("right-panel-title");
+      const content = document.getElementById("right-panel-content");
+      title.textContent = 'Details Panel';
+      content.replaceChildren();
+
+      const prompt = document.createElement('p');
+      prompt.id = 'right-panel-placeholder';
+      prompt.textContent = 'Select a layer to see its details here.';
+      content.appendChild(prompt);
+    }
 
     (function enableRightPanelResize() {
       const main = document.querySelector("main");
       const rightPanel = document.getElementById("right-panel");
+      const rightPanelHeader = document.getElementById("right-panel-header");
       const resizer = document.getElementById("right-panel-resizer");
       let startX = 0;
       let startWidth = 0;
       let isResizing = false;
+
+      rightPanelHeader.addEventListener("dblclick", () => {
+        rightPanel.classList.toggle("maximized");
+      });
 
       resizer.addEventListener("mousedown", (event) => {
         isResizing = true;
@@ -408,20 +707,47 @@
       }
     }
 
-    function updateUrl() {
-      const mwsId = document.getElementById('mwsIdInput').value;
+    function updateUrl(mwsId = document.getElementById('catalogMwsSelect').value) {
+      mwsId = String(mwsId || '').trim();
 
       if (mwsId.trim() !== "") {
-        csvUrls = [`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Registry/DBMS_${mwsId}.csv`];
-        console.log(csvUrls);
+        const registryMwsId = mwsId.replace(/^mws[-_]?/i, '').replace(/-/g, '_');
+        csvUrls = [`https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Registry/DBMS_${registryMwsId}.csv`];
       } else {
-        console.log("Please enter a valid MWS ID.");
+        csvUrls = [];
       }
     }
 
-    async function onEnterButtonClick() {
-      updateUrl();
+    function getSelectedMwsSuffix() {
+      const mwsId = String(document.getElementById('catalogMwsSelect').value || '').trim();
+      const suffix = mwsId.replace(/^mws[-_]?/i, '');
+      return /^\d+$/.test(suffix) ? suffix.padStart(3, '0') : suffix;
+    }
+
+    function isProductMapFile(file) {
+      return normalizeCatalogText(file.Group) === 'product' &&
+        normalizeCatalogText(file.Database) === 'map';
+    }
+
+    function resolveCatalogFileUrl(file, url) {
+      if (!url || !isProductMapFile(file)) return url;
+
+      const mwsSuffix = getSelectedMwsSuffix();
+      if (!mwsSuffix) return url;
+
+      return String(url).replace(
+        /(\/IWWRMP\/Data\/Derive\/Map\/[^/?#]+\/[^/?#]+_)\d{3}(\.[^/?#]+)$/i,
+        `$1${mwsSuffix}$2`
+      );
+    }
+
+    async function onEnterButtonClick(mwsId) {
+      updateUrl(mwsId);
+      if (!csvUrls.length) return;
+      const requestId = ++catalogLoadRequest;
+      document.getElementById("file-list").textContent = `Loading files for MWS ${mwsId}...`;
       const allFiles = await fetchAndMergeCSV(csvUrls);
+      if (requestId !== catalogLoadRequest) return;
       const groupedFiles = groupFiles(allFiles);
       const tree = createTree(groupedFiles);
 
@@ -429,12 +755,91 @@
       fileList.innerHTML = "";
       fileList.appendChild(tree);
       enableCollapsible();
+
+      if (!hasApprovedProposal(allFiles)) {
+        showNoProposalMessage(mwsId);
+      } else {
+        showCatalogPrompt();
+      }
     }
+
+    function sortCatalogValues(values) {
+      return Array.from(values).sort((a, b) => String(a).localeCompare(String(b), undefined, { numeric: true }));
+    }
+
+    function setCatalogOptions(select, placeholder, values, disabled = false) {
+      select.replaceChildren(new Option(placeholder, ''));
+      sortCatalogValues(values).forEach(value => select.appendChild(new Option(value, value)));
+      select.disabled = disabled;
+    }
+
+    function loadCatalogForSelection() {
+      const mwsId = document.getElementById('catalogMwsSelect').value;
+      if (!mwsId) return;
+      onEnterButtonClick(mwsId).catch(error => {
+        console.error('Could not load catalog files:', error);
+        document.getElementById('file-list').textContent = 'Could not load files for this MWS.';
+      });
+    }
+
+    async function initializeCatalogSelectors() {
+      const response = await fetch('https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/UMW/MWS_Boundary_Updated_UMC_Names.geojson');
+      if (!response.ok) throw new Error(`MWS boundary request failed (${response.status})`);
+      catalogBoundaryData = await response.json();
+
+      const districtSelect = document.getElementById('catalogDistSelect');
+      const dsdSelect = document.getElementById('catalogDsdSelect');
+      const mwsSelect = document.getElementById('catalogMwsSelect');
+      const features = catalogBoundaryData.features || [];
+      setCatalogOptions(districtSelect, '--Select Dist--', new Set(features.map(feature => feature.properties?.District).filter(Boolean)));
+
+      districtSelect.addEventListener('change', () => {
+        const filtered = features.filter(feature => !districtSelect.value || feature.properties?.District === districtSelect.value);
+        setCatalogOptions(dsdSelect, '--Select DSD--', new Set(filtered.map(feature => feature.properties?.MainDSD).filter(Boolean)));
+        setCatalogOptions(mwsSelect, '--Select MWS_ID--', [], true);
+      });
+
+      dsdSelect.addEventListener('change', () => {
+        const filtered = features.filter(feature =>
+          feature.properties?.District === districtSelect.value &&
+          feature.properties?.MainDSD === dsdSelect.value
+        );
+        setCatalogOptions(mwsSelect, '--Select MWS_ID--', new Set(filtered.map(feature => feature.properties?.MWS_ID).filter(Boolean)));
+      });
+
+      mwsSelect.addEventListener('change', loadCatalogForSelection);
+
+      const queryMwsId = new URLSearchParams(window.location.search).get('mwsId');
+      if (queryMwsId) {
+        const selectedFeature = features.find(feature => String(feature.properties?.MWS_ID) === queryMwsId);
+        if (selectedFeature) {
+          districtSelect.value = selectedFeature.properties.District;
+          districtSelect.dispatchEvent(new Event('change'));
+          dsdSelect.value = selectedFeature.properties.MainDSD;
+          dsdSelect.dispatchEvent(new Event('change'));
+          mwsSelect.value = queryMwsId;
+          onEnterButtonClick(queryMwsId).catch(error => {
+            console.error('Could not load catalog for the selected MWS:', error);
+            document.getElementById('file-list').textContent = 'Could not load files for this MWS.';
+          });
+        }
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeCatalogSelectors().catch(error => {
+        console.error('Could not load MWS selectors:', error);
+        document.getElementById('file-list').textContent = 'Could not load MWS selection data.';
+      });
+    });
 
     async function fetchAndMergeCSV(urls) {
       const allFiles = [];
       for (const url of urls) {
         const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Catalog file request failed (${response.status}): ${url}`);
+        }
         const text = await response.text();
         const rows = text.trim().split("\n").map(row => row.split(","));
         const headers = rows[0];
@@ -451,8 +856,15 @@
     function groupFiles(files) {
       const grouped = {};
       files.forEach(file => {
+        if (isHiddenCatalogLayer(file)) return;
+
         const group = file.Group || "Ungrouped";
-        const database = file.Database || "Undefined";
+        const isProposal = ['proposal', 'proposals'].includes(normalizeCatalogText(group));
+        const database = isProposal ? getProposalLayerCategory(file) : (file.Database || "Undefined");
+
+        // Proposal data is intentionally limited to the approved layers above.
+        if (isProposal && !database) return;
+
         if (!grouped[group]) grouped[group] = {};
         if (!grouped[group][database]) grouped[group][database] = [];
         grouped[group][database].push(file);
@@ -460,22 +872,53 @@
       return grouped;
     }
 
+    function showGroupDetails(group, groupFiles) {
+      const title = document.getElementById("right-panel-title");
+      const content = document.getElementById("right-panel-content");
+      title.textContent = `Details for ${group}`;
+      content.innerHTML = "";
+
+      const table = document.createElement("table");
+      table.className = "csv-table";
+      const header = table.insertRow();
+      ["Database", "Layer", "File"].forEach(label => {
+        const cell = document.createElement("th");
+        cell.textContent = label;
+        header.appendChild(cell);
+      });
+
+      Object.entries(groupFiles).forEach(([database, files]) => {
+        files.forEach(file => {
+          const row = table.insertRow();
+          row.insertCell().textContent = database;
+          row.insertCell().textContent = file.Layer || "";
+          const fileUrl = file.geojson || file.GeoJSON || file.File || file.Path || "";
+          row.insertCell().textContent = resolveCatalogFileUrl(file, fileUrl);
+        });
+      });
+
+      content.appendChild(table);
+    }
+
     function createTree(groupedFiles) {
       const ul = document.createElement("ul");
-      for (const group in groupedFiles) {
+      for (const group of sortTopicNames(Object.keys(groupedFiles))) {
         const groupLi = document.createElement("li");
         const groupSpan = document.createElement("span");
         groupSpan.classList.add("collapsible");
+        groupSpan.classList.add("catalog-topic");
         groupSpan.textContent = group;
+        groupSpan.addEventListener("click", () => showGroupDetails(group, groupedFiles[group]));
         groupLi.appendChild(groupSpan);
 
-        const groupUl = document.createElement("ul");
-        groupUl.classList.add("nested");
+          const groupUl = document.createElement("ul");
+          groupUl.classList.add("nested");
 
-        for (const database in groupedFiles[group]) {
+        for (const database of sortCategoryNames(group, Object.keys(groupedFiles[group]))) {
           const dbLi = document.createElement("li");
           const dbSpan = document.createElement("span");
           dbSpan.classList.add("collapsible");
+          dbSpan.classList.add("catalog-category");
           dbSpan.textContent = database;
           dbLi.appendChild(dbSpan);
 
@@ -485,7 +928,11 @@
           groupedFiles[group][database].forEach(file => {
             const fileLi = document.createElement("li");
             const fileButton = document.createElement("button");
-            fileButton.textContent = `${file.Layer} - ${file.layer}`;
+            fileButton.classList.add("layer-button");
+            const secondaryLayerName = String(file.layer || '').trim();
+            fileButton.textContent = secondaryLayerName && secondaryLayerName.toLowerCase() !== 'undefined'
+              ? `${file.Layer} - ${secondaryLayerName}`
+              : (file.Layer || 'Unnamed layer');
             fileButton.style.width = "100%";
             fileButton.addEventListener("click", () => loadFile(file));
             fileLi.appendChild(fileButton);
@@ -520,8 +967,8 @@
       const table = document.createElement("table");
       table.style.width = '100%';
       table.style.borderCollapse = 'collapse';
-      table.style.fontSize = '0.9rem';
-      table.style.lineHeight = '1.4';
+      table.style.fontSize = '0.85rem';
+      table.style.lineHeight = '1.3';
 
       const thead = document.createElement("thead");
       const headerRow = document.createElement("tr");
@@ -529,7 +976,7 @@
       const th1 = document.createElement("th");
       th1.textContent = "Attribute";
       th1.style.border = '1px solid #ddd';
-      th1.style.padding = '8px';
+      th1.style.padding = '7px';
       th1.style.backgroundColor = '#f2f2f2';
       th1.style.fontWeight = 'bold';
       th1.style.textAlign = 'left';
@@ -537,7 +984,7 @@
       const th2 = document.createElement("th");
       th2.textContent = "Value";
       th2.style.border = '1px solid #ddd';
-      th2.style.padding = '8px';
+      th2.style.padding = '7px';
       th2.style.backgroundColor = '#f2f2f2';
       th2.style.fontWeight = 'bold';
       th2.style.textAlign = 'left';
@@ -548,20 +995,45 @@
       table.appendChild(thead);
 
       const tbody = document.createElement("tbody");
+      const hiddenDetailFields = new Set([
+        'Contact.Name',
+        'Email.Address',
+        'Phone.Number',
+        'Address',
+        'Data.Source',
+        'Accuracy',
+        'Limitations',
+        'Resolution',
+        'Vertical.Datum',
+        'Access.Constraints',
+        'Use.Constraints',
+        'Download.Link',
+        'Process.Steps',
+        'Metadata.Creator',
+        'Metadata.Date',
+        'Metadata.Standard',
+        'Related.Publications',
+        'File.Size',
+        'Supplementary.Info'
+      ]);
 
       Object.entries(file).forEach(([key, value]) => {
+        if (hiddenDetailFields.has(String(key).trim())) return;
         const row = document.createElement("tr");
+        const displayValue = ['geojson', 'geojsonurl', 'file', 'path', 'url', 'download', 'download_url'].includes(normalizeCatalogText(key).replace(/ /g, '_'))
+          ? resolveCatalogFileUrl(file, value)
+          : value;
 
         const td1 = document.createElement("td");
         td1.textContent = key;
         td1.style.border = '1px solid #ddd';
-        td1.style.padding = '6px 8px';
+        td1.style.padding = '5px 8px';
         td1.style.fontWeight = '500';
 
         const td2 = document.createElement("td");
-        td2.textContent = value;
+        td2.textContent = displayValue;
         td2.style.border = '1px solid #ddd';
-        td2.style.padding = '6px 8px';
+        td2.style.padding = '5px 8px';
         td2.style.wordWrap = 'break-word';
 
         row.appendChild(td1);
@@ -581,11 +1053,11 @@
         return f.geojson || f.GeoJSON || f.GeoJson || f['Download'] || f['download'] || f['Download_URL'] || f['download_url'] || f['File'] || f['file'] || f.Path || f.path || f.URL || f.Url || f.url || '';
       }
 
-      const path = getFileUrl(file);
+      const path = resolveCatalogFileUrl(file, getFileUrl(file).trim());
       if (path.endsWith(".csv")) {
         showTablePreview(path);
       } else if (path.endsWith(".geojson")) {
-        showMapPreview(path);
+        showMapPreview(path, file);
       } else if (path.endsWith(".png") || path.endsWith(".jpg")) {
         showImagePreview(path);
       } else if (path.endsWith(".xlsx")) {
@@ -735,7 +1207,7 @@
       }
     }
 
-    async function showMapPreview(path) {
+    async function showMapPreview(path, file) {
       // Initialize the map if not done already
       initializeMap();
 
@@ -756,7 +1228,11 @@
         try { map.fitBounds(geojsonLayer.getBounds()); } catch (e) { console.warn('Could not fit bounds:', e); }
       } catch (err) {
         console.error('Failed to load GeoJSON for preview:', err);
-        alert('Could not load GeoJSON preview. If this page is being viewed inside a sandboxed iframe or preview pane, open the catalog page directly in a browser tab.\nIf you need the raw file, copy this URL:\n' + toRawGitHubUrl(path));
+        if (file && isProposalFile(file)) {
+          showUnavailableProposalMessage(file, document.getElementById('catalogMwsSelect').value);
+        } else {
+          showPreviewErrorMessage();
+        }
         showNoPreview();
         return;
       }
