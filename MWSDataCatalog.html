@@ -600,6 +600,22 @@
         (group === 'product' && database === 'map' && layer.startsWith('proposal'));
     }
 
+    function getProductMapFiles(file) {
+      if (!isProductMapFile(file)) return [file];
+
+      const layer = normalizeCatalogText(file.Layer);
+      if (layer === 'water quality map') return [];
+      if (layer !== 'temperature map') return [file];
+
+      const sourceUrl = file.geojson || file.GeoJSON || file.GeoJson || '';
+      const maxFile = {
+        ...file,
+        Layer: 'Temperature(Max) map',
+        geojson: String(sourceUrl).replace(/\/map_16\/Tmin\/16_TminMap_/i, '/map_16/Tmax/15_TmaxMap_')
+      };
+      return [maxFile, { ...file, Layer: 'Temperature(Min) map' }];
+    }
+
     function formatMwsId(mwsId) {
       return /^mws[-_]?/i.test(String(mwsId || '').trim())
         ? String(mwsId).trim().replace(/^mws[-_]?/i, 'MWS-')
@@ -867,7 +883,7 @@
 
         if (!grouped[group]) grouped[group] = {};
         if (!grouped[group][database]) grouped[group][database] = [];
-        grouped[group][database].push(file);
+        grouped[group][database].push(...getProductMapFiles(file));
       });
       return grouped;
     }
