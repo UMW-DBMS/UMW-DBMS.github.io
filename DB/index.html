@@ -1255,6 +1255,22 @@
                     'Type of Water Source': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=46&is_public=true',
                     'Water Overall': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=35&is_public=true'
                 };
+                const cboCategoryColors = {
+                    'Absence of Vegetation': '#e41a1c',
+                    'Availability of Water Treatment': '#377eb8',
+                    'CBO Category': '#4daf4a',
+                    'Containments from Houses': '#984ea3',
+                    'Erosion or Landslide': '#ff7f00',
+                    'Gender Empowerment': '#a65628',
+                    'Intake': '#f781bf',
+                    'Protection for Source': '#17a589',
+                    'Pump': '#d4ac0d',
+                    'Reservoir Type': '#5d6d7e',
+                    'Reservoir': '#1f618d',
+                    'Schema Type': '#7d3c98',
+                    'Type of Water Source': '#229954',
+                    'Water Overall': '#d35400'
+                };
                 const cboDataSources = Object.keys(cboDashboardUrls).map((name) => {
                     const fileName = `${name}.geojson`;
                     const encodedFileName = encodeURIComponent(fileName);
@@ -1341,7 +1357,7 @@
                     const cboGroup = document.createElement('div');
                     cboGroup.style.marginTop = '10px';
                     const cboTitle = document.createElement('h3');
-                    cboTitle.textContent = 'CBO Data';
+                    cboTitle.textContent = 'CBO Data - Department of National Community Water Supply';
                     cboTitle.style.marginTop = '0';
                     cboGroup.appendChild(cboTitle);
 
@@ -2862,15 +2878,25 @@
                                     max: Math.max(...numericValues)
                                 };
                             }
+                            const categoryColor = cboCategoryColors[src];
                             const layer = L.geoJSON(geojsonData, {
+                                style: function () {
+                                    if (!categoryColor) return {};
+                                    return {
+                                        color: categoryColor,
+                                        fillColor: categoryColor,
+                                        fillOpacity: 0.35,
+                                        weight: 2
+                                    };
+                                },
                                 pointToLayer: function (feature, latlng) {
                                     if (icons[src]) return L.marker(latlng, { icon: icons[src] });
                                     return L.circleMarker(latlng, {
                                         radius: 6,
-                                        color: '#8e44ad',
-                                        fillColor: '#d35400',
+                                        color: categoryColor || '#8e44ad',
+                                        fillColor: categoryColor || '#d35400',
                                         fillOpacity: 0.85,
-                                        weight: 1
+                                        weight: 2
                                     });
                                 },
                                 onEachFeature: function (feature, layer) {
