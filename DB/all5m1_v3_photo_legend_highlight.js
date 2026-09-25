@@ -32,6 +32,8 @@ const hiddenBaseLayers = new Set([
 const ENVIRONMENTAL_PROTECTION_LAYER_NAME = 'Environmental protection area';
 const ENVIRONMENTAL_PROTECTION_LAYER_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/03_RSV/RSV_FRC_TF/RSV_FRC_TF_UMW.geojson';
 const ENVIRONMENTAL_PROTECTION_LAYER_BASE_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/03_RSV';
+const MAJOR_TANKS_LAYER_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/02_HYD/Hydro_Tk/MajorTanks_UMW.geojson';
+const MINOR_TANKS_LAYER_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/02_HYD/Hydro_Tk/MinorTanks_UMW.geojson';
 let miniWatershedLinkedEnvironmentalArea = false;
 // Temporarily hidden from the Base Layers panel.
 // Remove entries above to show these layers again later.
@@ -614,16 +616,11 @@ function ensureSharedBaseLayers(databaseLayers) {
 function addReservoirTankCategory(databaseLayers) {
     const categoryName = 'Reservoirs/ Tanks';
     const tankLayers = [];
-    let waterPolygonLayer = null;
 
     Object.keys(databaseLayers).forEach((databaseName) => {
         const remainingLayers = databaseLayers[databaseName].filter((layerInfo) => {
             const normalizedName = String(layerInfo.Layer || '').trim().toLowerCase();
             const isTankLayer = /^(major|minor)\s+tanks?$/.test(normalizedName);
-            if (!waterPolygonLayer && isWaterFeaturesPolygonLayer(layerInfo.Layer)) {
-                waterPolygonLayer = layerInfo;
-            }
-            if (isTankLayer) tankLayers.push(layerInfo);
             return !isTankLayer;
         });
 
@@ -634,15 +631,10 @@ function addReservoirTankCategory(databaseLayers) {
         }
     });
 
-    // The published CSV currently exposes tanks through the common Water
-    // features-polygon dataset rather than as separate rows. Create the two
-    // requested controls from that source when dedicated rows are absent.
-    if (waterPolygonLayer) {
-        const hasMajorTanks = tankLayers.some((layerInfo) => /^major\s+tanks?$/i.test(String(layerInfo.Layer || '').trim()));
-        const hasMinorTanks = tankLayers.some((layerInfo) => /^minor\s+tanks?$/i.test(String(layerInfo.Layer || '').trim()));
-        if (!hasMajorTanks) tankLayers.push({ Layer: 'Major Tanks', geojson: waterPolygonLayer.geojson, Group: 'Base', tankType: 'major' });
-        if (!hasMinorTanks) tankLayers.push({ Layer: 'Minor Tanks', geojson: waterPolygonLayer.geojson, Group: 'Base', tankType: 'minor' });
-    }
+    // Keep these controls tied to their dedicated datasets instead of the
+    // combined Water features-polygon layer.
+    tankLayers.push({ Layer: 'Major Tanks', geojson: MAJOR_TANKS_LAYER_URL, Group: 'Base' });
+    tankLayers.push({ Layer: 'Minor Tanks', geojson: MINOR_TANKS_LAYER_URL, Group: 'Base' });
 
     // Insert after Water features (case-insensitive), retaining the CSV's
     // original category order for everything else.
@@ -834,7 +826,7 @@ function updateBasePanel(databaseLayers) {
 
 
                     // Add the legend for the layer (if applicable)
-                    if (!layerLegends[Layer]) {
+                    if (typeof createLegendControl === 'function' && !layerLegends[Layer]) {
                         const legendControl = createLegendControl(Layer); // Function to create a legend control
                         layerLegends[Layer] = legendControl;
                         legendControl.addTo(map);
@@ -2293,6 +2285,7 @@ function loadGeoJsonLayer(url, layerName) {
                     if (roadStyle) return roadStyle;
 
                     // ── All other existing style logic ────────────────────────
+                    const normalizedLayerName = String(layerName || '').trim().toLowerCase();
                     const props = (feature && feature.properties) ? feature.properties : {};
                     const landCoverType     = props['classLULC'];
                     const LandslideType     = props['level'];
@@ -2300,6 +2293,10 @@ function loadGeoJsonLayer(url, layerName) {
                     const agroecoType       = props['zone'];
                     const populationDensity = props['Density'];
                     const erosionClass      = (typeof getSoilErosionClass === 'function') ? getSoilErosionClass(props) : null;
+
+                    if (normalizedLayerName === 'major tanks' || normalizedLayerName === 'minor tanks') {
+                        return { color: '#0057b8', fillColor: '#2f80ed', weight: 2, fillOpacity: 0.65 };
+                    }
 
                     if (populationDensity !== undefined && populationDensity !== null) {
                         if      (populationDensity < 50)   return styleOptions['<50'];
@@ -2325,6 +2322,16 @@ function loadGeoJsonLayer(url, layerName) {
                 },
                 // Define actions for each feature (e.g., polygons, lines)
                 onEachFeature: function (feature, layer) {
+                    const normalizedLayerName = String(layerName || '').trim().toLowerCase();
+                    const tankName = feature && feature.properties ? String(feature.properties.Name || '').trim() : '';
+                    if (normalizedLayerName === 'major tanks' && tankName && typeof layer.bindTooltip === 'function') {
+                        layer.bindTooltip(tankName, {
+                            permanent: true,
+                            direction: 'center',
+                            className: 'tank-name-label',
+                            opacity: 0.9
+                        });
+                    }
                     const makeHandler = function (targetLayer) {
                         return function (event) {
                             const clickLatLng = (event && event.latlng) ? event.latlng : (targetLayer.getLatLng ? targetLayer.getLatLng() : null);
@@ -2350,6 +2357,9 @@ function loadGeoJsonLayer(url, layerName) {
 
             // Store and add the GeoJSON layer to the map
             geoJsonLayers[layerName] = geoJsonLayer.addTo(map);
+            if (/^(major|minor) tanks?$/.test(String(layerName || '').trim().toLowerCase()) && geoJsonLayer.getBounds().isValid()) {
+                map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] });
+            }
             if (String(layerName || '').trim().toLowerCase() === 'population' && geoJsonLayer.bringToFront) {
                 geoJsonLayer.bringToFront();
             }

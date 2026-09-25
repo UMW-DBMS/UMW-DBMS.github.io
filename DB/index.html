@@ -1239,6 +1239,33 @@
                     'Rainfall': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/10_MET/RF_St/MET_RF_St.geojson',
                     'Temperature': 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/10_MET/Temp/MET_Temp_St.geojson'
                 };
+                const cboDashboardUrls = {
+                    'Absence of Vegetation': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=16&is_public=true',
+                    'Availability of Water Treatment': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=15&is_public=true',
+                    'CBO Category': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=3&is_public=true',
+                    'Containments from Houses': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=19&is_public=true',
+                    'Erosion or Landslide': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=18&is_public=true',
+                    'Gender Empowerment': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=42&is_public=true',
+                    'Intake': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=24&is_public=true',
+                    'Protection for Source': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=17&is_public=true',
+                    'Pump': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=25&is_public=true',
+                    'Reservoir Type': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=44&is_public=true',
+                    'Reservoir': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=26&is_public=true',
+                    'Schema Type': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=4&is_public=true',
+                    'Type of Water Source': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=46&is_public=true',
+                    'Water Overall': 'https://web.rwss.lk/index.php/geo_dashboard/common?dq=35&is_public=true'
+                };
+                const cboDataSources = Object.keys(cboDashboardUrls).map((name) => {
+                    const fileName = `${name}.geojson`;
+                    const encodedFileName = encodeURIComponent(fileName);
+                    const basePath = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/14_CBO/';
+                    return {
+                        name,
+                        url: `${basePath}${encodedFileName}`,
+                        website: cboDashboardUrls[name]
+                    };
+                });
+                const staticCboDataUrls = Object.fromEntries(cboDataSources.map(({ name, url }) => [name, url]));
 
                 function renderWaterPanel() {
                     const waterPanel = document.getElementById('waterPanel');
@@ -1318,13 +1345,7 @@
                     cboTitle.style.marginTop = '0';
                     cboGroup.appendChild(cboTitle);
 
-                    [
-                        'Availability of Water Treatment',
-                        'Erosion or Landslide',
-                        'Reservoir Type',
-                        'Reservoir',
-                        'Type of Water Source'
-                    ].forEach((categoryName) => {
+                    cboDataSources.forEach(({ name: categoryName, website }) => {
                         const row = document.createElement('div');
                         row.style.marginLeft = '16px';
                         const checkbox = document.createElement('input');
@@ -1332,13 +1353,22 @@
                         checkbox.name = 'cboDataCategory';
                         checkbox.value = categoryName;
                         checkbox.id = `cbo_${categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '_')}`;
+                        checkbox.addEventListener('change', handleWaterSourceChange);
 
                         const label = document.createElement('label');
                         label.htmlFor = checkbox.id;
                         label.textContent = categoryName;
 
+                        const moreLink = document.createElement('a');
+                        moreLink.href = website;
+                        moreLink.target = '_blank';
+                        moreLink.rel = 'noopener noreferrer';
+                        moreLink.textContent = 'See more';
+                        moreLink.style.marginLeft = '8px';
+
                         row.appendChild(checkbox);
                         row.appendChild(label);
+                        row.appendChild(moreLink);
                         cboGroup.appendChild(row);
                     });
                     waterPanel.appendChild(cboGroup);
@@ -2718,12 +2748,12 @@
                 // Handle water source checkbox changes: load/unload multiple GeoJSON layers
                 async function handleWaterSourceChange() {
                     const requestVersion = ++waterSourceRequestVersion;
-                    const checkboxes = Array.from(document.querySelectorAll('input[name="waterSource"]'));
+                    const checkboxes = Array.from(document.querySelectorAll('input[name="waterSource"], input[name="cboDataCategory"]'));
                     if (!checkboxes.length) return;
                     const climateStationUrls = await getClimateStationUrls();
                     if (requestVersion !== waterSourceRequestVersion) return;
                     // Keep fixed station URLs authoritative; climate CSV URLs are only a fallback.
-                    const urls = { ...climateStationUrls, ...staticWaterSourceUrls };
+                    const urls = { ...climateStationUrls, ...staticWaterSourceUrls, ...staticCboDataUrls };
 
                     // Define custom icons for each source
                     const icons = {
@@ -2834,7 +2864,14 @@
                             }
                             const layer = L.geoJSON(geojsonData, {
                                 pointToLayer: function (feature, latlng) {
-                                    return L.marker(latlng, { icon: icons[src] });
+                                    if (icons[src]) return L.marker(latlng, { icon: icons[src] });
+                                    return L.circleMarker(latlng, {
+                                        radius: 6,
+                                        color: '#8e44ad',
+                                        fillColor: '#d35400',
+                                        fillOpacity: 0.85,
+                                        weight: 1
+                                    });
                                 },
                                 onEachFeature: function (feature, layer) {
                                     if (!feature || !feature.properties) return;
