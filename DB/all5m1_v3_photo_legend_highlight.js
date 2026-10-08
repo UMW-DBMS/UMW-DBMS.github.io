@@ -48,6 +48,17 @@ const waterFeaturePointTypes = [
     { name: 'Tube Well', code: 'TBWLP' }, { name: 'Well', code: 'WELLP' }
 ];
 const waterFeaturePointDataCache = new Map();
+// Polygon types contained in the "Water features-polygon" source layer.
+// HF_CODE is the published field; HG_GFCODE is retained as a fallback for
+// older exports of the same dataset.
+const WATER_FEATURE_POLYGON_COLOR = '#0000FF';
+const waterFeaturePolygonTypes = [
+    { name: 'Reservoir area', code: 'RSVRA' },
+    { name: 'Tank area', code: 'TANKA' },
+    { name: 'Lake', code: 'LAKEA' },
+    { name: 'Others', code: null }
+];
+const waterFeaturePolygonDataCache = new Map();
 const waterFeatureLineTypes = [
     { name: 'Streams', codes: ['STRMV', 'STRML'], color: '#08519c' },
     { name: 'Canals', codes: ['CNNLL', 'CHNAL', 'CHNLL', 'CHNLV'], color: '#2171b5' },
@@ -66,6 +77,52 @@ function isWaterFeaturesPolygonLayer(layerName) {
 
 function isWaterFeaturesLineLayer(layerName) {
     return String(layerName || '').trim().toLowerCase().replace(/[\s-]+/g, '') === 'waterfeaturesline';
+}
+
+function getWaterFeaturePolygonCode(properties) {
+    const sourceProperties = properties || {};
+    return String(sourceProperties.HF_CODE || sourceProperties.HG_GFCODE || '').trim().toUpperCase();
+}
+
+function loadWaterFeaturePolygonType(url, layerName, polygonType) {
+    const cacheKey = String(url || '').trim();
+    const dataPromise = waterFeaturePolygonDataCache.has(cacheKey) ? waterFeaturePolygonDataCache.get(cacheKey) : fetch(url).then((response) => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    });
+    waterFeaturePolygonDataCache.set(cacheKey, dataPromise);
+
+    dataPromise.then((data) => {
+        if (!layerState[layerName] || geoJsonLayers[layerName]) return;
+        const knownCodes = waterFeaturePolygonTypes.filter((type) => type.code).map((type) => type.code);
+        const filteredData = {
+            ...data,
+            features: (data.features || []).filter((feature) => {
+                const code = getWaterFeaturePolygonCode(feature.properties);
+                return polygonType.name === 'Others' ? !knownCodes.includes(code) : code === polygonType.code;
+            })
+        };
+        const layer = L.geoJSON(filteredData, {
+            style: {
+                color: WATER_FEATURE_POLYGON_COLOR,
+                fillColor: WATER_FEATURE_POLYGON_COLOR,
+                weight: 1,
+                fillOpacity: 0.6
+            },
+            onEachFeature: (feature, featureLayer) => featureLayer.on('click', (event) => {
+                const clickLatLng = event && event.latlng ? event.latlng : null;
+                if (typeof window.handleMeasurePointFromLayer === 'function' && window.handleMeasurePointFromLayer(clickLatLng)) return;
+                if (typeof window.showClickCoordinates === 'function') window.showClickCoordinates(clickLatLng);
+                updateInfoPanel(feature.properties || {}, layerName, featureLayer);
+                highlightFeature(featureLayer);
+            })
+        });
+        geoJsonLayers[layerName] = layer;
+        layer.addTo(map);
+    }).catch((error) => {
+        waterFeaturePolygonDataCache.delete(cacheKey);
+        console.error(`Error loading water-feature polygons for ${layerName}:`, error);
+    });
 }
 
 function getWaterFeatureLineCode(properties) {
@@ -726,6 +783,41 @@ function updateBasePanel(databaseLayers) {
             const normalizedLayerName = String(Layer || '').trim().toLowerCase();
             const isHiddenLayer = hiddenBaseLayers.has(normalizedLayerName);
             if (isHiddenLayer) {
+                return;
+            }
+
+            if (isWaterFeaturesPolygonLayer(Layer)) {
+                const polygonGroup = document.createElement('div');
+                const polygonTitle = document.createElement('strong');
+                polygonTitle.textContent = Layer;
+                polygonGroup.appendChild(polygonTitle);
+
+                waterFeaturePolygonTypes.forEach((polygonType) => {
+                    const polygonLayerName = `${Layer} - ${polygonType.name}`;
+                    const polygonDiv = document.createElement('div');
+                    polygonDiv.style.marginLeft = '16px';
+                    const polygonCheckbox = document.createElement('input');
+                    polygonCheckbox.type = 'checkbox';
+                    polygonCheckbox.id = `layer_${databaseName}_${index}_${polygonType.name.toLowerCase().replace(/\s+/g, '_')}`;
+                    polygonCheckbox.checked = layerState[polygonLayerName] || false;
+                    polygonCheckbox.addEventListener('change', (event) => {
+                        const isChecked = event.target.checked;
+                        layerState[polygonLayerName] = isChecked;
+                        if (isChecked) {
+                            loadWaterFeaturePolygonType(geojson, polygonLayerName, polygonType);
+                        } else if (geoJsonLayers[polygonLayerName]) {
+                            map.removeLayer(geoJsonLayers[polygonLayerName]);
+                            delete geoJsonLayers[polygonLayerName];
+                        }
+                    });
+                    const polygonLabel = document.createElement('label');
+                    polygonLabel.htmlFor = polygonCheckbox.id;
+                    polygonLabel.textContent = polygonType.name;
+                    polygonDiv.appendChild(polygonCheckbox);
+                    polygonDiv.appendChild(polygonLabel);
+                    polygonGroup.appendChild(polygonDiv);
+                });
+                databaseDiv.appendChild(polygonGroup);
                 return;
             }
 
