@@ -693,6 +693,14 @@ function addReservoirTankCategory(databaseLayers) {
     tankLayers.push({ Layer: 'Major Tanks', geojson: MAJOR_TANKS_LAYER_URL, Group: 'Base' });
     tankLayers.push({ Layer: 'Minor Tanks', geojson: MINOR_TANKS_LAYER_URL, Group: 'Base' });
 
+    const dadTankDetails = [
+        { Layer: 'Minor Tanks', dadCategory: 'Minor Tank', baseLayerKey: 'DAD Tanks Details - Minor Tanks', Group: 'Base' },
+        { Layer: 'Anicuts', dadCategory: 'Anicuts', baseLayerKey: 'DAD Tanks Details - Anicuts', Group: 'Base' }
+    ];
+    const undpTankDetails = [
+        { Layer: 'Tanks', dadCategory: 'UNDP Tanks', baseLayerKey: 'UNDP Tanks Details - Tanks', Group: 'Base' }
+    ];
+
     // Insert after Water features (case-insensitive), retaining the CSV's
     // original category order for everything else.
     const orderedLayers = {};
@@ -701,11 +709,17 @@ function addReservoirTankCategory(databaseLayers) {
         orderedLayers[databaseName] = databaseLayers[databaseName];
         if (!inserted && String(databaseName).trim().toLowerCase() === 'water features') {
             orderedLayers[categoryName] = tankLayers;
+            orderedLayers['DAD Tanks Details'] = dadTankDetails;
+            orderedLayers['UNDP Tanks Details'] = undpTankDetails;
             inserted = true;
         }
     });
 
-    if (!inserted) orderedLayers[categoryName] = tankLayers;
+    if (!inserted) {
+        orderedLayers[categoryName] = tankLayers;
+        orderedLayers['DAD Tanks Details'] = dadTankDetails;
+        orderedLayers['UNDP Tanks Details'] = undpTankDetails;
+    }
     return orderedLayers;
 }
 
@@ -774,12 +788,21 @@ function updateBasePanel(databaseLayers) {
 
     Object.keys(databaseLayers).forEach(databaseName => {
         const databaseDiv = document.createElement('div');
-        const databaseTitle = document.createElement('h3');
+        const compactCategoryNames = new Set([
+            'Reservoirs/ Tanks',
+            'DAD Tanks Details',
+            'UNDP Tanks Details'
+        ]);
+        // Match the compact heading size used by Water features-polygon.
+        const databaseTitle = document.createElement(
+            compactCategoryNames.has(databaseName) ? 'strong' : 'h3'
+        );
         databaseTitle.textContent = databaseName;
         databaseDiv.appendChild(databaseTitle);
 
         databaseLayers[databaseName].forEach((layerInfo, index) => {
-            const { Layer, geojson, Group, tankType } = layerInfo;
+            const { Layer, geojson, Group, tankType, dadCategory, baseLayerKey } = layerInfo;
+            const mapLayerKey = baseLayerKey || Layer;
             const normalizedLayerName = String(Layer || '').trim().toLowerCase();
             const isHiddenLayer = hiddenBaseLayers.has(normalizedLayerName);
             if (isHiddenLayer) {
@@ -896,17 +919,24 @@ function updateBasePanel(databaseLayers) {
             checkbox.type = 'checkbox';
             checkbox.id = `layer_${databaseName}_${index}`;
             //checkbox.checked = false;
-            checkbox.checked = layerState[Layer] || false;  // Use stored state if available
+            checkbox.checked = layerState[mapLayerKey] || false;  // Use stored state if available
 
             checkbox.addEventListener('change', (e) => {
                 const isChecked = e.target.checked; // Get the checkbox state
-                layerState[Layer] = isChecked; // Update layer state
+                layerState[mapLayerKey] = isChecked; // Update layer state
 
                 if (isChecked) {
                     // Add the layer
                     const rasterOverrideUrl = getRasterOverrideUrl(Layer, geojson);
                     const shouldLoadAsGeoJson = isGeoJsonUrl(geojson);
-                    if (tankType && geojson) {
+                    if (dadCategory) {
+                        loadDadProposalLayer(dadCategory, mapLayerKey).catch(error => {
+                            console.error(`Error loading ${Layer}:`, error);
+                            layerState[mapLayerKey] = false;
+                            checkbox.checked = false;
+                            alert(`Could not load ${Layer}.`);
+                        });
+                    } else if (tankType && geojson) {
                         loadTankFeatureType(geojson, Layer, tankType);
                     } else if (shouldLoadAsGeoJson) {
                         loadGeoJsonLayer(geojson, Layer);
@@ -926,16 +956,16 @@ function updateBasePanel(databaseLayers) {
                     }
                 } else {
                     // Remove the layer
-                    if (Group === 'Raster' && pngOverlays[Layer]) {
-                        map.removeLayer(pngOverlays[Layer]);
-                        delete pngOverlays[Layer];
-                        clearBottomLegendIfLayer(Layer);
-                        console.log(`Removed Raster layer: ${Layer}`);
-                    } else if (geoJsonLayers[Layer]) {
-                        map.removeLayer(geoJsonLayers[Layer]);
-                        removeRoadDecorations(Layer);
-                        delete geoJsonLayers[Layer];
-                        console.log(`Removed GeoJSON layer: ${Layer}`);
+                    if (Group === 'Raster' && pngOverlays[mapLayerKey]) {
+                        map.removeLayer(pngOverlays[mapLayerKey]);
+                        delete pngOverlays[mapLayerKey];
+                        clearBottomLegendIfLayer(mapLayerKey);
+                        console.log(`Removed Raster layer: ${mapLayerKey}`);
+                    } else if (geoJsonLayers[mapLayerKey]) {
+                        map.removeLayer(geoJsonLayers[mapLayerKey]);
+                        removeRoadDecorations(mapLayerKey);
+                        delete geoJsonLayers[mapLayerKey];
+                        console.log(`Removed GeoJSON layer: ${mapLayerKey}`);
                     }
 
                     // Remove the legend for the layer
@@ -1358,6 +1388,112 @@ function loadGeoJsonLayer(url, layerName) {
 }
 
 
+// Shared DAD datasets are stored outside the individual MWS registries.
+const DAD_DATA_ROOT = 'IWWRMP/Data/EXD/15_DAD/';
+const DAD_GITHUB_TREE_URL = 'https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/git/trees/main?recursive=1';
+const DAD_RAW_BASE_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/';
+let dadProposalTreeRequest = null;
+
+function normalizeDadMwsId(value) {
+    const normalized = String(value ?? '').trim().toUpperCase()
+        .replace(/^MWS[-_\s]*/i, '')
+        .replace(/[^A-Z0-9]/g, '');
+    return /^\d+$/.test(normalized) ? String(Number(normalized)) : normalized;
+}
+
+function dadFeatureMatchesSelectedMws(feature, selectedMwsId) {
+    const properties = feature && feature.properties ? feature.properties : {};
+    const featureMwsId = properties.MWS_ID ?? properties.MWSID ?? properties.MWS_Id ?? properties.mws_id ?? properties.mwsid;
+    return normalizeDadMwsId(featureMwsId) === normalizeDadMwsId(selectedMwsId);
+}
+
+function addDadCoordinates(feature, forceLatLng) {
+    const properties = feature && feature.properties ? feature.properties : {};
+    const lat = Number(properties.Lat ?? properties.LAT ?? properties.latitude ?? properties.Latitude);
+    const lng = Number(properties.Lng ?? properties.LNG ?? properties.lon ?? properties.Longitude ?? properties.longitude);
+    if ((!forceLatLng && feature.geometry) || !Number.isFinite(lat) || !Number.isFinite(lng)) return feature;
+    return { ...feature, geometry: { type: 'Point', coordinates: [lng, lat] } };
+}
+
+function normalizeDadFolderName(value) {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/s$/, '');
+}
+
+async function getDadProposalUrls(category) {
+    if (!dadProposalTreeRequest) {
+        dadProposalTreeRequest = fetch(DAD_GITHUB_TREE_URL)
+            .then(response => {
+                if (!response.ok) throw new Error(`DAD file index request failed (${response.status})`);
+                return response.json();
+            })
+            .then(tree => tree.tree || []);
+    }
+
+    try {
+        const categoryFolderName = normalizeDadFolderName(category);
+        const tree = await dadProposalTreeRequest;
+        const urls = tree
+            .filter(item => {
+                if (item.type !== 'blob' || !item.path.toLowerCase().startsWith(DAD_DATA_ROOT.toLowerCase()) || !/\.geojson$/i.test(item.path)) return false;
+                const relativePath = item.path.slice(DAD_DATA_ROOT.length);
+                const dataFolder = relativePath.split('/')[0];
+                return normalizeDadFolderName(dataFolder) === categoryFolderName;
+            })
+            .map(item => `${DAD_RAW_BASE_URL}${item.path.split('/').map(encodeURIComponent).join('/')}`);
+        if (urls.length) return urls;
+    } catch (error) {
+        console.warn('Could not read the DAD file index; trying the standard filename.', error);
+    }
+
+    const fallbackCategories = category === 'Minor Tank' ? ['Minor Tank', 'Minor Tanks'] : [category];
+    return fallbackCategories.map(folder => {
+        const encodedFolder = encodeURIComponent(folder);
+        return `${DAD_RAW_BASE_URL}${DAD_DATA_ROOT}${encodedFolder}/${encodedFolder}.geojson`;
+    });
+}
+
+async function loadDadProposalLayer(category, layerKey) {
+    const selectedMwsId = document.getElementById('selectMWSID').value;
+    const urls = await getDadProposalUrls(category);
+    const results = await Promise.allSettled(urls.map(async url => {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`${response.status} while loading ${url}`);
+        return response.json();
+    }));
+    const datasets = results.filter(result => result.status === 'fulfilled').map(result => result.value);
+    if (!datasets.length) throw new Error(`No GeoJSON files could be loaded for ${category}.`);
+
+    const features = datasets.flatMap(data => Array.isArray(data.features) ? data.features : [])
+        .filter(feature => dadFeatureMatchesSelectedMws(feature, selectedMwsId))
+        // Anicuts are positioned from the Lat and Lng attributes supplied in the data.
+        .map(feature => addDadCoordinates(feature, category === 'Anicuts'))
+        .filter(feature => feature && feature.geometry);
+
+    if (!features.length) {
+        alert(`No ${category} records are available for ${selectedMwsId}.`);
+        return;
+    }
+
+    const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
+        pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
+            radius: 6,
+            color: '#1e6091',
+            weight: 1,
+            fillColor: '#34a0a4',
+            fillOpacity: 0.85
+        }),
+        onEachFeature: (feature, featureLayer) => {
+            featureLayer.on('click', event => {
+                const clickLatLng = event && event.latlng ? event.latlng : null;
+                if (typeof window.showClickCoordinates === 'function') window.showClickCoordinates(clickLatLng);
+                updateInfoPanel(feature.properties || {}, category, featureLayer);
+                highlightFeature(featureLayer);
+            });
+        }
+    }).addTo(map);
+    geoJsonLayers[layerKey] = layer;
+}
+
 // Function to activate buttons and fetch CSV for Proposal Layers
 function activateProposalLayers() {
     const selectElement = document.getElementById('selectMWSID');
@@ -1397,6 +1533,7 @@ function activateProposalLayers() {
             })
             .catch(error => {
                 console.error('Error fetching the Proposal CSV file:', error);
+                updateProposalPanel({});
             });
     } else {
         alert('Please select a valid MWS_ID.');
@@ -1748,32 +1885,41 @@ function updateProposalPanel(databaseLayers) {
 
     Object.keys(databaseLayers).forEach(databaseName => {
         const databaseDiv = document.createElement('div');
+        databaseDiv.style.marginBottom = '12px';
         const databaseTitle = document.createElement('h3');
         databaseTitle.textContent = databaseName;
         databaseDiv.appendChild(databaseTitle);
 
         databaseLayers[databaseName].forEach((layerInfo, index) => {
-            const { Layer, geojson } = layerInfo;
+            const { Layer, geojson, dadCategory, layerKey } = layerInfo;
+            const mapLayerKey = layerKey || Layer;
 
             const layerDiv = document.createElement('div');
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.id = `proposal_layer_${databaseName}_${index}`;
             //checkbox.checked = false;
-            checkbox.checked = layerState[Layer] || false;  // Retrieve and set layer state				
+            checkbox.checked = layerState[mapLayerKey] || false;  // Retrieve and set layer state				
 
             checkbox.addEventListener('change', (e) => {
-                layerState[Layer] = e.target.checked;  // Update layer state				
+                layerState[mapLayerKey] = e.target.checked;  // Update layer state				
                 if (e.target.checked) {
-                    if (geoJsonLayers[Layer]) {
-                        geoJsonLayers[Layer].addTo(map);
+                    if (geoJsonLayers[mapLayerKey]) {
+                        geoJsonLayers[mapLayerKey].addTo(map);
+                    } else if (dadCategory) {
+                        loadDadProposalLayer(dadCategory, mapLayerKey).catch(error => {
+                            console.error(`Error loading DAD proposal layer ${dadCategory}:`, error);
+                            layerState[mapLayerKey] = false;
+                            checkbox.checked = false;
+                            alert(`Could not load ${dadCategory}.`);
+                        });
                     } else {
                         loadGeoJsonLayerP(geojson, Layer);
                     }
                 } else {
-                    if (geoJsonLayers[Layer]) {
-                        map.removeLayer(geoJsonLayers[Layer]);
-                        removeRoadDecorations(Layer);
+                    if (geoJsonLayers[mapLayerKey]) {
+                        map.removeLayer(geoJsonLayers[mapLayerKey]);
+                        removeRoadDecorations(mapLayerKey);
                     }
                 }
             });
