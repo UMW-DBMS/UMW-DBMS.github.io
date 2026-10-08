@@ -1389,7 +1389,7 @@ function loadGeoJsonLayer(url, layerName) {
 
 
 // Shared DAD datasets are stored outside the individual MWS registries.
-const DAD_DATA_ROOT = 'IWWRMP/Data/EXD/15_DAD/';
+const DAD_DATA_ROOT = 'IWWRMP/Data/EXD/15_TNK/';
 const DAD_GITHUB_TREE_URL = 'https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/git/trees/main?recursive=1';
 const DAD_RAW_BASE_URL = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/';
 let dadProposalTreeRequest = null;
