@@ -1419,7 +1419,27 @@ function normalizeDadFolderName(value) {
     return String(value || '').toLowerCase().replace(/[^a-z0-9]/g, '').replace(/s$/, '');
 }
 
-async function getDadProposalUrls(category) {
+async function getDadProposalUrls(category, selectedMwsId) {
+    const normalizedCategory = normalizeDadFolderName(category);
+    if (normalizedCategory === 'anicut' || normalizedCategory === 'minortank' || normalizedCategory === 'undptank') {
+        const mwsCode = String(selectedMwsId || '')
+            .trim()
+            .replace(/^MWS[-_\s]*/i, '')
+            .replace(/-/g, '_');
+        if (!/^[A-Z0-9]+(?:_[A-Z0-9]+)*$/i.test(mwsCode)) {
+            throw new Error(`Invalid MWS ID for ${category}: ${selectedMwsId}`);
+        }
+
+        const fileDetails = {
+            anicut: { folderName: 'DAD_Anicuts', filePrefix: 'DAD_Anicut_MWS_' },
+            minortank: { folderName: 'DAD_Tanks', filePrefix: 'DAD_MinorTanks_MWS_' },
+            undptank: { folderName: 'UNDP_Tanks', filePrefix: 'UNDP_Tanks_MWS_' }
+        }[normalizedCategory];
+        const folderName = fileDetails.folderName;
+        const fileName = `${fileDetails.filePrefix}${mwsCode}.geojson`;
+        return [`${DAD_RAW_BASE_URL}${DAD_DATA_ROOT}${folderName}/${encodeURIComponent(fileName)}`];
+    }
+
     if (!dadProposalTreeRequest) {
         dadProposalTreeRequest = fetch(DAD_GITHUB_TREE_URL)
             .then(response => {
@@ -1452,9 +1472,41 @@ async function getDadProposalUrls(category) {
     });
 }
 
+function createDadTankMarker(latlng, outerColor, innerColor) {
+    const icon = L.divIcon({
+        className: 'undefine',
+        html: `
+            <div style="position: relative; width: 20px; height: 20px;">
+                <div style="
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    background-color: ${outerColor};
+                "></div>
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    width: 10px;
+                    height: 10px;
+                    border-radius: 50%;
+                    background-color: ${innerColor};
+                "></div>
+            </div>
+        `,
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+    return L.marker(latlng, { icon });
+}
+
 async function loadDadProposalLayer(category, layerKey) {
     const selectedMwsId = document.getElementById('selectMWSID').value;
-    const urls = await getDadProposalUrls(category);
+    const urls = await getDadProposalUrls(category, selectedMwsId);
     const results = await Promise.allSettled(urls.map(async url => {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`${response.status} while loading ${url}`);
@@ -1475,13 +1527,25 @@ async function loadDadProposalLayer(category, layerKey) {
     }
 
     const layer = L.geoJSON({ type: 'FeatureCollection', features }, {
-        pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
-            radius: 6,
-            color: '#1e6091',
-            weight: 1,
-            fillColor: '#34a0a4',
-            fillOpacity: 0.85
-        }),
+        pointToLayer: (feature, latlng) => {
+            if (category === 'Anicuts' || category === 'Minor Tank' || category === 'UNDP Tanks') {
+                const markerColors = {
+                    Anicuts: { outer: 'rgba(0, 0, 255, 0.5)', inner: '#FFD700' },
+                    'Minor Tank': { outer: 'rgba(0, 0, 255, 0.5)', inner: '#008000' },
+                    'UNDP Tanks': { outer: 'rgba(0, 0, 255, 0.5)', inner: '#FF8C00' }
+                };
+                const colors = markerColors[category];
+                return createDadTankMarker(latlng, colors.outer, colors.inner);
+            }
+
+            return L.circleMarker(latlng, {
+                radius: 6,
+                color: '#1e6091',
+                weight: 1,
+                fillColor: '#34a0a4',
+                fillOpacity: 0.85
+            });
+        },
         onEachFeature: (feature, featureLayer) => {
             featureLayer.on('click', event => {
                 const clickLatLng = event && event.latlng ? event.latlng : null;
