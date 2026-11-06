@@ -1,11 +1,12 @@
 /**
  * Welcome / Help modal
  *
- * Purpose : Step-by-step welcome modal (photo + video per step), "don't show again" preference, keyboard and backdrop close.
- *           Its top shows the ministry logo, the IWWRMP logo and the names of the ministry and the project (TRC review),
- *           built here from WELCOME_BANNER below, so index.html needs no change.
+ * Purpose : Step-by-step welcome window (photo + video per step), "don't show again" preference, keyboard and backdrop close.
+ *           Its top shows the ministry logo, the IWWRMP logo and the names of the ministry and the project (TRC review), built here from
+ *           WELCOME_BANNER below. The layout of the whole window (banner, step dots, text beside photo and video, buttons) is in
+ *           css/umw-enhancements.css, section "Help window".
  * Depends : The `#readme-modal` markup in index.html; help media from the MWS_001 GitHub repo; the two logo files in assets/logos/
- *           (see WELCOME_BANNER). A missing logo file is hidden and the names still show.
+ *           (a missing logo file is hidden and the names still show).
  * Exposes : initHelpModal() (runs on window load)
  */
 
@@ -20,38 +21,6 @@ const WELCOME_BANNER = {
     ministryLogo: { src: 'assets/logos/ministry-logo.png', alt: 'Emblem of the Ministry of Agriculture, Livestock, Land and Irrigation' },
     projectLogo: { src: 'assets/logos/iwwrmp-logo.png', alt: 'Logo of the Integrated Watershed and Water Resources Management Project (IWWRMP)' }
 };
-
-// Styles of the banner (kept here with the banner so the whole feature is in this one file). Class names start with "welcome-"
-// and do not clash with any rule in css/. Colours use the theme variables when they exist. This style element is added after
-// the linked stylesheets, so these rules win where they overlap.
-const WELCOME_BANNER_CSS = `
-/* The welcome window must be above the page header (the header is z-index 1100, the window 1000), or the header hides the top of it. */
-#readme-modal { z-index: 2000; }
-/* The banner takes about 160 px, so the window may use more of the screen height (css/help-modal.css gives 80vh). */
-#readme-modal .modal-content { max-height: 92vh; }
-/* In step mode the step box is a fixed 360 px and a card with its photo and video can be taller, so its top and bottom were cut off
-   (the "Step N" label with them). The card now scrolls inside the box instead. */
-#readme-modal .flowchart.step-mode .flow-node.current-step { max-height: calc(100% - 16px); overflow-y: auto; }
-.welcome-banner { display: flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 14px; margin: 0 0 8px; padding: 2px 4px 10px; text-align: center; border-bottom: 2px solid var(--c-border, #c9d3cd); }
-.welcome-banner .welcome-text { flex: 1 1 auto; min-width: 0; }
-.welcome-banner h2 { margin: 0 0 4px; }
-.welcome-banner .welcome-ministry, .welcome-banner .welcome-project { margin: 2px 0; line-height: 1.3; }
-.welcome-banner .welcome-ministry { font-weight: 700; color: var(--c-primary, #1d5c3a); }
-.welcome-banner .welcome-project { font-size: 0.95em; color: var(--c-muted, #4f5f56); }
-.welcome-banner .welcome-logo { flex: 0 0 auto; width: auto; height: auto; max-height: 72px; max-width: 30%; object-fit: contain; }
-@media (max-height: 700px) {
-    #readme-modal .modal-content { max-height: 96vh; }
-    .welcome-banner { gap: 10px; margin-bottom: 4px; padding-bottom: 4px; }
-    .welcome-banner .welcome-logo { max-height: 40px; }
-    .welcome-banner h2 { font-size: 1.15rem; }
-    .welcome-banner .welcome-project { font-size: 0.88em; }
-}
-@media (max-width: 600px) {
-    .welcome-banner { flex-wrap: wrap; gap: 6px 10px; }
-    .welcome-banner .welcome-text { order: 3; flex-basis: 100%; }
-    .welcome-banner .welcome-logo { max-height: 52px; max-width: 40%; }
-}
-`;
 
 function initHelpModal() {
     const helpModal = document.getElementById('readme-modal');
@@ -88,13 +57,11 @@ function initHelpModal() {
         'https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Step%2011.png'
     ];
     let imagePopup = null;
-
     function closeImagePopup() {
         if (!imagePopup) return;
         imagePopup.remove();
         imagePopup = null;
     }
-
     function openImagePopup(src, altText) {
         closeImagePopup();
         imagePopup = document.createElement('div');
@@ -106,20 +73,19 @@ function initHelpModal() {
         imagePopup.style.justifyContent = 'center';
         imagePopup.style.zIndex = '5000';
         imagePopup.style.padding = '18px';
-
         const image = document.createElement('img');
         image.src = src;
         image.alt = altText || 'Step image';
-        image.style.maxWidth = '50vw';
-        image.style.maxHeight = '50vh';
+        image.style.maxWidth = '90vw';
+        image.style.maxHeight = '86vh';
         image.style.border = '2px solid #fff';
         image.style.borderRadius = '4px';
         image.style.boxShadow = '0 8px 24px rgba(0,0,0,0.35)';
         imagePopup.appendChild(image);
-
         imagePopup.addEventListener('click', closeImagePopup);
         document.body.appendChild(imagePopup);
     }
+
     // -----------------------------------------------------------------------------------------------------------------
     // Welcome banner: ministry logo | title, ministry and project names | IWWRMP logo
     // -----------------------------------------------------------------------------------------------------------------
@@ -137,12 +103,6 @@ function initHelpModal() {
     }
     function addWelcomeBanner() {
         if (!helpModalContent || helpModalContent.querySelector('.welcome-banner')) return;   // once only
-        if (!document.getElementById('welcome-banner-styles')) {
-            const style = document.createElement('style');
-            style.id = 'welcome-banner-styles';
-            style.textContent = WELCOME_BANNER_CSS;
-            document.head.appendChild(style);
-        }
         const banner = document.createElement('div');
         banner.className = 'welcome-banner';
         const text = document.createElement('div');
@@ -167,14 +127,18 @@ function initHelpModal() {
     }
     addWelcomeBanner();
 
-    //const videoBaseUrl = 'https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/';
-
+    // -----------------------------------------------------------------------------------------------------------------
+    // Steps: photo and video of each step go into one media column
+    // -----------------------------------------------------------------------------------------------------------------
     document.querySelectorAll('#readme-modal .flow-node').forEach((node, index) => {
+        const media = document.createElement('div');
+        media.className = 'step-media';
         const photo = document.createElement('img');
         photo.className = 'step-photo';
         photo.alt = `Step ${index + 1} preview`;
         photo.src = stepPhotoSources[index] || '';
         photo.style.cursor = 'zoom-in';
+        photo.title = 'Click to enlarge';
         photo.addEventListener('click', function() {
             if (!photo.src) return;
             openImagePopup(photo.src, photo.alt);
@@ -182,23 +146,41 @@ function initHelpModal() {
         photo.addEventListener('error', function() {
             photo.style.display = 'none';
         });
-        node.appendChild(photo);
-
+        media.appendChild(photo);
         const video = document.createElement('video');
         video.className = 'step-video';
         video.controls = true;
-        //video.playsInline = true;
+        video.preload = 'none';          // only the video of the step on screen is prepared (see renderStepView)
         video.src = stepVideoSources[index] || 'documentary.mp4';
-        //video.preload = 'metadata';
-        //const fileName = `Step ${index + 1}.mp4`;
-        //video.src = `${videoBaseUrl}${encodeURIComponent(fileName)}`;
-        //video.addEventListener('error', function() {
-            //console.warn(`Help video not found or not playable: ${fileName}`);
-        //});
-        node.appendChild(video);
+        media.appendChild(video);
+        node.appendChild(media);
     });
     const stepNodes = Array.from(document.querySelectorAll('#readme-modal .flow-node'));
     let currentStepIndex = 0;
+
+    // Step dots and "Step 3 of 10" between the banner and the step
+    const progress = document.createElement('div');
+    progress.className = 'step-progress';
+    const dots = document.createElement('div');
+    dots.className = 'step-dots';
+    const dotButtons = stepNodes.map((node, index) => {
+        const dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'step-dot';
+        dot.setAttribute('aria-label', `Go to step ${index + 1}`);
+        dot.addEventListener('click', function () {
+            currentStepIndex = index;
+            renderStepView();
+        });
+        dots.appendChild(dot);
+        return dot;
+    });
+    const stepCount = document.createElement('span');
+    stepCount.className = 'step-count';
+    stepCount.setAttribute('role', 'status');
+    progress.appendChild(dots);
+    progress.appendChild(stepCount);
+    if (flowchart && flowchart.parentNode) flowchart.parentNode.insertBefore(progress, flowchart);
 
     function renderStepView() {
         stepNodes.forEach((node, index) => {
@@ -210,7 +192,22 @@ function initHelpModal() {
             } else {
                 node.classList.add('hidden-step');
             }
+            const video = node.querySelector('.step-video');
+            if (video) {
+                if (index === currentStepIndex) {
+                    video.preload = 'metadata';
+                } else if (!video.paused) {
+                    video.pause();
+                }
+            }
         });
+        dotButtons.forEach((dot, index) => {
+            dot.classList.toggle('is-current', index === currentStepIndex);
+            dot.classList.toggle('is-done', index < currentStepIndex);
+            if (index === currentStepIndex) dot.setAttribute('aria-current', 'step'); else dot.removeAttribute('aria-current');
+        });
+        stepCount.textContent = `Step ${currentStepIndex + 1} of ${stepNodes.length}`;
+        if (flowchart) flowchart.scrollTop = 0;
         if (prevStepBtn) {
             prevStepBtn.disabled = currentStepIndex <= 0;
             prevStepBtn.style.opacity = prevStepBtn.disabled ? '0.5' : '1';
@@ -222,26 +219,21 @@ function initHelpModal() {
             nextStepBtn.style.cursor = nextStepBtn.disabled ? 'not-allowed' : 'pointer';
         }
     }
-
     function shouldHideHelpModalOnLoad() {
         return localStorage.getItem(helpModalPreferenceKey) === 'true';
     }
-
     function syncHelpPreferenceCheckbox() {
         if (!dontShowAgainCheckbox) return;
         dontShowAgainCheckbox.checked = shouldHideHelpModalOnLoad();
     }
-
     function openHelpModal() {
         helpModal.style.display = 'flex';
         currentStepIndex = 0;
         renderStepView();
         syncHelpPreferenceCheckbox();
     }
-
     if (flowchart) flowchart.classList.add('step-mode');
     renderStepView();
-
     const closeHelpModal = function() {
         helpModal.style.display = 'none';
         closeImagePopup();
@@ -250,7 +242,6 @@ function initHelpModal() {
             video.currentTime = 0;
         });
     };
-
     // Show README modal on load
     syncHelpPreferenceCheckbox();
     if (!shouldHideHelpModalOnLoad()) {
@@ -258,23 +249,19 @@ function initHelpModal() {
     } else {
         helpModal.style.display = 'none';
     }
-
     if (dontShowAgainCheckbox) {
         dontShowAgainCheckbox.addEventListener('change', function() {
             localStorage.setItem(helpModalPreferenceKey, dontShowAgainCheckbox.checked ? 'true' : 'false');
         });
     }
-
     // Close README modal
     document.getElementById('close-readme').onclick = function() {
         closeHelpModal();
     };
-
     // Show README modal when "Help" button is clicked
     document.getElementById('help-button').onclick = function() {
         openHelpModal();
     };
-
     if (prevStepBtn) {
         prevStepBtn.onclick = function() {
             if (currentStepIndex > 0) {
@@ -283,7 +270,6 @@ function initHelpModal() {
             }
         };
     }
-
     if (nextStepBtn) {
         nextStepBtn.onclick = function() {
             if (currentStepIndex < stepNodes.length - 1) {
@@ -292,19 +278,29 @@ function initHelpModal() {
             }
         };
     }
-
-    // Close with Esc or Enter when modal is visible
+    // Close with Esc or Enter when modal is visible; the arrow keys move between the steps
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape' && imagePopup) {
             closeImagePopup();
             return;
         }
         if (helpModal.style.display !== 'flex') return;
+        if (event.key === 'ArrowRight' && nextStepBtn && !nextStepBtn.disabled) {
+            nextStepBtn.click();
+            return;
+        }
+        if (event.key === 'ArrowLeft' && prevStepBtn && !prevStepBtn.disabled) {
+            prevStepBtn.click();
+            return;
+        }
+        // Enter on a button (a step dot, Previous, Next) or a field does what that control does; it only closes the window from elsewhere
+        if (event.key === 'Enter' && event.target && event.target.closest && event.target.closest('button, a, input, select, textarea, video')) {
+            return;
+        }
         if (event.key === 'Escape' || event.key === 'Enter') {
             closeHelpModal();
         }
     });
-
     // Close when clicking on modal backdrop
     helpModal.addEventListener('click', function(event) {
         if (event.target === helpModal && !helpModalContent.contains(event.target)) {
@@ -312,5 +308,4 @@ function initHelpModal() {
         }
     });
 }
-
 window.addEventListener('load', initHelpModal);
