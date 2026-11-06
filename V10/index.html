@@ -18,15 +18,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="stylesheet" href="css/symbology.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <!-- All the newer parts of the page: header banner (logos, ministry, project and the dashboard title), compact footer, language box, Explore area, Data Catalog, Statistics and Stakeholders windows, Help window, data-provider pop-up, GN search box. Keep it after the files above. -->
+    <link rel="stylesheet" href="css/umw-enhancements.css">
+    <!-- The header layout (logo order, Help / User Guide / Map Symbols / Log in next to Explore area). Keep it LAST: it overrides section 1 of the file above. -->
+    <link rel="stylesheet" href="css/umw-header.css">
 </head>
 
 <body>
     <div class="top-bar">
         <div id="google_translate_element"></div>
     </div>
-
     <!-- Legend items will be dynamically added here -->
-
     <!-- README Modal -->
     <div id="readme-modal" class="modal">
         <div class="modal-content">
@@ -39,9 +41,9 @@
                         <div>If you know the Mini Watershed (MWS) ID, select it. If not, click a location on the map to
                             see its MWS ID in the popup.</div>
                         <div>Click "Go". The data buttons unlock after you press Go.</div>
+                        <div>To see a whole District or DSD (or the whole UMW) at once, choose it and click "Explore area".</div>
                     </div>
                 </div>
-
                 <div class="flow-node">
                     <div class="flow-title">Step 2</div>
                     <div class="flow-body">Use the footer menu to switch background map (e.g., Satellite, OSM).</div>
@@ -85,7 +87,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-footer">
                 <label class="modal-checkbox">
                     <input id="dont-show-help-again" type="checkbox">
@@ -99,20 +100,41 @@
             </div>
         </div>
     </div>
-
     <a class="skip-link" href="#map">Skip to map</a>
-
     <header class="app-header">
-        <div class="app-topbar">
+        <!-- Header banner, left to right: IWWRMP logo, the dashboard title, then (at the right) the ministry and project names and the ministry emblem.
+             Logo files: assets/logos/. The layout is in css/umw-header.css. -->
+        <div class="agency-banner">
+            <img class="agency-logo agency-logo--project" src="assets/logos/iwwrmp-logo.png" alt="Logo of the Integrated Watershed and Water Resources Management Project (IWWRMP)" onerror="this.hidden=true">
             <div class="brand">
-                <span class="brand-mark" aria-hidden="true">UMW</span>
                 <div class="brand-text">
                     <h1>Watershed Management Plan</h1>
                     <p>Upper Mahaweli Watershed</p>
                 </div>
             </div>
+            <div class="agency-text">
+                <p class="agency-ministry">Ministry of Agriculture, Livestock, Land and Irrigation</p>
+                <p class="agency-project">Integrated Watershed and Water Resources Management Project</p>
+            </div>
+            <img class="agency-logo agency-logo--ministry" src="assets/logos/ministry-logo.png" alt="Emblem of the Ministry of Agriculture, Livestock, Land and Irrigation" onerror="this.hidden=true">
+        </div>
+        <div class="app-topbar">
             <div class="location-block">
                 <div class="location-group" role="group" aria-label="Choose a location">
+                    <!-- GN / DSD / District / MWS search (js/location/gn-search.js; style: css/umw-enhancements.css, section 9) -->
+                    <div class="field field--search">
+                        <label for="mwsSearchInput">Search</label>
+                        <div class="gn-search">
+                            <input id="mwsSearchInput" class="mws-search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-haspopup="listbox" aria-controls="gnSuggestList" placeholder="Search GN, DSD, District" autocomplete="off" spellcheck="false">
+                            <button id="mwsSearchBtn" class="button search-icon-btn" type="button" title="Search" aria-label="Search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i></button>
+                            <button id="clearGndSearchBtn" class="button search-clear-btn" type="button" title="Clear the search and the outlined GN" aria-label="Clear the search" hidden>Clear</button>
+                            <div id="gnSuggest" class="gn-suggest" hidden>
+                                <div id="gnSuggestMsg" class="gn-msg" role="status"></div>
+                                <div id="gnSuggestList" role="listbox" aria-label="Search results"></div>
+                                <div id="gnSuggestFoot" class="gn-foot"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="field">
                         <label for="selectDist">District</label>
                         <select id="selectDist">
@@ -132,19 +154,28 @@
                         </select>
                     </div>
                     <button id="goBtn" class="button button-go" type="button" disabled>Go</button>
+                    <button id="areaBtn" class="button button-area" type="button" title="Show all layers and statistics of the chosen DSD or District (or of the whole UMW when nothing is chosen)"><i class="fa-solid fa-draw-polygon" aria-hidden="true"></i><span>Explore area</span></button>
+                    <!-- Help, User Guide, Map Symbols and Log in: next to Explore area (they were in the toolbar). Same ids and onclick as before. When the names do not fit, js/core/header-links.js shows only the icons (the names stay in the tooltip). -->
+                    <div class="header-links" role="group" aria-label="Help and access">
+                        <button id="help-button" class="button" type="button" title="Help" onclick="openWorkthrough()"><i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Help</span></button>
+                        <button id="info-button" class="button" type="button" title="User Guide" onclick="openWorkthrough()"><i class="fa-solid fa-book" aria-hidden="true"></i><span>User Guide</span></button>
+                        <button id="symbols-button" class="button" type="button" title="Map Symbols" onclick="openSymbologyGuide()"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Map Symbols</span></button>
+                        <button id="userInputBtn" class="button" type="button" title="Log in" onclick="openUserInput()"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Log in</span></button>
+                    </div>
                 </div>
                 <p id="selectionStatus" class="selection-status" role="status" aria-live="polite">Select District, DSD and MWS ID, then press Go.</p>
+                <p id="areaHint" class="area-hint" role="status" aria-live="polite"></p>
             </div>
             <div class="language-switcher">
                 <label for="languageSelect">Language</label>
-                <select id="languageSelect">
-                    <option value="en">English</option>
-                    <option value="si">Sinhala</option>
-                    <option value="ta">Tamil</option>
+                <!-- Each language is always written in its own letters (translate="no" keeps Google Translate from changing them) -->
+                <select id="languageSelect" class="notranslate" translate="no">
+                    <option value="en" lang="en" translate="no">English</option>
+                    <option value="si" lang="si" translate="no">සිංහල</option>
+                    <option value="ta" lang="ta" translate="no">தமிழ்</option>
                 </select>
             </div>
         </div>
-
         <div class="app-toolbar">
             <nav class="app-nav" aria-label="Dashboard tools">
                 <div class="nav-group" role="group" aria-label="Map data">
@@ -153,34 +184,29 @@
                 <button id="climateLayerBtn" class="button" type="button" onclick="handleButtonClick('climateLayerBtn', 'climPanel')" data-requires-mws disabled><i class="fa-solid fa-cloud-sun-rain" aria-hidden="true"></i><span>Climate Layer</span></button>
                 <button id="waterQualityBtn" class="button" type="button" onclick="handleButtonClick('waterQualityBtn', 'waterPanel')"><i class="fa-solid fa-satellite-dish" aria-hidden="true"></i><span>Station Data</span></button>
                 </div>
+                <div class="nav-group nav-group--area" role="group" aria-label="Area (District, DSD or whole UMW)">
+                <button id="areaLayersBtn" class="button" type="button" data-requires-area disabled title="Press Explore area first"><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Area Layers</span></button>
+                <button id="areaStatsBtn" class="button" type="button" data-requires-area disabled title="Press Explore area first"><i class="fa-solid fa-chart-column" aria-hidden="true"></i><span>Area Statistics</span></button>
+                </div>
                 <div class="nav-group" role="group" aria-label="Information">
                 <button id="dataCatalogBtn" class="button" type="button" onclick="handleButtonClick('dataCatalogBtn', 'catalogPanel')" data-requires-mws disabled><i class="fa-solid fa-database" aria-hidden="true"></i><span>Data Catalog</span></button>
                 <button id="tableBtn" class="button" type="button" onclick="handleButtonClick('tableBtn', 'tablePanel')" data-requires-mws disabled hidden><i class="fa-solid fa-table" aria-hidden="true"></i><span>Data Table</span></button>
                 <button id="statisticBtn" class="button" type="button" onclick="handleButtonClick('statisticBtn', 'statPanel')" data-requires-mws disabled><i class="fa-solid fa-chart-pie" aria-hidden="true"></i><span>Statistics</span></button>
                 <button id="partnersBtn" class="button" type="button" onclick="handleButtonClick('partnersBtn', 'partnersPanel')"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Stakeholders</span></button>
                 </div>
-                <div class="nav-group" role="group" aria-label="Help and access">
-                <button id="help-button" class="button" type="button" onclick="openWorkthrough()"><i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Help</span></button>
-                <button id="info-button" class="button" type="button" onclick="openWorkthrough()"><i class="fa-solid fa-book" aria-hidden="true"></i><span>User Guide</span></button>
-                <button id="symbols-button" class="button" type="button" onclick="openSymbologyGuide()"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Map Symbols</span></button>
-                <button id="userInputBtn" class="button" type="button" onclick="openUserInput()"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Log in</span></button>
-                </div>
             </nav>
         </div>
         <!-- MWS Info button is disabled. If you restore it, add the data-requires-mws attribute so it unlocks with Go:
         <button id="mwsInfoBtn" class="button" type="button" data-requires-mws disabled onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS Info</button> -->
     </header>
-
     <main class="workspace">
     <div id="map" class="map" aria-label="Interactive map"></div>
-
     <div id="basePanel" class="panel"><button class="hide-btn" onclick="hidePanel('basePanel')">Close</button><p class="panel-note">Loading layers...</p></div>
     <div id="proposalPanel" class="panel">
         <div id="proposalNoLabel" style="display:none;">No.</div>
         <button class="hide-btn" onclick="hidePanel('proposalPanel')">Close</button>
         <p class="panel-note">Loading proposals...</p>
     </div>
-
     <div id="infoPanel" class="panel"><button class="hide-btn"
             onclick="hidePanel('infoPanel')">Close</button></div>
     <div id="climPanel" class="panel"><button class="hide-btn" onclick="hidePanel('climPanel')">Close</button><p class="panel-note">Loading climate layers...</p></div>
@@ -188,70 +214,37 @@
     <div id="attributePanel" class="panel"><button class="hide-btn" onclick="hidePanel('attributePanel')">Close</button></div>
     <div id="tablePanel" class="panel"><button class="hide-btn"
             onclick="hidePanel('tablePanel')">Close</button><h3 class="panel-title">Data Table</h3>
-
     </div>
-    <div id="partnersPanel" class="panel">
-        <button class="hide-btn" onclick="hidePanel('partnersPanel')">Close</button>
-        <h3 class="panel-title">Stakeholders</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Institute</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1</td>
-                    <td>Land Use Policy Planning Department (LUPPD)</td>
-                </tr>
-                <tr>
-                    <td>2</td>
-                    <td>Forest Department (FD)</td>
-                </tr>
-                <tr>
-                    <td>3</td>
-                    <td>Mahaweli Authority of Sri Lanka (MASL)</td>
-                </tr>
-                <tr>
-                    <td>4</td>
-                    <td>Department of Wildlife Conservation (DWLC)</td>
-                </tr>
-                <tr>
-                    <td>6</td>
-                    <td>Natural Resource Management Centre (NRMC)</td>
-                </tr>
-                <tr>
-                    <td>7</td>
-                    <td>Department of Meteorology (DM)</td>
-                </tr>
-                <tr>
-                    <td>8</td>
-                    <td>National Building Research Organization (NBRO)</td>
-                </tr>
-                <tr>
-                    <td>9</td>
-                    <td>Central Environment Authority (CEA)</td>
-                </tr>
-                <tr>
-                    <td>10</td>
-                    <td>Resource profile (DSD office)</td>
-                </tr>
-                <tr>
-                    <td>11</td>
-                    <td>Survey Department (SD)</td>
-                </tr>
-                <tr>
-                    <td>12</td>
-                    <td>National Water Supply and Drainage Board (NWSDB)</td>
-                </tr>
-            </tbody>
-        </table>
+    <!-- Stakeholders: one card per institution (the short name in a coloured tag, the full name beside it). To add or change an institution, copy one <li> line. -->
+    <div id="partnersPanel" class="panel" aria-label="Stakeholders">
+        <div class="stk-card">
+            <div class="stat-head">
+                <div class="stat-headtext">
+                    <h3 class="stat-title">Stakeholders</h3>
+                    <p class="stat-sub">11 institutions</p>
+                </div>
+                <button class="hide-btn" type="button" onclick="hidePanel('partnersPanel')">Close</button>
+            </div>
+            <ul class="stk-list">
+                <li class="stk-item"><span class="stk-abbr">LUPPD</span><span class="stk-name">Land Use Policy Planning Department</span></li>
+                <li class="stk-item"><span class="stk-abbr">FD</span><span class="stk-name">Forest Department</span></li>
+                <li class="stk-item"><span class="stk-abbr">MASL</span><span class="stk-name">Mahaweli Authority of Sri Lanka</span></li>
+                <li class="stk-item"><span class="stk-abbr">DWLC</span><span class="stk-name">Department of Wildlife Conservation</span></li>
+                <li class="stk-item"><span class="stk-abbr">NRMC</span><span class="stk-name">Natural Resource Management Centre</span></li>
+                <li class="stk-item"><span class="stk-abbr">DM</span><span class="stk-name">Department of Meteorology</span></li>
+                <li class="stk-item"><span class="stk-abbr">NBRO</span><span class="stk-name">National Building Research Organization</span></li>
+                <li class="stk-item"><span class="stk-abbr">CEA</span><span class="stk-name">Central Environment Authority</span></li>
+                <li class="stk-item"><span class="stk-abbr">DSD office</span><span class="stk-name">Resource profile</span></li>
+                <li class="stk-item"><span class="stk-abbr">SD</span><span class="stk-name">Survey Department</span></li>
+                <li class="stk-item"><span class="stk-abbr">NWSDB</span><span class="stk-name">National Water Supply and Drainage Board</span></li>
+            </ul>
+        </div>
     </div>
     <div id="waterQualityStationPanel" class="panel"></div>
     <div id="catalogPanel" class="panel"><button class="hide-btn" onclick="hidePanel('catalogPanel')">Close</button>
         <h3 class="panel-title">Data Catalog</h3>
-
+        <!-- The cards below are built (by js/panels/catalog-panel.js) from the rows of the table that follows; the table itself stays, hidden, because js/panels/data-catalog.js fills it. -->
+        <div id="catalogView" class="catalog-view" aria-live="polite"></div>
         <table id="csvTable">
             <thead>
                 <tr>
@@ -267,7 +260,6 @@
                     <th><select id="filterProvider">
                             <option value="">All Data Providers</option>
                         </select></th>
-
                 </tr>
                 <tr>
                     <th>ID</th>
@@ -282,21 +274,33 @@
         </table>
     </div>
     <div id="statPanel" class="panel">
-        <div>
-            <button class="hide-btn" onclick="hidePanel('statPanel')">Close</button>
-            <button id="lulcstatPanel" class="tab" type="button" onclick="selectTab('lulc', this)">LULC</button>
-            <button id="hazardstatPanel" class="tab" type="button" onclick="selectTab('hazard', this)">Hazard</button>
-            <button id="demostatPanel" class="tab" type="button" onclick="selectTab('demography', this)">Demography</button>
-            <button id="adminstatPanel" class="tab" type="button" onclick="selectTab('admin', this)">Admin</button>
-            <button id="soilstatPanel" class="tab" type="button" onclick="selectTab('soil', this)">Soil</button>
+        <div class="stat-card">
+            <div class="stat-head">
+                <div class="stat-headtext">
+                    <h3 class="stat-title">Statistics</h3>
+                    <p id="statSubtitle" class="stat-sub">Selected mini watershed</p>
+                </div>
+                <button class="hide-btn" onclick="hidePanel('statPanel')">Close</button>
+            </div>
+            <div class="stat-tabs" role="group" aria-label="Statistics topic">
+                <button id="lulcstatPanel" class="tab" type="button" onclick="selectTab('lulc', this)">LULC</button>
+                <button id="hazardstatPanel" class="tab" type="button" onclick="selectTab('hazard', this)">Hazard</button>
+                <button id="demostatPanel" class="tab" type="button" onclick="selectTab('demography', this)">Demography</button>
+                <button id="adminstatPanel" class="tab" type="button" onclick="selectTab('admin', this)">Admin</button>
+                <button id="soilstatPanel" class="tab" type="button" onclick="selectTab('soil', this)">Soil</button>
+            </div>
             <canvas id="areaPieChart"></canvas>
             <div id="statisticsLegend" aria-label="Statistics class color legend"></div>
-            <button id="downloadButton" type="button">Download CSV</button>
-            <button id="downloadChartButton" type="button">Download Chart as Image</button>
+            <div class="stat-actions">
+                <button id="downloadButton" type="button">Download CSV</button>
+                <button id="downloadChartButton" type="button">Download Chart as Image</button>
+            </div>
         </div>
     </div>
+    <!-- Area explorer: all layers and statistics of a District, a DSD or the whole UMW (filled by js/area/area-explorer.js) -->
+    <div id="areaLayersPanel" class="panel" aria-label="Area layers"></div>
+    <div id="areaStatPanel" class="panel" aria-label="Area statistics"></div>
     </main>
-
     <footer class="app-footer">
         <div class="footer-left">
             <div id="infoPopupPanel" style="display:none;"></div>
@@ -327,16 +331,13 @@
             </button>
         </div>
     </footer>
-
     <!-- Third-party libraries (versions pinned; Leaflet is loaded once) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
-
     <!-- Symbology: colours, markers and legends (needed by the layer, statistics and station scripts) -->
     <script src="js/layers/symbology.js"></script>
-
     <!-- Application scripts (order matters: each group only uses what is loaded above it) -->
     <!-- core: map first, then everything that draws on it -->
     <script src="js/core/map-init.js"></script>
@@ -345,8 +346,11 @@
     <!-- location: boundary outline + District/DSD/MWS selectors -->
     <script src="js/location/boundary-overview.js"></script>
     <script src="js/location/location-selector.js"></script>
+    <!-- GN / DSD / District / MWS search box (after the selectors it fills) -->
+    <script src="js/location/gn-search.js"></script>
     <!-- panels: catalog, table, MWS info, station data -->
     <script src="js/panels/data-catalog.js"></script>
+    <script src="js/panels/catalog-panel.js"></script>
     <script src="js/panels/data-table.js"></script>
     <script src="js/panels/mws-info.js"></script>
     <script src="js/panels/station-data.js"></script>
@@ -369,12 +373,19 @@
     <script src="js/layers/layer-water-features.js"></script>
     <script src="js/layers/feature-info.js"></script>
     <script src="js/layers/layer-panels.js"></script>
+    <!-- cost-estimate circles for every proposal layer (after the layer scripts it adds to) -->
+    <script src="js/layers/proposal-cost-circles.js"></script>
+    <!-- data provider "i" in the Base Layers list -->
+    <script src="js/layers/layer-source-info.js"></script>
     <!-- header buttons / panels, help modal, language switcher -->
     <script src="js/core/ui-panels.js"></script>
+    <!-- Area explorer (District / DSD / whole UMW): after ui-panels.js, which it works with -->
+    <script src="js/area/area-explorer.js"></script>
     <script src="js/help/help-modal.js"></script>
     <script src="js/core/translate.js"></script>
+    <!-- Header: Help / User Guide / Map Symbols / Log in show their names when they fit beside Explore area, icons otherwise -->
+    <script src="js/core/header-links.js"></script>
     <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
 </body>
 
 </html>

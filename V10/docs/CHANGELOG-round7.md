@@ -1,0 +1,5 @@
+## Round 7: dashboard title in the banner, Stakeholders cards, GN search prepared
+
+- `index.html`: the title block (UMW tile, "Watershed Management Plan", "Upper Mahaweli Watershed") moved from the dark bar into `.agency-banner`; the dark bar now holds `.location-block` and `.language-switcher` only. Stakeholders table replaced by a card list (`.stk-list`). The GN / DSD / District search markup added inside a comment, same ids as `index (4).html`.
+- `css/umw-enhancements.css`: section 1 rewritten (banner with the title and a gold rule; the title goes on its own row under 940 px); new section 5b (Stakeholders cards, per-card accent and a darker ink colour for the tag text); new section 9 (GN search box and the orange `.gn-search-label` map label, ported from `index (4).html`); footer wraps onto two rows at 380 px and below (it overflowed the screen at 320 px).
+- Not done: the GN search script (needs `dropdown.js`, `scripts.js`, the current `location-selector.js` and `boundary-overview.js`, and the GN data file).
