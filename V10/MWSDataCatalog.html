@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MWS Data Catalog - UMW Watershed Management Plan</title>
+  <meta name="theme-color" content="#14432a">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="css/symbology.css">
+  <link rel="stylesheet" href="css/catalog.css">
+</head>
+
+<body>
+  <a class="skip-link" href="#file-list">Skip to the layer list</a>
+
+  <header class="catalog-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">UMW</span>
+      <div class="brand-text">
+        <h1>Mini Watershed Data Catalog</h1>
+        <p>Upper Mahaweli Watershed</p>
+      </div>
+    </div>
+
+    <div class="catalog-selectors" role="group" aria-label="Choose a mini watershed">
+      <div class="field">
+        <label for="catalogDistSelect">District</label>
+        <select id="catalogDistSelect">
+          <option value="">Select District</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="catalogDsdSelect">DSD</label>
+        <select id="catalogDsdSelect" disabled>
+          <option value="">Select DSD</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="catalogMwsSelect">MWS ID</label>
+        <select id="catalogMwsSelect" disabled>
+          <option value="">Select MWS ID</option>
+        </select>
+      </div>
+    </div>
+
+    <a class="header-link" href="index.html">Back to dashboard</a>
+  </header>
+
+  <main class="catalog-main">
+    <!-- 1. Layers -->
+    <aside id="file-list" class="pane" aria-label="Layers">
+      <div class="pane-title">Layers</div>
+      <div class="tree-tools">
+        <div class="search-box">
+          <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+          <input id="layer-search" type="search" placeholder="Search layers" aria-label="Search layers" autocomplete="off">
+        </div>
+        <div class="tree-actions">
+          <button type="button" id="expand-all" class="link-btn">Expand all</button>
+          <button type="button" id="collapse-all" class="link-btn">Collapse all</button>
+        </div>
+      </div>
+      <div id="tree-scroll" class="tree-scroll">
+        <p>Select District, DSD, and MWS ID to load files.</p>
+      </div>
+    </aside>
+
+    <!-- 2. Preview -->
+    <section id="preview-panel" class="pane" aria-label="Preview">
+      <div id="preview-bar" class="preview-bar"></div>
+      <div class="preview-stage">
+        <div id="preview-empty"></div>
+        <div id="map" hidden></div>
+        <div id="table-preview" hidden></div>
+        <div id="image-preview-wrap" hidden><img id="image-preview" alt=""></div>
+      </div>
+    </section>
+
+    <!-- 3. Details -->
+    <aside id="right-panel" class="pane" aria-label="Layer details">
+      <div id="right-panel-resizer" title="Drag to resize"></div>
+      <div id="right-panel-header" class="pane-title" title="Double-click to maximize or restore">
+        <span id="right-panel-title" class="grow">Layer details</span>
+        <button type="button" id="maximize-btn" class="icon-btn" aria-label="Maximize or restore the details panel" aria-pressed="false">
+          <svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 3 21 3 21 9" /><polyline points="9 21 3 21 3 15" /><line x1="21" y1="3" x2="14" y2="10" /><line x1="3" y1="21" x2="10" y2="14" /></svg>
+        </button>
+      </div>
+      <div id="right-panel-content" aria-live="polite"></div>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <script src="js/layers/symbology.js"></script>
+  <script src="js/catalog/catalog-data.js"></script>
+  <script src="js/catalog/catalog-metadata.js"></script>
+  <script src="js/catalog/catalog-page.js"></script>
+</body>
+
+</html>

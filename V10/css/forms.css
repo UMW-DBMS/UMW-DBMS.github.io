@@ -1,0 +1,209 @@
+/**
+ * Login and upload pages (UserInput.html, WaterQuality.html, LULC.html).
+ *
+ * Loaded AFTER each page's own <style> block, so these rules win and the three
+ * pages look the same as the dashboard. Tokens come from theme.css.
+ */
+
+body {
+    font-size: var(--fs-base);
+    line-height: 1.45;
+    color: var(--c-text);
+    background: var(--c-bg);
+}
+
+header {
+    padding: 12px 20px;
+    color: #fff;
+    background: var(--c-primary-dark);
+    box-shadow: 0 3px 0 var(--c-accent);
+}
+
+.header-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.header-title,
+.header-actions {
+    align-items: center;
+}
+
+.header-btn,
+.header-help-btn {
+    min-height: 34px;
+    padding: 5px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.header-btn:hover,
+.header-help-btn:hover {
+    color: var(--c-primary-dark);
+    background: #fff;
+}
+
+main {
+    padding: 24px 16px;
+}
+
+.card {
+    padding: 20px 22px;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+}
+
+.card h2 {
+    margin: 0 0 6px;
+    font-size: 1.25rem;
+    color: var(--c-primary-dark);
+}
+
+.hint,
+.note {
+    font-size: var(--fs-small);
+    color: var(--c-muted);
+}
+
+label {
+    font-size: var(--fs-small);
+    font-weight: 600;
+    color: var(--c-text);
+}
+
+input,
+select,
+textarea {
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--c-text);
+    background: #fff;
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius-sm);
+}
+
+.form-row input[type="text"],
+.form-row input[type="email"],
+.form-row input[type="password"] {
+    min-width: 220px;
+}
+
+input[type="file"] {
+    min-height: 0;
+    padding: 4px;
+}
+
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+    border-color: var(--c-primary);
+}
+
+input:disabled,
+select:disabled {
+    color: var(--c-disabled-text);
+    background: var(--c-disabled-bg);
+    cursor: not-allowed;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    min-height: 0;
+    accent-color: var(--c-primary);
+}
+
+.btn {
+    min-height: 36px;
+    padding: 7px 16px;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--c-primary);
+    border: 1px solid var(--c-primary);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+.btn:hover:not(:disabled) {
+    background: var(--c-primary-dark);
+}
+
+.btn:disabled {
+    color: var(--c-disabled-text);
+    background: var(--c-disabled-bg);
+    border-color: #c5cdc8;
+    cursor: not-allowed;
+}
+
+/* Proposal-type chips (UserInput.html) */
+.proposal-list,
+.form-panel,
+.file-list {
+    background: #fafbfa;
+    border-color: var(--c-border);
+}
+
+.proposal-item {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c-primary);
+    background: #fff;
+    border: 1px solid var(--c-primary);
+    border-radius: var(--radius-sm);
+}
+
+.proposal-item:hover {
+    background: var(--c-primary-light);
+}
+
+.proposal-item.active {
+    color: #fff;
+    background: var(--c-primary);
+}
+
+.file-item {
+    background: #fff;
+    border-color: var(--c-border);
+}
+
+.file-link {
+    font-weight: 600;
+    color: var(--c-primary);
+}
+
+.form-panel h3 {
+    color: var(--c-primary-dark);
+}
+
+.help-card {
+    border-color: var(--c-border);
+    border-radius: var(--radius);
+}
+
+.help-card h3 {
+    color: var(--c-primary-dark);
+}
+
+@media (max-width: 640px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}

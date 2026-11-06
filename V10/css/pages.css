@@ -1,0 +1,72 @@
+/**
+ * User guide (workthrough.html) and print view (print-map.html).
+ *
+ * These pages carry their own inline styles built on CSS variables. This file is
+ * loaded after them and re-points those variables at the shared theme tokens, so
+ * they follow the dashboard palette with no change to their layout.
+ */
+
+/* ===== User guide ===== */
+
+:root {
+    --bg: var(--c-bg);
+    --sidebar-bg: var(--c-primary-dark);
+    --sidebar-active: var(--c-primary);
+    --sidebar-hover: #1a5434;
+    --sidebar-text: #d6e4db;
+    --accent: var(--c-primary);
+    --accent-light: var(--c-primary-light);
+    --accent-mid: var(--c-primary-mid);
+    --header-bg: var(--c-primary-dark);
+    --text: var(--c-text);
+    --text-muted: var(--c-muted);
+    --border: var(--c-border);
+    --tag-text: var(--c-primary);
+}
+
+/* The guide used Google Fonts; use the shared system stack instead (one less request) */
+body,
+header h1,
+.section-title,
+h4 {
+    font-family: var(--font);
+}
+
+/* Box-shadow, not a border: the guide's layout height assumes a fixed 72px header */
+header {
+    box-shadow: 0 3px 0 var(--c-accent), 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+header p {
+    color: #b9d3c3;
+}
+
+p {
+    color: #33443a;
+}
+
+.nav-item {
+    font-size: 14px;
+}
+
+/* ===== Print view ===== */
+
+.toolbar {
+    background: var(--c-primary-dark);
+    box-shadow: 0 3px 0 var(--c-accent);
+}
+
+.toolbar button {
+    min-height: 34px;
+    font-weight: 600;
+    color: var(--c-primary-dark);
+    border-radius: var(--radius-sm);
+}
+
+.toolbar button:hover {
+    background: var(--c-primary-light);
+}
+
+#status {
+    color: var(--c-muted);
+}

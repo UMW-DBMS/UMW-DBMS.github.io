@@ -1,0 +1,90 @@
+/**
+ * Shared design tokens for every page.
+ *
+ * One palette, one type scale, one focus style. Page-specific layout lives in
+ * dashboard.css (index.html), forms.css (login/upload pages) and pages.css
+ * (catalog, guide, print). Load this file first (index.html) or last (pages
+ * that carry their own inline styles) so the tokens apply everywhere.
+ *
+ * Contrast (WCAG AA): white on --c-primary 7.9:1, --c-text on white 14:1,
+ * --c-muted on white 6.6:1, --c-text on --c-accent 8:1.
+ */
+
+:root {
+    /* Colour */
+    --c-primary: #1d5c3a;
+    --c-primary-dark: #14432a;
+    --c-primary-mid: #2f7a50;
+    --c-primary-light: #e8f1ec;
+    --c-accent: #f2b705;
+    --c-accent-dark: #c99700;
+    --c-bg: #f3f5f4;
+    --c-surface: #ffffff;
+    --c-border: #c9d3cd;
+    --c-border-strong: #8a9a91;
+    --c-text: #1f2a24;
+    --c-muted: #4f5f56;
+    --c-disabled-bg: #e6e9e7;
+    --c-disabled-text: #6b7770;
+    --c-danger: #a4262c;
+    --c-focus: #1a5fb4;
+
+    /* Shape and depth */
+    --radius: 6px;
+    --radius-sm: 4px;
+    --shadow: 0 4px 16px rgba(20, 40, 30, 0.18);
+    --shadow-sm: 0 1px 3px rgba(20, 40, 30, 0.14);
+
+    /* Type: system fonts only (no web-font download); Sinhala and Tamil faces listed explicitly */
+    --font: "Segoe UI", "Noto Sans", "Nirmala UI", "Noto Sans Sinhala", "Noto Sans Tamil", "Iskoola Pota", Latha, system-ui, -apple-system, Arial, sans-serif;
+    --fs-base: 15px;
+    --fs-small: 13px;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    font-family: var(--font);
+}
+
+/* Keyboard focus: always visible, on light and dark backgrounds */
+:focus-visible {
+    outline: 3px solid var(--c-focus);
+    outline-offset: 2px;
+}
+
+.app-topbar :focus-visible,
+.catalog-header :focus-visible,
+.toolbar :focus-visible {
+    outline-color: #ffd24a;
+}
+
+/* Skip link for keyboard and screen-reader users */
+.skip-link {
+    position: absolute;
+    left: 8px;
+    top: -56px;
+    z-index: 5000;
+    padding: 8px 14px;
+    font-weight: 600;
+    color: var(--c-primary-dark);
+    background: #fff;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+}
+
+.skip-link:focus {
+    top: 8px;
+}
+
+/* Respect the user's reduced-motion setting */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}

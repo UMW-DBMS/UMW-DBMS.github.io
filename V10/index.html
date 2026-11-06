@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UMW Watershed Management Plan</title>
+    <meta name="description" content="Upper Mahaweli Watershed Management Plan database with GIS maps, station data, climate layers, watershed information, data catalog, and statistics for UMW planning.">
+    <meta name="keywords" content="UMW, Upper Mahaweli Watershed, Watershed Management Plan, watershed management database, GIS watershed map, Sri Lanka watershed, mini watershed, station data, climate layer, water quality data">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="UMW Watershed Management Plan">
+    <meta property="og:description" content="GIS-based Upper Mahaweli Watershed Management Plan database for maps, station data, climate layers, water quality, and watershed statistics.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#14432a">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="css/help-modal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="css/symbology.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <div class="top-bar">
+        <div id="google_translate_element"></div>
+    </div>
+
+    <!-- Legend items will be dynamically added here -->
+
+    <!-- README Modal -->
+    <div id="readme-modal" class="modal">
+        <div class="modal-content">
+            <h2>Welcome to Upper Mahaweli Watershed Management Database</h2>
+            <div class="flowchart">
+                <div class="flow-node">
+                    <div class="flow-title">Step 1</div>
+                    <div class="flow-body">
+                        <div>Select your District & Divisional Secretariat Division name.</div>
+                        <div>If you know the Mini Watershed (MWS) ID, select it. If not, click a location on the map to
+                            see its MWS ID in the popup.</div>
+                        <div>Click "Go". The data buttons unlock after you press Go.</div>
+                    </div>
+                </div>
+
+                <div class="flow-node">
+                    <div class="flow-title">Step 2</div>
+                    <div class="flow-body">Use the footer menu to switch background map (e.g., Satellite, OSM).</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 3</div>
+                    <div class="flow-body">Select "Base Layers" to explore GIS data layers. Select "Attribute" to view
+                        detailed information by clicking features on the map.</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 4</div>
+                    <div class="flow-body">Select "Proposal" to explore proposal locations.</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 5</div>
+                    <div class="flow-body">Select "Climate Layer" for weather data and use "Attribute" for time-series
+                        exploration.</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 6</div>
+                    <div class="flow-body">To see the water quality station information click on "Water Quality Data".
+                        Click on the each Station point to see more information</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 7</div>
+                    <div class="flow-body">Select "MWS Info" for watershed committee details.</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 8</div>
+                    <div class="flow-body">Select "Data Catalog" to access metadata and downloads. You can go to the
+                        "Open MWS Data Catalog" to access and downloads.</div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 9</div>
+                    <div class="flow-body">Select "Statistics" for MWS-level statistics (e.g., land cover, population).
+                    </div>
+                </div>
+                <div class="flow-node">
+                    <div class="flow-title">Step 10</div>
+                    <div class="flow-body">To explore another MWS, close panels, change the MWS ID, and click "GO".
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <label class="modal-checkbox">
+                    <input id="dont-show-help-again" type="checkbox">
+                    <span>Don't show again</span>
+                </label>
+                <button id="close-readme" class="close-btn">Close</button>
+                <div class="step-nav-buttons">
+                    <button id="prev-step-btn" class="close-btn step-next-btn" type="button">&lt;</button>
+                    <button id="next-step-btn" class="close-btn step-next-btn" type="button">&gt;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <a class="skip-link" href="#map">Skip to map</a>
+
+    <header class="app-header">
+        <div class="app-topbar">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true">UMW</span>
+                <div class="brand-text">
+                    <h1>Watershed Management Plan</h1>
+                    <p>Upper Mahaweli Watershed</p>
+                </div>
+            </div>
+            <div class="location-block">
+                <div class="location-group" role="group" aria-label="Choose a location">
+                    <div class="field">
+                        <label for="selectDist">District</label>
+                        <select id="selectDist">
+                            <option value="">Select District</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="selectDSD">DSD</label>
+                        <select id="selectDSD">
+                            <option value="">Select DSD</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="selectMWSID">MWS ID</label>
+                        <select id="selectMWSID">
+                            <option value="">Select MWS ID</option>
+                        </select>
+                    </div>
+                    <button id="goBtn" class="button button-go" type="button" disabled>Go</button>
+                </div>
+                <p id="selectionStatus" class="selection-status" role="status" aria-live="polite">Select District, DSD and MWS ID, then press Go.</p>
+            </div>
+            <div class="language-switcher">
+                <label for="languageSelect">Language</label>
+                <select id="languageSelect">
+                    <option value="en">English</option>
+                    <option value="si">Sinhala</option>
+                    <option value="ta">Tamil</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="app-toolbar">
+            <nav class="app-nav" aria-label="Dashboard tools">
+                <div class="nav-group" role="group" aria-label="Map data">
+                <button id="baseLayersBtn" class="button" type="button" onclick="handleButtonClick('baseLayersBtn', 'basePanel')" data-requires-mws disabled><i class="fa-solid fa-layer-group" aria-hidden="true"></i><span>Base Layers</span></button>
+                <button id="proposalBtn" class="button" type="button" onclick="handleButtonClick('proposalBtn', 'proposalPanel')" data-requires-mws disabled><i class="fa-solid fa-clipboard-list" aria-hidden="true"></i><span>Proposal</span></button>
+                <button id="climateLayerBtn" class="button" type="button" onclick="handleButtonClick('climateLayerBtn', 'climPanel')" data-requires-mws disabled><i class="fa-solid fa-cloud-sun-rain" aria-hidden="true"></i><span>Climate Layer</span></button>
+                <button id="waterQualityBtn" class="button" type="button" onclick="handleButtonClick('waterQualityBtn', 'waterPanel')"><i class="fa-solid fa-satellite-dish" aria-hidden="true"></i><span>Station Data</span></button>
+                </div>
+                <div class="nav-group" role="group" aria-label="Information">
+                <button id="dataCatalogBtn" class="button" type="button" onclick="handleButtonClick('dataCatalogBtn', 'catalogPanel')" data-requires-mws disabled><i class="fa-solid fa-database" aria-hidden="true"></i><span>Data Catalog</span></button>
+                <button id="tableBtn" class="button" type="button" onclick="handleButtonClick('tableBtn', 'tablePanel')" data-requires-mws disabled hidden><i class="fa-solid fa-table" aria-hidden="true"></i><span>Data Table</span></button>
+                <button id="statisticBtn" class="button" type="button" onclick="handleButtonClick('statisticBtn', 'statPanel')" data-requires-mws disabled><i class="fa-solid fa-chart-pie" aria-hidden="true"></i><span>Statistics</span></button>
+                <button id="partnersBtn" class="button" type="button" onclick="handleButtonClick('partnersBtn', 'partnersPanel')"><i class="fa-solid fa-users" aria-hidden="true"></i><span>Stakeholders</span></button>
+                </div>
+                <div class="nav-group" role="group" aria-label="Help and access">
+                <button id="help-button" class="button" type="button" onclick="openWorkthrough()"><i class="fa-solid fa-circle-question" aria-hidden="true"></i><span>Help</span></button>
+                <button id="info-button" class="button" type="button" onclick="openWorkthrough()"><i class="fa-solid fa-book" aria-hidden="true"></i><span>User Guide</span></button>
+                <button id="symbols-button" class="button" type="button" onclick="openSymbologyGuide()"><i class="fa-solid fa-palette" aria-hidden="true"></i><span>Map Symbols</span></button>
+                <button id="userInputBtn" class="button" type="button" onclick="openUserInput()"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i><span>Log in</span></button>
+                </div>
+            </nav>
+        </div>
+        <!-- MWS Info button is disabled. If you restore it, add the data-requires-mws attribute so it unlocks with Go:
+        <button id="mwsInfoBtn" class="button" type="button" data-requires-mws disabled onclick="handleButtonClick('mwsInfoBtn', 'infoPanel')">MWS Info</button> -->
+    </header>
+
+    <main class="workspace">
+    <div id="map" class="map" aria-label="Interactive map"></div>
+
+    <div id="basePanel" class="panel"><button class="hide-btn" onclick="hidePanel('basePanel')">Close</button><p class="panel-note">Loading layers...</p></div>
+    <div id="proposalPanel" class="panel">
+        <div id="proposalNoLabel" style="display:none;">No.</div>
+        <button class="hide-btn" onclick="hidePanel('proposalPanel')">Close</button>
+        <p class="panel-note">Loading proposals...</p>
+    </div>
+
+    <div id="infoPanel" class="panel"><button class="hide-btn"
+            onclick="hidePanel('infoPanel')">Close</button></div>
+    <div id="climPanel" class="panel"><button class="hide-btn" onclick="hidePanel('climPanel')">Close</button><p class="panel-note">Loading climate layers...</p></div>
+    <div id="waterPanel" class="panel"></div>
+    <div id="attributePanel" class="panel"><button class="hide-btn" onclick="hidePanel('attributePanel')">Close</button></div>
+    <div id="tablePanel" class="panel"><button class="hide-btn"
+            onclick="hidePanel('tablePanel')">Close</button><h3 class="panel-title">Data Table</h3>
+
+    </div>
+    <div id="partnersPanel" class="panel">
+        <button class="hide-btn" onclick="hidePanel('partnersPanel')">Close</button>
+        <h3 class="panel-title">Stakeholders</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th>Institute</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Land Use Policy Planning Department (LUPPD)</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Forest Department (FD)</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Mahaweli Authority of Sri Lanka (MASL)</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Department of Wildlife Conservation (DWLC)</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Natural Resource Management Centre (NRMC)</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Department of Meteorology (DM)</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>National Building Research Organization (NBRO)</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Central Environment Authority (CEA)</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Resource profile (DSD office)</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>Survey Department (SD)</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>National Water Supply and Drainage Board (NWSDB)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="waterQualityStationPanel" class="panel"></div>
+    <div id="catalogPanel" class="panel"><button class="hide-btn" onclick="hidePanel('catalogPanel')">Close</button>
+        <h3 class="panel-title">Data Catalog</h3>
+
+        <table id="csvTable">
+            <thead>
+                <tr>
+                    <th><select id="filterID">
+                            <option value="">All IDs</option>
+                        </select></th>
+                    <th><select id="filterDatabase">
+                            <option value="">All Databases</option>
+                        </select></th>
+                    <th><select id="filterLayer">
+                            <option value="">All Layers</option>
+                        </select></th>
+                    <th><select id="filterProvider">
+                            <option value="">All Data Providers</option>
+                        </select></th>
+
+                </tr>
+                <tr>
+                    <th>ID</th>
+                    <th>Database</th>
+                    <th>Layer</th>
+                    <th>Data provider</th>
+                    <th>Download</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div id="statPanel" class="panel">
+        <div>
+            <button class="hide-btn" onclick="hidePanel('statPanel')">Close</button>
+            <button id="lulcstatPanel" class="tab" type="button" onclick="selectTab('lulc', this)">LULC</button>
+            <button id="hazardstatPanel" class="tab" type="button" onclick="selectTab('hazard', this)">Hazard</button>
+            <button id="demostatPanel" class="tab" type="button" onclick="selectTab('demography', this)">Demography</button>
+            <button id="adminstatPanel" class="tab" type="button" onclick="selectTab('admin', this)">Admin</button>
+            <button id="soilstatPanel" class="tab" type="button" onclick="selectTab('soil', this)">Soil</button>
+            <canvas id="areaPieChart"></canvas>
+            <div id="statisticsLegend" aria-label="Statistics class color legend"></div>
+            <button id="downloadButton" type="button">Download CSV</button>
+            <button id="downloadChartButton" type="button">Download Chart as Image</button>
+        </div>
+    </div>
+    </main>
+
+    <footer class="app-footer">
+        <div class="footer-left">
+            <div id="infoPopupPanel" style="display:none;"></div>
+        </div>
+        <div class="footer-center">
+            <div class="footer-field">
+                <label for="baseLayerSelect">Base map</label>
+                <select id="baseLayerSelect" onchange="changeBaseLayer()">
+                    <option value="osm">OpenStreetMap</option>
+                    <option value="esri">ESRI Satellite View</option>
+                    <option value="opentopo">OpenTopoMap</option>
+                    <option value="custom">Custom URL</option>
+                </select>
+            </div>
+            <button id="measureFooterBtn" class="footer-btn" type="button" onclick="toggleFooterMeasure()">
+                <i class="fa-solid fa-ruler" aria-hidden="true"></i>
+                <span>Measure</span>
+            </button>
+            <button id="printMapBtn" class="footer-btn" type="button" onclick="openPrintMapWindow()">
+                <i class="fa-solid fa-print" aria-hidden="true"></i>
+                <span>Print</span>
+            </button>
+        </div>
+        <div class="footer-right">
+            <button class="footer-btn" type="button" onclick="openNewTab()">
+                <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+                <span>Open MWS Data Catalog</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- Third-party libraries (versions pinned; Leaflet is loaded once) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+
+    <!-- Symbology: colours, markers and legends (needed by the layer, statistics and station scripts) -->
+    <script src="js/layers/symbology.js"></script>
+
+    <!-- Application scripts (order matters: each group only uses what is loaded above it) -->
+    <!-- core: map first, then everything that draws on it -->
+    <script src="js/core/map-init.js"></script>
+    <script src="js/tools/map-tools.js"></script>
+    <script src="js/tools/locate-me.js"></script>
+    <!-- location: boundary outline + District/DSD/MWS selectors -->
+    <script src="js/location/boundary-overview.js"></script>
+    <script src="js/location/location-selector.js"></script>
+    <!-- panels: catalog, table, MWS info, station data -->
+    <script src="js/panels/data-catalog.js"></script>
+    <script src="js/panels/data-table.js"></script>
+    <script src="js/panels/mws-info.js"></script>
+    <script src="js/panels/station-data.js"></script>
+    <script src="js/panels/station-cbo.js"></script>
+    <!-- statistics: shared helpers first, then one file per tab -->
+    <script src="js/statistics/statistics-shared.js"></script>
+    <script src="js/statistics/lulc-stats.js"></script>
+    <script src="js/statistics/admin-stats.js"></script>
+    <script src="js/statistics/population-stats.js"></script>
+    <script src="js/statistics/soil-stats.js"></script>
+    <script src="js/statistics/hazard-stats.js"></script>
+    <!-- print / export -->
+    <script src="js/tools/print-export.js"></script>
+    <!-- layers: state and config, helpers, legends, loaders, feature info, then the panels that use them -->
+    <script src="js/layers/layer-state.js"></script>
+    <script src="js/layers/layer-config.js"></script>
+    <script src="js/layers/layer-helpers.js"></script>
+    <script src="js/layers/layer-legends.js"></script>
+    <script src="js/layers/layer-loaders.js"></script>
+    <script src="js/layers/layer-water-features.js"></script>
+    <script src="js/layers/feature-info.js"></script>
+    <script src="js/layers/layer-panels.js"></script>
+    <!-- header buttons / panels, help modal, language switcher -->
+    <script src="js/core/ui-panels.js"></script>
+    <script src="js/help/help-modal.js"></script>
+    <script src="js/core/translate.js"></script>
+    <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+</body>
+
+</html>
