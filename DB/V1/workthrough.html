@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UMW Watershed Management Plan Dashboard Guide</title>
+  <style>
+    :root {
+      --bg: #f0f4f2;
+      --sidebar-bg: #1a2e25;
+      --sidebar-active: #2e7d52;
+      --sidebar-hover: #243b2e;
+      --sidebar-text: #a8c4b4;
+      --sidebar-active-text: #fff;
+      --accent: #2e7d52;
+      --accent-light: #e6f4ec;
+      --accent-mid: #4caf80;
+      --header-bg: #1a2e25;
+      --card-bg: #ffffff;
+      --text: #1c2b22;
+      --text-muted: #6b8a78;
+      --border: #d4e6da;
+      --tag-bg: #e8f5ed;
+      --tag-text: #2e7d52;
+      --code-bg: #1a2e25;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background: var(--header-bg);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    header .logo-mark {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-mid);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-weight: 700;
+      font-size: 16px;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    header p {
+      font-size: 12px;
+      color: #7aaB8e;
+      margin-top: 2px;
+    }
+
+    .layout {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 72px);
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 240px;
+      min-width: 240px;
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 20px 0 30px;
+    }
+
+    .sidebar-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #4a7060;
+      padding: 0 20px 10px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 20px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: all 0.18s ease;
+      color: var(--sidebar-text);
+      font-size: 13.5px;
+      font-weight: 400;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: var(--sidebar-hover);
+      color: #d0ead9;
+    }
+
+    .nav-item.active {
+      background: rgba(46, 125, 82, 0.18);
+      border-left-color: var(--accent-mid);
+      color: var(--sidebar-active-text);
+      font-weight: 500;
+    }
+
+    .nav-item .nav-icon {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .nav-group-title {
+      padding: 14px 20px 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: #6ea78b;
+    }
+
+    .nav-item.sub-item {
+      padding-left: 42px;
+      font-size: 13px;
+    }
+
+    .nav-item.sub-item .nav-icon {
+      font-size: 12px;
+      width: 16px;
+    }
+
+    /* CONTENT */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 36px 40px;
+    }
+
+    .section-panel {
+      display: none;
+      animation: fadeSlide 0.28s ease;
+    }
+
+    .section-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* CARD */
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 28px 32px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.055);
+      margin-bottom: 20px;
+    }
+
+    #intro .card,
+    #step12 .card {
+      min-height: calc(100vh - 144px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title .title-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--accent-light);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+    }
+
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-mid), transparent);
+      border-radius: 2px;
+      margin: 14px 0 20px;
+    }
+
+    h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin: 20px 0 7px;
+    }
+
+    p {
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: #3b5244;
+      margin-bottom: 8px;
+    }
+
+    b {
+      color: var(--text);
+    }
+
+    ul.cat-list {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 16px;
+    }
+
+    ul.cat-list li {
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      border: 1px solid #b8dfc6;
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 12.5px;
+      font-weight: 500;
+    }
+
+    .step-image {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      display: block;
+      margin: 14px 0;
+      cursor: zoom-in;
+      transition: box-shadow 0.2s;
+    }
+
+    .step-image:hover {
+      box-shadow: 0 4px 20px rgba(46, 125, 82, 0.2);
+    }
+
+    .step-image-sm {
+      max-width: 200px;
+    }
+
+    .intro-image {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      cursor: zoom-in;
+      display: block;
+      flex: 1;
+      min-height: 0;
+      max-height: calc(100vh - 250px);
+      object-fit: contain;
+      object-position: center;
+    }
+
+    .help-video {
+      width: 100%;
+      display: block;
+      flex: 1;
+      min-height: 0;
+      max-height: calc(100vh - 250px);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #000;
+    }
+
+    .note-box {
+      background: #e8f5ed;
+      border-left: 4px solid var(--accent-mid);
+      border-radius: 0 8px 8px 0;
+      padding: 12px 16px;
+      margin: 14px 0;
+      font-size: 13.5px;
+      color: #2d5c3e;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .note-box .note-icon {
+      font-size: 16px;
+      margin-top: 2px;
+    }
+
+    /* IMAGE MODAL */
+    .img-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 5000;
+      backdrop-filter: blur(3px);
+    }
+
+    .img-modal.open {
+      display: flex;
+    }
+
+    .img-modal-inner {
+      background: #fff;
+      border-radius: 12px;
+      padding: 14px;
+      max-width: 92vw;
+      max-height: 92vh;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .img-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .img-modal-title {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .img-modal-close {
+      background: #f0f4f2;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #333;
+    }
+
+    .img-modal-body img {
+      max-width: 100%;
+      max-height: 78vh;
+      border-radius: 6px;
+    }
+
+    /* LANGUAGE */
+    .lang-switch {
+      position: fixed;
+      right: 14px;
+      top: 18px;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #a8c4b4;
+    }
+
+    .lang-switch select {
+      font-size: 11px;
+      background: #243b2e;
+      color: #d0ead9;
+      border: 1px solid #3d6b50;
+      border-radius: 5px;
+      padding: 4px 8px;
+    }
+
+    #google_translate_element {
+      position: fixed;
+      top: -9999px;
+      left: -9999px;
+      opacity: 0;
+    }
+
+    /* Scrollbar */
+    .sidebar::-webkit-scrollbar,
+    .content-area::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #2e5040;
+      border-radius: 4px;
+    }
+
+    .content-area::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .content-area::-webkit-scrollbar-thumb {
+      background: #c0d8c8;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        flex-direction: column;
+        height: auto;
+        overflow: auto;
+      }
+
+      .sidebar {
+        width: 100%;
+        min-width: 100%;
+        max-height: 32vh;
+      }
+
+      .content-area {
+        padding: 20px;
+      }
+
+      #intro .card,
+      #step12 .card {
+        min-height: auto;
+      }
+
+      .intro-image,
+      .help-video {
+        max-height: calc(100vh - 220px);
+      }
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 14px 16px;
+      }
+
+      .content-area {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+
+      .section-title {
+        font-size: 18px;
+      }
+
+      .divider {
+        margin: 10px 0 14px;
+      }
+
+      .intro-image,
+      .help-video {
+        max-height: calc(100vh - 190px);
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/pages.css">
+</head>
+
+<body>
+
+  <header>
+    <div class="logo-mark">UMW</div>
+    <div>
+      <h1 id="pageTitle">Watershed Management Plan Dashboard Guide</h1>
+      <p id="pageSubtitle">Step-by-step walkthrough</p>
+    </div>
+  </header>
+
+  <div class="lang-switch">
+    <label for="langSel" id="langLabel">Lang</label>
+    <select id="langSel">
+      <option value="en">English</option>
+      <option value="si">Sinhala</option>
+      <option value="ta">Tamil</option>
+    </select>
+  </div>
+
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+      <div class="sidebar-label">Navigation</div>
+      <div class="nav-item active" data-target="intro"> <span class="nav-icon">📖</span> Introduction</div>
+      <div class="nav-item" data-target="step1"> <span class="nav-icon">🗺️</span> Access to Dashboard</div>
+      <div class="nav-item" data-target="step2"> <span class="nav-icon">🗂️</span> Base Layers</div>
+      <div class="nav-item" data-target="step3"> <span class="nav-icon">📋</span> Proposal</div>
+      <div class="nav-item" data-target="step4"> <span class="nav-icon">🌡️</span> Climate Layer</div>
+      <div class="nav-item" data-target="step5"> <span class="nav-icon">📡</span> Station Data</div>
+      <div class="nav-item" data-target="step6"> <span class="nav-icon">📦</span> Data Catalog</div>
+      <div class="nav-item" data-target="step7"> <span class="nav-icon">📊</span> Data Table</div>
+      <div class="nav-item" data-target="step8"> <span class="nav-icon">📈</span> Statistics</div>
+      <div class="nav-item" data-target="step9"> <span class="nav-icon">🖨️</span> Print</div>
+      <div class="nav-item" data-target="step10"> <span class="nav-icon">📏</span> Measure</div>
+      <div id="loginGroupLabel" class="nav-group-title">Login</div>
+      <div class="nav-item sub-item" data-target="step11"> <span class="nav-icon">•</span> Proposal Data</div>
+      <div class="nav-item sub-item" data-target="step11wq"> <span class="nav-icon">•</span> Water Quality</div>
+      <div class="nav-item sub-item" data-target="step11lulc"> <span class="nav-icon">•</span> LULC</div>
+      <div class="nav-item" data-target="step12"> <span class="nav-icon">🎬</span> Video Guide</div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="content-area">
+
+      <!-- INTRO -->
+      <div id="intro" class="section-panel active">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📖</span> Introduction</div>
+          <div class="divider"></div>
+          <img class="intro-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Introduction.png"
+            alt="Introduction">
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="step1" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🗺️</span> How to Access the Dashboard</div>
+          <div class="divider"></div>
+
+          <h4>Select the District</h4>
+          <p>Choose a district from the dropdown list: <b>Badulla</b>, <b>Kandy</b>, or <b>Nuwara Eliya</b>.</p>
+
+          <h4>Select the DSD</h4>
+          <p>After selecting the district, choose the relevant <b>DSD (Divisional Secretariat Division)</b> from the
+            available options.</p>
+
+          <h4>Select the MWS_ID</h4>
+          <p>If you already know the <b>MWS_ID</b>, select it from the dropdown list.</p>
+          <p>If you do not know the MWS_ID, simply click on the map. A popup will appear displaying the MWS_ID along
+            with the corresponding District and DSD information.</p>
+
+          <h4>Proceed</h4>
+          <p>After completing all selections, click the <b>"Go"</b> button to load the data.</p>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="step2" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🗂️</span> Base Layers</div>
+          <div class="divider"></div>
+
+          <p>Click on the <b>Base Layer</b> button available on the map interface.</p>
+          <img class="step-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Base%20Layers.PNG"
+            alt="Base Layers panel">
+
+          <h4>Choose the Required Layers</h4>
+          <p>In the Base Layer panel, you will see several thematic categories:</p>
+          <ul class="cat-list">
+            <li>Administration</li>
+            <li>Land Cover</li>
+            <li>Reservation</li>
+            <li>Topography</li>
+            <li>Soil</li>
+            <li>Risk and Hazard</li>
+            <li>Location</li>
+            <li>Demography</li>
+            <li>Hydrology</li>
+            <li>Water Features</li>
+            <li>Transportation</li>
+          </ul>
+
+          <h4>Enable Layers</h4>
+          <p>Tick the checkbox next to the layer(s) you want to view.</p>
+
+          <h4>View the Map</h4>
+          <p>The selected layers will appear on the map, displaying the relevant information for the selected Mini
+            Watershed (MWS_ID).</p>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="step3" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📋</span> How to Access Proposals</div>
+          <div class="divider"></div>
+
+          <h4>Click the Proposal Button</h4>
+          <p>After selecting the required Mini Watershed <b>(MWS_ID)</b>, click the <b>Proposal</b> button to display
+            the proposals related to that mini watershed.</p>
+
+          <h4>View Proposal Locations</h4>
+          <p>The proposals will appear in the layer panel on the left side. Tick the relevant checkboxes to display
+            proposal locations on the map.</p>
+          <ul class="cat-list">
+            <li>Soil and Water Conservation</li>
+            <li>Water Resource Management</li>
+            <li>Water Quality Improvement</li>
+            <li>Minor Tank Restoration</li>
+          </ul>
+
+          <h4>View Detailed Information</h4>
+          <p>Click on any proposal point on the map to open a popup displaying detailed information about the selected
+            proposal.</p>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div id="step4" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🌡️</span> How to Use the Climate Layer Panel</div>
+          <div class="divider"></div>
+
+          <p>Click on the <b>Climate Layer</b> button to access climate-related data layers for the selected project
+            area.</p>
+
+          <h4>Available Climate Data</h4>
+          <p>The panel provides the following monthly datasets:</p>
+          <ul class="cat-list">
+            <li>Rainfall</li>
+            <li>Maximum Temperature</li>
+            <li>Minimum Temperature</li>
+            <li>Evaporation</li>
+          </ul>
+
+          <h4>Display Data on the Map</h4>
+          <p>Tick the checkbox next to the desired dataset(s) to display the corresponding data layers on the map for
+            the selected project area.</p>
+
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div id="step5" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📡</span> How to View Station Data</div>
+          <div class="divider"></div>
+
+          <img class="step-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Station.PNG"
+            alt="Station data panel">
+
+          <p>Click the <b>Station Data</b> button to access the available station information.</p>
+
+          <h4>View Station Data Layers</h4>
+          <p>After clicking the button, the layer panel will display different types of station data including:</p>
+          <ul class="cat-list">
+            <li>Water Quality</li>
+            <li>Rainfall</li>
+            <li>Temperature</li>
+            <li>Evaporation</li>
+          </ul>
+
+          <h4>Display Stations on the Map</h4>
+          <p>Tick the checkboxes next to the required station data layers to display the corresponding stations on the
+            map.</p>
+
+          <h4>View Station Information</h4>
+          <p>Click on any station point on the map to open the detailed information about the selected station.</p>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div id="step6" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📦</span> How to Access the Data Catalog</div>
+          <div class="divider"></div>
+
+          <p>Click the <b>Data Catalog</b> button — this will display the available datasets related to the selected
+            Mini Watershed.</p>
+
+          <h4>Download Data</h4>
+          <p>From the catalog, you can select the required data files <b>(geojson/shp)</b> for the chosen Mini Watershed
+            (MWS_ID) and download via the <b>Download</b> button.</p>
+
+          <div class="note-box">
+            <span class="note-icon">💡</span>
+            <span>Alternatively, click the <b>'Open MWS Data Catalog'</b> button at the bottom right, enter the
+              <b>MWS_ID</b>, and download the data you need.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 7 -->
+      <div id="step7" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📊</span> How to View Data in Table Format</div>
+          <div class="divider"></div>
+
+          <p>Click the <b>Data Table</b> button to access the tabular data view for the selected Mini Watershed.</p>
+          <p>You can download the table in <b>CSV format</b> using the export option provided.</p>
+        </div>
+      </div>
+
+      <!-- STEP 8 -->
+      <div id="step8" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📈</span> How to View Statistics</div>
+          <div class="divider"></div>
+
+          <p>Click the <b>Statistics</b> button to access statistical information related to the selected Mini
+            Watershed.</p>
+
+          <h4>Select a Category to View Graphs</h4>
+          <p>Choose one of the following categories to view its statistics for the selected Mini Watershed (MWS_ID):</p>
+          <ul class="cat-list">
+            <li>LULC (Land Use/Land Cover)</li>
+            <li>Hazard</li>
+            <li>Demography</li>
+            <li>Administration</li>
+            <li>Soil</li>
+          </ul>
+
+          <h4>Download Data</h4>
+          <p>Click <b>'Download CSV'</b> to export the data in CSV format.</p>
+          <p>Click <b>'Download Chart as Image'</b> to download the graphical representation of the statistics.</p>
+        </div>
+      </div>
+
+      <!-- STEP 9 -->
+      <div id="step9" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🖨️</span> How to Print a Map</div>
+          <div class="divider"></div>
+
+          <img class="step-image" src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Print.PNG"
+            alt="Print Map">
+
+          <h4>Click the Print Button</h4>
+          <p>Click the <b>Print Map</b> button to generate the map layout.</p>
+
+          <h4>Print the Map</h4>
+          <p>The system will produce a printable map with a legend, scale bar, and other relevant elements — ready for
+            printing or saving.</p>
+          <p>Zoom in or out to adjust the map view before printing.</p>
+
+          <div class="note-box">
+            <span class="note-icon">💾</span>
+            <span>Click the <b>Download</b> button to save the map in your preferred format: <b>JPG</b> or
+              <b>PNG</b>.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 10 -->
+      <div id="step10" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">📏</span> How to Measure Distance</div>
+          <div class="divider"></div>
+
+          <img class="step-image step-image-sm"
+            src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Measure.PNG" alt="Measure Distance">
+
+          <p>Click the <b>Measure Distance</b> button to activate the measurement tool.</p>
+          <p>Click on the map to place the <b>starting point</b>, then click again to place the <b>ending point</b>.</p>
+          <p>The distance will be displayed on screen.</p>
+
+          <div class="note-box">
+            <span class="note-icon">ℹ️</span>
+            <span>When you are done measuring, click the <b>Measure Distance</b> button again to deactivate the
+              tool.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 11 -->
+      <div id="step11" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🔐</span> How to Add New Proposal Data via Login</div>
+          <div class="divider"></div>
+
+          <h4>Click the Login Button</h4>
+          <p>Click the <b>Login</b> button to access the login page.</p>
+
+          <h4>Select District and DSD</h4>
+          <p>Choose the relevant <b>District</b> and <b>DSD (Divisional Secretariat Division)</b> from the dropdown
+            menus.</p>
+
+          <h4>Enter Login Credentials</h4>
+          <p>Enter the <b>Email</b> and <b>Password</b> provided by the administrator.</p>
+
+          <h4>Verify the Login</h4>
+          <p>Click the <b>Verify Login</b> button to proceed.</p>
+
+          <h4>Enter GitHub Token</h4>
+          <p>Enter the GitHub token provided by the Administrator.</p>
+          <div class="note-box">
+            <span class="note-icon">🔒</span>
+            <span>Only authorized users with a valid email, password, and GitHub access token are allowed to upload new
+              data.</span>
+          </div>
+
+          <h4>Select MWS_ID</h4>
+          <p>Choose the relevant <b>MWS_ID</b> (Mini Watershed) from the list.</p>
+
+          <h4>Select the Proposal Type</h4>
+          <ul class="cat-list">
+            <li>DWS</li>
+            <li>LANDSLIDES</li>
+            <li>MI</li>
+            <li>MT</li>
+            <li>SR</li>
+            <li>SWC_ON</li>
+            <li>SWC_OFF</li>
+            <li>WP</li>
+            <li>WSP</li>
+          </ul>
+
+          <h4>Enter the Required Data</h4>
+          <p>Fill in the necessary proposal details and information in the provided fields.</p>
+
+          <h4>Upload a Photo (Optional)</h4>
+          <p>If available, upload a photo related to the proposal.</p>
+          <div class="note-box">
+            <span class="note-icon">📷</span>
+            <span>Ensure the photo file size is <b>less than 1 MB</b> before uploading.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="step11wq" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">💧</span> How to Update Water Quality Data via Login</div>
+          <div class="divider"></div>
+
+          <h4>Click the Water Quality Button</h4>
+          <p>Click the <b>Water Quality</b> button and open the <b>Water Quality</b> page.</p>
+
+          <h4>Select the Agency</h4>
+          <p>Choose the relevant agency from the available options: <b>CEA</b>, <b>MASL</b>, or <b>NWSDB</b>.</p>
+          <ul class="cat-list">
+            <li>CEA</li>
+            <li>MASL</li>
+            <li>NWSDB</li>
+          </ul>
+
+          <h4>Enter Login Credentials</h4>
+          <p>Enter the authorized <b>Email</b>, <b>Password</b>, and <b>GitHub token</b> provided for data updates.</p>
+
+          <h4>Select the CSV Name</h4>
+          <p>After selecting the agency, choose the required <b>CSV file name</b> from the dropdown list.</p>
+
+          <h4>Load the Existing File</h4>
+          <p>Click <b>Load Existing CSV</b> to view and download the current file already available in the dashboard
+            repository.</p>
+
+          <h4>Upload the Updated CSV</h4>
+          <p>Select the updated CSV file from your computer and click <b>Upload CSV</b> to replace the existing dataset.
+          </p>
+
+          <div class="note-box">
+            <span class="note-icon">🔒</span>
+            <span>Only approved agency users can access and update water quality CSV files.</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="step11lulc" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🗂️</span> How to Update LULC Data via Login</div>
+          <div class="divider"></div>
+
+          <h4>Click the LULC Button</h4>
+          <p>Click the <b>LULC</b> button and open the <b>LULC</b> page.</p>
+
+          <h4>Select District, DSD, and MWS_ID</h4>
+          <p>Choose the relevant <b>District</b>, <b>DSD</b>, and <b>MWS_ID</b> to identify the area for the upload.</p>
+
+          <h4>Enter Login Credentials</h4>
+          <p>Enter the authorized <b>Email</b> and <b>Password</b>, then provide the <b>GitHub token</b> with access to
+            the repository.</p>
+
+          <h4>Load Existing LULC Files</h4>
+          <p>Click <b>Load LULC Files</b> to display the currently available LULC files linked to the selected
+            watershed.</p>
+
+          <h4>Select the GeoJSON File</h4>
+          <p>Choose the updated <b>LULC GeoJSON</b> file from your computer before uploading.</p>
+
+          <h4>Upload the LULC Data</h4>
+          <p>Click <b>Upload GeoJSON</b> to save the updated LULC file to the dashboard repository.</p>
+
+          <div class="note-box">
+            <span class="note-icon">ℹ️</span>
+            <span>Use the correct MWS_ID and file before uploading so the selected watershed data is updated in the
+              right location.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 12 -->
+      <div id="step12" class="section-panel">
+        <div class="card">
+          <div class="section-title"><span class="title-icon">🎬</span> Video Guide</div>
+          <div class="divider"></div>
+          <video id="helpVideo" class="help-video" controls preload="metadata">
+            <source src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Guide.webm" type="video/webm" />
+            <!-- <source src="https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Guide.mp4" type="video/mp4" /> -->
+
+          </video>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /layout -->
+
+  <!-- IMAGE MODAL -->
+  <div id="imgModal" class="img-modal">
+    <div class="img-modal-inner">
+      <div class="img-modal-header">
+        <span class="img-modal-title" id="imgModalTitle">Image Preview</span>
+        <button class="img-modal-close" id="imgModalClose">✕ Close</button>
+      </div>
+      <div class="img-modal-body">
+        <img id="imgModalImg" src="" alt="Preview">
+      </div>
+    </div>
+  </div>
+
+  <script src="js/guide/guide-translations.js"></script>
+  <script src="js/guide/guide.js"></script>
+</body>
+
+</html>
