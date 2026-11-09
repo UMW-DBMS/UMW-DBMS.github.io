@@ -1622,7 +1622,7 @@
 
 .fm-popup__metrics {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     background: #f4f6f7;
     border-top: 1px solid #e4e8eb;
     border-bottom: 1px solid #e4e8eb;
@@ -1630,11 +1630,15 @@
 
 .fm-popup__metrics > div { padding: 10px 14px; }
 .fm-popup__metrics > div + div { border-left: 1px solid #e0e5e8; }
+.fm-popup__location { padding: 10px 16px; border-bottom: 1px solid #e4e8eb; font-size: 12px; }
 .fm-popup__metric-label { color: #71808d; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
 .fm-popup__metric-value { margin-top: 2px; font-size: 16px; }
 .fm-popup__section-title { margin: 14px 16px 4px; font-size: 11px; color: #71808d; text-transform: uppercase; letter-spacing: .04em; }
+.fm-popup__activity-name-list { margin: 0; padding: 0 16px 12px 32px; }
+.fm-popup__activity-name-list li { padding: 4px 0; border-top: 1px solid #edf0f2; }
 .fm-popup__activity { display: flex; justify-content: space-between; gap: 16px; padding: 10px 16px; border-top: 1px solid #edf0f2; }
 .fm-popup__activity-name { display: block; font-size: 13px; }
+.fm-popup__badge { display: inline-block; margin-left: 6px; padding: 1px 4px; color: #687887; border: 1px solid #cbd4da; border-radius: 3px; font-size: 10px; }
 .fm-popup__activity-note { margin-top: 2px; }
 .fm-popup__amount { flex: 0 0 auto; text-align: right; white-space: nowrap; }
 .fm-popup__amount span { margin-top: 2px; }

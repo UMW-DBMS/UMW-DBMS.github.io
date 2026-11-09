@@ -194,7 +194,20 @@ function loadGeoJsonLayerP(url, layerName) {
             if (!response.ok) throw new Error('Network response was not ok');
             return response.json();
         })
-        .then(geojsonData => {
+        .then(async geojsonData => {
+            const isForestManagement = String(layerName || '').toLowerCase().startsWith('forest management (');
+            let forestManagementRows = [];
+            if (isForestManagement) {
+                const selectedMwsId = String(layerName).replace(/^Forest Management\s*\(/i, '').replace(/\)$/, '');
+                const fileCode = selectedMwsId.trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
+                const csvUrl = `https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Forest%20Management/MWS_${encodeURIComponent(fileCode)}.csv`;
+                try {
+                    const response = await fetch(csvUrl);
+                    if (response.ok) forestManagementRows = Papa.parse(await response.text(), { header: true, skipEmptyLines: true }).data || [];
+                } catch (error) {
+                    console.warn('Forest Management activity CSV unavailable for popup details:', error);
+                }
+            }
             const geoJsonLayer = L.geoJSON(geojsonData, {
                 // Customize line features with a specific style
                 style: function (feature) {
@@ -256,7 +269,7 @@ function loadGeoJsonLayerP(url, layerName) {
                 // Define actions for each feature (e.g., polygons, lines)
                 onEachFeature: function (feature, layer) {
                     if (String(layerName || '').toLowerCase().startsWith('forest management (')) {
-                        layer.bindPopup(createForestManagementPopup(feature && feature.properties ? feature.properties : {}), {
+                        layer.bindPopup(createForestManagementPopup(feature && feature.properties ? feature.properties : {}, feature, forestManagementRows), {
                             maxWidth: 520,
                             minWidth: 320,
                             className: 'forest-management-popup'
@@ -309,7 +322,7 @@ function loadGeoJsonLayerP(url, layerName) {
         .catch(error => console.error(`Error loading GeoJSON for layer ${layerName}:`, error));
 }
 
-function createForestManagementPopup(properties) {
+function createForestManagementPopup(properties, feature, csvRows) {
     const props = properties || {};
     const popup = document.createElement('div');
     popup.className = 'fm-popup';
@@ -320,26 +333,78 @@ function createForestManagementPopup(properties) {
         parent.appendChild(element);
         return element;
     };
-    const formatMoney = (value) => {
-        const amount = Number(value);
-        return Number.isFinite(amount) ? `LKR ${amount.toLocaleString('en-LK', { maximumFractionDigits: 0 })}` : '—';
+    const name = props.FOREST_NAM || props.Forest_Name || props.forest_name || 'Forest Management Site';
+    const category = props.Forest_Cat || props.Forest_Category || props.forest_type || 'Forest';
+    const species = props.Species || props.SPECIES || props.species || props.species_code || props.SPECIES_CD || '—';
+
+    const polygonAreaHa = (geometry) => {
+        const ringArea = (ring) => {
+            if (!Array.isArray(ring) || ring.length < 3) return 0;
+            const radius = 6378137;
+            let sum = 0;
+            for (let i = 0; i < ring.length; i++) {
+                const current = ring[i], next = ring[(i + 1) % ring.length];
+                sum += (Number(next[0]) - Number(current[0])) * Math.PI / 180 *
+                    (2 + Math.sin(Number(current[1]) * Math.PI / 180) + Math.sin(Number(next[1]) * Math.PI / 180));
+            }
+            return Math.abs(sum * radius * radius / 2);
+        };
+        const polygonArea = (polygon) => Math.max(0, ringArea(polygon[0]) - polygon.slice(1).reduce((sum, hole) => sum + ringArea(hole), 0));
+        if (!geometry) return 0;
+        const squareMetres = geometry.type === 'Polygon' ? polygonArea(geometry.coordinates) :
+            geometry.type === 'MultiPolygon' ? geometry.coordinates.reduce((sum, polygon) => sum + polygonArea(polygon), 0) : 0;
+        return squareMetres / 10000;
     };
-    const activities = Array.isArray(props.activities) ? props.activities : [];
-    const name = props.FOREST_NAM || props.Forest_Name || 'Forest Management Site';
-    const category = props.Forest_Cat || props.Forest_Category || 'Forest';
+    const areaFromProps = Number(props.Area_ha || props.area_ha || props.AREA_HA) || 0;
+    const area = areaFromProps || polygonAreaHa(feature && feature.geometry);
+    const areaLabel = area > 0 ? `${area.toLocaleString('en-LK', { maximumFractionDigits: 2 })} ha` : '—';
+    const featureId = props.FID_FC_201 ?? (feature && feature.id) ?? props.id ?? '—';
+    const activityCount = props.n_activities ?? props.N_ACTIVITIES ?? '—';
+    const normalize = (value) => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+    const siteTokens = normalize(name).split(' ').filter((word) => word.length >= 5 && !['forest', 'plantation', 'reserve', 'division'].includes(word));
+    const editDistanceAtMostOne = (a, b) => {
+        if (Math.abs(a.length - b.length) > 1) return false;
+        let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+        for (let i = 1; i <= a.length; i++) {
+            const current = [i];
+            for (let j = 1; j <= b.length; j++) current[j] = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+            previous = current;
+        }
+        return previous[b.length] <= 1;
+    };
+    const columns = Object.keys((csvRows && csvRows[0]) || {});
+    const activityColumn = columns.find((key) => key.toLowerCase().replace(/[^a-z0-9]/g, '') === 'activity');
+    const locationColumn = columns.find((key) => key.toLowerCase().replace(/[^a-z0-9]/g, '') === 'location');
+    let currentActivity = '';
+    let currentLocation = '';
+    const activityNames = [];
+    (csvRows || []).forEach((row) => {
+        if (activityColumn && String(row[activityColumn] || '').trim()) currentActivity = String(row[activityColumn]).trim();
+        if (locationColumn && String(row[locationColumn] || '').trim()) currentLocation = String(row[locationColumn]).trim();
+        const location = normalize(currentLocation);
+        if (!currentActivity || /^around\b/.test(location)) return;
+        const locationTokens = location.split(' ');
+        if (!siteTokens.some((token) => locationTokens.some((part) => part === token || (Math.min(part.length, token.length) >= 6 && editDistanceAtMostOne(token, part))))) return;
+        if (!activityNames.includes(currentActivity)) activityNames.push(currentActivity);
+    });
+    if (!activityNames.length && Array.isArray(props.activities)) {
+        props.activities.forEach((activity) => {
+            const label = typeof activity === 'string' ? activity : (activity && (activity.activity || activity.Activity));
+            if (label && !activityNames.includes(String(label))) activityNames.push(String(label));
+        });
+    }
 
     const header = document.createElement('div');
     header.className = 'fm-popup__header';
     const titleBlock = document.createElement('div');
     addText('strong', 'fm-popup__title', name, titleBlock);
-    addText('span', 'fm-popup__subtitle', `${category} · ID ${props.FID_FC_201 ?? '—'}`, titleBlock);
+    addText('span', 'fm-popup__subtitle', `${category} · ID ${featureId}`, titleBlock);
     header.appendChild(titleBlock);
     popup.appendChild(header);
 
     const metrics = document.createElement('div');
     metrics.className = 'fm-popup__metrics';
-    [['Area', Number.isFinite(Number(props.Area_ha)) ? `${Number(props.Area_ha).toLocaleString('en-LK', { maximumFractionDigits: 2 })} ha` : '—'],
-        ['Activities', props.n_activities ?? activities.length]].forEach(([label, value]) => {
+    [['Area', areaLabel], ['Species', species], ['Activities', activityCount]].forEach(([label, value]) => {
         const metric = document.createElement('div');
         addText('span', 'fm-popup__metric-label', label, metric);
         addText('strong', 'fm-popup__metric-value', value, metric);
@@ -347,41 +412,21 @@ function createForestManagementPopup(properties) {
     });
     popup.appendChild(metrics);
 
-    addText('h4', 'fm-popup__section-title', 'Planned activities');
-    if (activities.length) {
-        const list = document.createElement('div');
-        list.className = 'fm-popup__activities';
-        activities.forEach((activity) => {
-            const row = document.createElement('div');
-            row.className = 'fm-popup__activity';
-            const detail = document.createElement('div');
-            addText('strong', 'fm-popup__activity-name', activity.activity || 'Activity', detail);
-            const notes = [activity.location_text, activity.years].filter(Boolean).join(' · ');
-            if (notes) addText('span', 'fm-popup__activity-note', notes, detail);
-            const amount = document.createElement('div');
-            amount.className = 'fm-popup__amount';
-            addText('strong', '', formatMoney(activity.total_lkr), amount);
-            if (activity.years) addText('span', '', activity.years, amount);
-            row.append(detail, amount);
-            list.appendChild(row);
-        });
+    if (activityNames.length) {
+        addText('h4', 'fm-popup__section-title', 'Activities');
+        const list = document.createElement('ul');
+        list.className = 'fm-popup__activity-name-list';
+        activityNames.forEach((activityName) => addText('li', '', activityName, list));
         popup.appendChild(list);
-    } else {
-        addText('p', 'fm-popup__empty', 'No planned activities recorded.');
     }
 
-    const footer = document.createElement('div');
-    footer.className = 'fm-popup__footer';
-    [['Site-specific cost', formatMoney(props.site_cost_lkr)],
-        ['Shared programme', formatMoney(activities.filter((a) => String(a.scope || '').toLowerCase() === 'shared')
-            .reduce((sum, a) => sum + (Number(a.total_lkr) || 0), 0))]].forEach(([label, value]) => {
-        addText('span', '', label, footer);
-        addText('strong', '', value, footer);
-    });
-    popup.appendChild(footer);
+    const division = props.Division || props.DIVISION || props.forest_division || '';
+    const range = props.Range || props.RANGE || props.forest_range || '';
+    const beat = props.Beat || props.BEAT || props.forest_beat || '';
+    const location = [division, range, beat].filter(Boolean).join('  ›  ');
+    if (location) addText('div', 'fm-popup__location', location);
     return popup;
 }
-
 function loadGeoJsonLayer(url, layerName) {
     const dataPromise = (async () => {
         const normalizedLayerName = String(layerName || '').trim().toLowerCase().replace(/\s+/g, ' ');

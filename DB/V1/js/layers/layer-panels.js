@@ -385,14 +385,16 @@ function appendForestManagementCheckbox(parent, mwsId) {
     parent.appendChild(row);
 }
 
-function showForestManagementCsvPanel(mwsId) {
+function showForestManagementCsvPanel(mwsId, forestName = '') {
     const panel = document.getElementById('attributePanel');
     if (!panel) return;
     const fileCode = String(mwsId).trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
     const csvUrl = `https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Forest%20Management/MWS_${encodeURIComponent(fileCode)}.csv`;
     const geojsonUrl = `https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Forest%20Management/MWS_${encodeURIComponent(fileCode)}.geojson`;
+    const forestKey = String(forestName || '').trim().toLowerCase();
     panel.dataset.forestManagement = 'true';
     panel.dataset.forestManagementMws = fileCode;
+    panel.dataset.forestManagementForest = forestKey;
     panel.style.display = 'block';
     panel.style.right = '10px';
     panel.style.width = 'min(520px, calc(100% - 20px))';
@@ -405,10 +407,11 @@ function showForestManagementCsvPanel(mwsId) {
         panel.style.display = 'none';
         delete panel.dataset.forestManagement;
         delete panel.dataset.forestManagementMws;
+        delete panel.dataset.forestManagementForest;
     };
     panel.appendChild(closeButton);
     const title = document.createElement('h3');
-    title.textContent = `Forest Management Plan - MWS_${fileCode}`;
+    title.textContent = forestName ? `${forestName} - Forest Management Plan` : `Forest Management Plan - MWS_${fileCode}`;
     panel.appendChild(title);
     const status = document.createElement('p');
     status.textContent = 'Loading activities...';
@@ -421,20 +424,12 @@ function showForestManagementCsvPanel(mwsId) {
         }),
         fetch(geojsonUrl).then((response) => response.ok ? response.json() : null).catch(() => null)
     ]).then(([csvText, geojsonData]) => {
-        if (panel.dataset.forestManagement !== 'true' || panel.dataset.forestManagementMws !== fileCode) return;
+        if (panel.dataset.forestManagement !== 'true' || panel.dataset.forestManagementMws !== fileCode || panel.dataset.forestManagementForest !== forestKey) return;
         const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
         const headers = (parsed.meta.fields || []).filter((field) => field && field.trim());
-        const mwsColumn = headers.find((field) => field.trim().toLowerCase().replace(/[^a-z0-9]/g, '') === 'mwsid');
-        const rows = (parsed.data || []).filter((row) => !mwsColumn || String(row[mwsColumn] || '').trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_') === fileCode);
-        status.remove();
-        if (!rows.length) {
-            const empty = document.createElement('p');
-            empty.textContent = 'No Forest Management activities are recorded for this MWS.';
-            panel.appendChild(empty);
-            return;
-        }
-
         const headerKey = (wanted) => headers.find((header) => header.toLowerCase().replace(/[^a-z0-9]/g, '') === wanted);
+        const mwsColumn = headers.find((field) => field.trim().toLowerCase().replace(/[^a-z0-9]/g, '') === 'mwsid');
+        const allRows = (parsed.data || []).filter((row) => !mwsColumn || String(row[mwsColumn] || '').trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_') === fileCode);
         const activityColumn = headerKey('activity');
         const detailsColumn = headerKey('description') || headerKey('location');
         const locationColumn = headerKey('location');
@@ -444,18 +439,55 @@ function showForestManagementCsvPanel(mwsId) {
         const areaColumn = headers.find((header) => /area/i.test(header) && /ha/i.test(header));
         const asAmount = (value) => Number(String(value || '').replace(/[^\d.-]/g, '')) || 0;
         const money = (value) => `LKR ${Math.round(value).toLocaleString('en-LK')}`;
-        const grouped = new Map();
+        const normalize = (value) => String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        const closeWord = (a, b) => {
+            if (Math.abs(a.length - b.length) > 1) return false;
+            let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+            for (let i = 1; i <= a.length; i++) {
+                const current = [i];
+                for (let j = 1; j <= b.length; j++) current[j] = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+                previous = current;
+            }
+            return previous[b.length] <= 1;
+        };
+        const forestTokens = normalize(forestName).split(' ').filter((word) => word.length >= 5 && !['forest', 'plantation', 'reserve', 'division'].includes(word));
         let previousActivity = '';
+        let previousLocation = '';
+        let previousDuration = '';
+        const rows = [];
+        allRows.forEach((row) => {
+            const activityValue = activityColumn ? String(row[activityColumn] || '').trim() : '';
+            const locationValue = locationColumn ? String(row[locationColumn] || '').trim() : '';
+            const durationValue = durationColumn ? String(row[durationColumn] || '').trim() : '';
+            if (activityValue) previousActivity = activityValue;
+            if (locationValue) previousLocation = locationValue;
+            if (durationValue) previousDuration = durationValue;
+            if (forestName) {
+                const location = normalize(previousLocation);
+                if (/^around\b/.test(location)) return;
+                const locationTokens = location.split(' ');
+                if (!forestTokens.some((token) => locationTokens.some((part) => part === token || (Math.min(token.length, part.length) >= 6 && closeWord(token, part))))) return;
+            }
+            rows.push({ ...row, __fmActivity: previousActivity, __fmLocation: previousLocation, __fmDuration: durationValue || previousDuration });
+        });
+        status.remove();
+        if (!rows.length) {
+            const empty = document.createElement('p');
+            empty.textContent = forestName
+                ? `No activity rows match ${forestName} in the CSV location column.`
+                : 'No Forest Management activities are recorded for this MWS.';
+            panel.appendChild(empty);
+            return;
+        }
+        const grouped = new Map();
         rows.forEach((row) => {
-            const rowActivity = activityColumn ? String(row[activityColumn] || '').trim() : '';
-            if (rowActivity) previousActivity = rowActivity;
-            const activityName = previousActivity || 'Other activities';
+            const activityName = row.__fmActivity || 'Other activities';
             if (!grouped.has(activityName)) grouped.set(activityName, { amount: 0, details: [], locations: [], durations: [], shared: false });
             const group = grouped.get(activityName);
             group.amount += amountColumn ? asAmount(row[amountColumn]) : 0;
             if (detailsColumn && row[detailsColumn] && !group.details.includes(String(row[detailsColumn]).trim())) group.details.push(String(row[detailsColumn]).trim());
-            if (locationColumn && row[locationColumn] && !group.locations.includes(String(row[locationColumn]).trim())) group.locations.push(String(row[locationColumn]).trim());
-            if (durationColumn && row[durationColumn] && !group.durations.includes(String(row[durationColumn]).trim())) group.durations.push(String(row[durationColumn]).trim());
+            if (row.__fmLocation && !group.locations.includes(row.__fmLocation)) group.locations.push(row.__fmLocation);
+            if (row.__fmDuration && !group.durations.includes(row.__fmDuration)) group.durations.push(row.__fmDuration);
             if (scopeColumn && String(row[scopeColumn]).toLowerCase().includes('shared')) group.shared = true;
         });
 
@@ -463,7 +495,12 @@ function showForestManagementCsvPanel(mwsId) {
         const totalCost = activities.reduce((sum, item) => sum + item.amount, 0);
         const sharedCost = activities.filter((item) => item.shared).reduce((sum, item) => sum + item.amount, 0);
         const siteCost = totalCost - sharedCost;
-        const geoFeatures = Array.isArray(geojsonData && geojsonData.features) ? geojsonData.features : [];
+        const geoFeatures = (Array.isArray(geojsonData && geojsonData.features) ? geojsonData.features : []).filter((feature) => {
+            if (!forestName) return true;
+            const props = feature && feature.properties ? feature.properties : {};
+            const featureTokens = normalize(props.FOREST_NAM || props.Forest_Name || props.forest_name).split(' ').filter((word) => word.length >= 5);
+            return featureTokens.some((part) => forestTokens.some((token) => part === token || closeWord(part, token)));
+        });
         const areaFromGeoJson = geoFeatures.reduce((sum, feature) => {
             const props = feature && feature.properties ? feature.properties : {};
             return sum + (Number(props.Area_ha || props.area_ha) || 0);
@@ -545,7 +582,7 @@ function showForestManagementCsvPanel(mwsId) {
         summary.appendChild(footer);
         panel.appendChild(summary);
     }).catch((error) => {
-        if (panel.dataset.forestManagement !== 'true' || panel.dataset.forestManagementMws !== fileCode) return;
+        if (panel.dataset.forestManagement !== 'true' || panel.dataset.forestManagementMws !== fileCode || panel.dataset.forestManagementForest !== forestKey) return;
         console.warn('Forest Management CSV unavailable:', error);
         status.textContent = 'No Forest Management CSV is available for this MWS.';
     });
