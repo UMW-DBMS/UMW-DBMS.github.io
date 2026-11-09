@@ -11,7 +11,7 @@ const SELECTION_COLOR = '#C71585';
 const SELECTION_STYLE = {
     district: { color: SELECTION_COLOR, weight: 1.4, opacity: 0.9, fillColor: SELECTION_COLOR, fillOpacity: 0.1 },
     dsd: { color: SELECTION_COLOR, weight: 2.5, opacity: 0.95, fillColor: SELECTION_COLOR, fillOpacity: 0.08 },
-    mws: { color: SELECTION_COLOR, weight: 3.5, opacity: 1, fill: false, fillOpacity: 0, halo: true }
+    mws: { color: SELECTION_COLOR, weight: 6, opacity: 1, fill: false, fillOpacity: 0 }
 };
 
 // Declare global variables to store the GeoJSON layer and its original data
@@ -194,7 +194,7 @@ function populateSelectMWSIDDropdown(filteredFeatures) {
 // Create a custom pane for the pink layer with a lower z-index
 map.createPane('pinkLayerPane');
 
-map.getPane('pinkLayerPane').style.zIndex = 400;  // Set lower z-index for pink layer
+map.getPane('pinkLayerPane').style.zIndex = 620;
 
 // Update GeoJSON layer creation to ensure the top layer is non-interactive
 function createGeoJSONLayer(features, style) {
