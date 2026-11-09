@@ -1,0 +1,1692 @@
+/**
+ * UMW dashboard: the newer parts of the page (index.html). Load LAST, after dashboard.css.
+ *
+ * Sections:  1 Header banner (logos, ministry, project, dashboard title)   2 Language box   3 Explore area   4 Compact footer
+ *            5 Statistics windows   5b Stakeholders window   6 Data Catalog window   7 Help window   8 Data provider "i"   9 GN search
+ * Colours, fonts and shapes come from theme.css. Class names do not clash with the other css files; where a rule has to beat one of
+ * dashboard.css or help-modal.css it uses an id in front, so no existing file has to be edited.
+ */
+
+/* ===================================================================================================================
+   1. Header banner: one light strip with, from left to right, the ministry emblem, the ministry and project names, the dashboard title
+   (UMW mark, "Watershed Management Plan", "Upper Mahaweli Watershed") and the IWWRMP logo. The dashboard title is here, not in the dark
+   bar below, so that bar has all its width for the drop-downs (and the GN search box). The strip is light because the IWWRMP logo has
+   dark lettering.
+   =================================================================================================================== */
+.agency-banner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 14px;
+    padding: 4px 16px;
+    background: var(--c-surface, #fff);
+    border-bottom: 1px solid var(--c-border, #c9d3cd);
+}
+
+.agency-banner .agency-logo {
+    flex: 0 0 auto;
+    width: auto;
+    height: 40px;
+    max-width: 30%;
+    object-fit: contain;
+}
+
+.agency-banner .agency-text {
+    flex: 1 1 260px;
+    min-width: 0;
+}
+
+.agency-banner .agency-ministry,
+.agency-banner .agency-project {
+    margin: 0;
+    line-height: 1.25;
+}
+
+.agency-banner .agency-ministry {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--c-primary-dark, #14432a);
+}
+
+.agency-banner .agency-project {
+    font-size: 0.76rem;
+    color: var(--c-muted, #4f5f56);
+}
+
+/* The dashboard title: set apart from the ministry names by a thin gold rule */
+.agency-banner .brand {
+    flex: 0 1 auto;
+    gap: 10px;
+    padding-left: 16px;
+    border-left: 2px solid var(--c-accent, #f2b705);
+}
+
+.agency-banner .brand-mark {
+    width: 42px;
+    height: 36px;
+    font-size: 12px;
+    color: var(--c-accent, #f2b705);
+    background: var(--c-primary-dark, #14432a);
+    border: 0;
+    border-radius: var(--radius, 6px);
+}
+
+.agency-banner .brand-text h1 {
+    font-size: 1.15rem;
+    line-height: 1.15;
+    color: var(--c-primary-dark, #14432a);
+}
+
+.agency-banner .brand-text p {
+    margin: 1px 0 0;
+    font-size: 0.7rem;
+    color: var(--c-muted, #4f5f56);
+    opacity: 1;
+}
+
+@media (max-width: 1100px) {
+    .agency-banner .agency-ministry {
+        font-size: 0.82rem;
+    }
+
+    .agency-banner .agency-project {
+        font-size: 0.7rem;
+    }
+
+    .agency-banner .brand-text h1 {
+        font-size: 1.05rem;
+    }
+}
+
+/* Below this width the title goes onto a row of its own under the logos and names */
+@media (max-width: 940px) {
+    .agency-banner .agency-text {
+        flex-basis: 0;
+    }
+
+    .agency-banner .agency-logo--project {
+        order: 3;
+    }
+
+    .agency-banner .brand {
+        order: 4;
+        flex: 1 0 100%;
+        padding: 3px 0 0;
+        margin-top: 1px;
+        border-top: 1px solid var(--c-border, #c9d3cd);
+        border-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .agency-banner {
+        gap: 3px 8px;
+        padding: 4px 12px;
+    }
+
+    .agency-banner .agency-logo {
+        height: 30px;
+    }
+
+    .agency-banner .agency-ministry {
+        font-size: 0.74rem;
+    }
+
+    .agency-banner .agency-project {
+        font-size: 0.66rem;
+    }
+
+    .agency-banner .brand-mark {
+        width: 38px;
+        height: 32px;
+        font-size: 11px;
+    }
+
+    .agency-banner .brand-text h1 {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .agency-banner .agency-logo {
+        height: 26px;
+    }
+
+    .agency-banner .agency-ministry {
+        font-size: 0.68rem;
+    }
+
+    .agency-banner .agency-project {
+        font-size: 0.62rem;
+    }
+}
+
+/* ===================================================================================================================
+   2. Language box: every language is written in its own letters. The font list is the theme's, which carries Sinhala and Tamil faces.
+   =================================================================================================================== */
+#languageSelect {
+    min-width: 112px;
+    font-family: var(--font, "Segoe UI", "Noto Sans", "Nirmala UI", "Noto Sans Sinhala", "Noto Sans Tamil", "Iskoola Pota", Latha, system-ui, sans-serif);
+    font-size: 14px;
+}
+
+#languageSelect option {
+    font-family: inherit;
+}
+
+/* The word "Language" stays for screen readers; the box itself already says English / සිංහල / தமிழ். It saves 70 px so the header fits on one row. */
+.language-switcher label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* ===================================================================================================================
+   3. Explore area: the button next to Go, the line under the drop-downs, the Area buttons and the two Area panels
+   =================================================================================================================== */
+.button-area {
+    color: #fff;
+    background: transparent;
+    border-color: #cfe0d5;
+}
+
+.button-area:hover:not(:disabled) {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* The status line and the hint share one line under the drop-downs (the hint is empty while an area is shown) */
+.location-block .selection-status,
+.location-block .area-hint {
+    display: inline;
+}
+
+.area-hint {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: #bcd3c4;
+}
+
+.area-hint:not(:empty)::before {
+    content: "\00a0\00b7\00a0";
+}
+
+.area-hint:empty {
+    display: none;
+}
+
+.nav-group--area {
+    padding-left: 10px;
+    border-left: 2px solid #0b3d91;
+}
+
+.nav-group--area .button {
+    color: #0b3d91;
+    border-color: #0b3d91;
+}
+
+.nav-group--area .button:hover:not(:disabled) {
+    background: #e7eefb;
+}
+
+.nav-group--area .button.active,
+.nav-group--area .button.active:hover:not(:disabled) {
+    color: #fff;
+    background: #0b3d91;
+}
+
+.nav-group--area .button:disabled {
+    color: var(--c-disabled-text);
+    border-color: #c5cdc8;
+}
+
+#areaLayersPanel {
+    top: 10px;
+    left: 56px;
+    width: clamp(280px, 24vw, 350px);
+    max-height: calc(100% - 20px);
+}
+
+#areaStatPanel {
+    top: 10px;
+    right: 10px;
+    width: clamp(360px, 32vw, 480px);
+    max-height: calc(100% - 20px);
+}
+
+#areaLayersPanel > div > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 4px;
+    border-radius: var(--radius-sm);
+}
+
+#areaLayersPanel > div > div:hover {
+    background: var(--c-primary-light);
+}
+
+#areaLayersPanel .area-title {
+    margin: 2px 0 2px;
+}
+
+#areaLayersPanel .area-sub {
+    margin: 0 0 6px;
+    font-size: 12.5px;
+    color: var(--c-muted);
+}
+
+#areaLayersPanel .area-status {
+    font-size: 12px;
+    font-style: italic;
+    color: #7a5a00;
+}
+
+#areaLayersPanel .area-status:empty {
+    display: none;
+}
+
+#areaLayersPanel .area-note {
+    font-size: 12.5px;
+}
+
+/* ===================================================================================================================
+   4. Compact footer: one slim row (the bottom ribbon was about 70 px high; this gives that height back to the map)
+   =================================================================================================================== */
+.app-footer {
+    gap: 4px 12px;
+    padding: 3px 12px;
+}
+
+.app-footer .footer-center {
+    align-items: center;
+    gap: 6px 10px;
+}
+
+.app-footer .footer-field {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+}
+
+.app-footer .footer-field label {
+    margin: 0;
+    font-size: 0.7rem;
+    white-space: nowrap;
+}
+
+.app-footer .footer-btn,
+.app-footer select {
+    min-height: 30px;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    font-size: 13px;
+}
+
+.app-footer select {
+    padding-right: 24px;
+}
+
+.app-footer #infoPopupPanel {
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+@media (max-width: 768px) {
+    /* a phone: the controls wrap into as few rows as they can instead of one row each */
+    .app-footer {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 4px 8px;
+        padding: 3px 10px;
+    }
+
+    .app-footer .footer-left {
+        flex: 1 0 100%;
+    }
+
+    .app-footer .footer-left:empty {
+        display: none;
+    }
+
+    .app-footer .footer-center,
+    .app-footer .footer-right {
+        flex: 0 1 auto;
+        justify-content: flex-start;
+    }
+
+    /* "Base map" stays for screen readers; the drop-down itself already reads OpenStreetMap / ESRI ..., so the three controls fit on one row */
+    .app-footer .footer-center {
+        flex-wrap: nowrap;
+    }
+
+    .app-footer .footer-field label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .app-footer .footer-btn,
+    .app-footer select {
+        min-height: 38px;
+    }
+
+    .app-footer .footer-center select {
+        min-width: 0;
+        max-width: 148px;
+    }
+
+    .app-footer .footer-btn {
+        padding-right: 9px;
+        padding-left: 9px;
+    }
+}
+
+/* The smallest phones (320 to 380 px): the three footer controls are wider than the screen on one row, so they may wrap onto two */
+@media (max-width: 380px) {
+    .app-footer .footer-center {
+        flex-wrap: wrap;
+    }
+
+    .app-footer .footer-center select {
+        max-width: 100%;
+    }
+}
+
+/* ===================================================================================================================
+   5. Statistics window: the one-mini-watershed window (#statPanel) and the area window (#areaStatPanel) look the same
+   =================================================================================================================== */
+#statPanel,
+#areaStatPanel {
+    padding: 0;
+    width: clamp(360px, 32vw, 480px);
+}
+
+#statPanel .stat-card,
+#areaStatPanel .stat-card {
+    padding: 0 14px 14px;
+}
+
+.stat-head {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 10px;
+    padding: 12px 0 8px;
+    background: #fff;
+    border-bottom: 1px solid var(--c-border);
+}
+
+.stat-headtext {
+    min-width: 0;
+}
+
+.stat-head .stat-title {
+    margin: 0;
+    padding: 0;
+    font-size: 1.05rem;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--c-primary-dark);
+    border: 0;
+}
+
+.stat-head .stat-sub {
+    margin: 2px 0 0;
+    font-size: 12.5px;
+    color: var(--c-muted);
+}
+
+.stat-head .hide-btn {
+    float: none;
+    flex: 0 0 auto;
+    margin: 0;
+}
+
+.stat-tabs {
+    display: flex;
+    gap: 3px;
+    padding: 3px;
+    margin: 0 0 10px;
+    overflow-x: auto;
+    background: #eef3f0;
+    border-radius: 999px;
+}
+
+.stat-tabs .tab {
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 6px 8px;
+    font-size: 12.5px;
+    white-space: nowrap;
+    color: var(--c-primary-dark);
+    background: transparent;
+    border: 0;
+    border-radius: 999px;
+}
+
+.stat-tabs .tab:hover {
+    background: rgba(29, 92, 58, 0.12);
+}
+
+.stat-tabs .tab.active {
+    color: #fff;
+    background: var(--c-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+#areaPieChart {
+    display: block;
+    width: 100%;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-chart {
+    position: relative;
+    height: clamp(170px, 30vh, 280px);
+    margin: 0 0 10px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-chart[hidden],
+.stat-actions[hidden] {
+    display: none;
+}
+
+#statisticsLegend,
+.stat-table {
+    max-height: 26vh;
+    margin: 10px 0;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+}
+
+#statisticsLegend table,
+.stat-legend-table {
+    width: 100%;
+    margin: 0;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+
+#statisticsLegend th,
+.stat-legend-table th {
+    position: sticky;
+    top: 0;
+    padding: 7px 10px;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--c-primary-dark);
+    background: var(--c-primary-light);
+    border: 0;
+    border-bottom: 1px solid var(--c-border);
+}
+
+#statisticsLegend td,
+.stat-legend-table td {
+    padding: 6px 10px;
+    vertical-align: middle;
+    border: 0;
+    border-bottom: 1px solid #e3e9e5;
+}
+
+#statisticsLegend td:last-child,
+#statisticsLegend td:nth-last-child(2):not(:first-child),
+.stat-legend-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-legend-table th.num {
+    text-align: right;
+}
+
+#statisticsLegend tbody tr:hover td,
+.stat-legend-table tbody tr:hover td {
+    background: #f4f8f5;
+}
+
+.stat-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-right: 8px;
+    vertical-align: -1px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    border-radius: 3px;
+}
+
+.stat-progress,
+.stat-summary {
+    margin: 0 0 8px;
+    font-size: 13px;
+    color: var(--c-muted);
+}
+
+.stat-summary {
+    color: var(--c-text);
+}
+
+.stat-progress:empty,
+.stat-summary:empty {
+    display: none;
+}
+
+.stat-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+#statPanel .stat-actions button,
+#areaStatPanel .stat-actions button {
+    flex: 1 1 150px;
+    margin: 0;
+}
+
+#statPanel #downloadButton,
+#areaStatPanel .stat-actions button[data-act="csv"] {
+    color: #fff;
+    background: var(--c-primary);
+}
+
+#statPanel #downloadButton:hover:not(:disabled),
+#areaStatPanel .stat-actions button[data-act="csv"]:hover:not(:disabled) {
+    background: var(--c-primary-dark);
+}
+
+#areaStatPanel .stat-open {
+    min-height: 26px;
+    padding: 2px 10px;
+}
+
+/* ===================================================================================================================
+   5b. Stakeholders window: a header like the Statistics window and one card per institution (short name in a coloured tag, full
+   name beside it). The accent colour changes from card to card and repeats after eight.
+   =================================================================================================================== */
+#partnersPanel {
+    padding: 0;
+}
+
+#partnersPanel .stk-card {
+    padding: 0 14px 14px;
+}
+
+#partnersPanel .stk-list {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+#partnersPanel .stk-item {
+    --stk-accent: var(--c-primary, #1d5c3a);
+    --stk-ink: #14432a;
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    padding: 9px 12px;
+    background: #fff;
+    border: 1px solid var(--c-border, #c9d3cd);
+    border-left: 5px solid var(--stk-accent);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --stk-accent is the stripe and the tint of the tag; --stk-ink is a darker shade of the same colour for the tag's text, so it reads clearly */
+#partnersPanel .stk-item:nth-child(8n + 2) { --stk-accent: #1565c0; --stk-ink: #0d47a1; }
+#partnersPanel .stk-item:nth-child(8n + 3) { --stk-accent: #ef6c00; --stk-ink: #8a3d00; }
+#partnersPanel .stk-item:nth-child(8n + 4) { --stk-accent: #6a1b9a; --stk-ink: #4a148c; }
+#partnersPanel .stk-item:nth-child(8n + 5) { --stk-accent: #00838f; --stk-ink: #005a63; }
+#partnersPanel .stk-item:nth-child(8n + 6) { --stk-accent: #c62828; --stk-ink: #a31515; }
+#partnersPanel .stk-item:nth-child(8n + 7) { --stk-accent: #7a6a00; --stk-ink: #5f5200; }
+#partnersPanel .stk-item:nth-child(8n + 8) { --stk-accent: #4527a0; --stk-ink: #311b92; }
+
+#partnersPanel .stk-abbr {
+    justify-self: stretch;
+    padding: 3px 6px;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    line-height: 1.25;
+    text-align: center;
+    overflow-wrap: anywhere;
+    color: var(--stk-ink);
+    background: #eef3f0;
+    background: color-mix(in srgb, var(--stk-accent) 12%, #ffffff);
+    border-radius: 999px;
+}
+
+#partnersPanel .stk-name {
+    font-size: 14px;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+    color: var(--c-text, #1f2a24);
+}
+
+/* ===================================================================================================================
+   6. Data Catalog window: cards (js/panels/catalog-panel.js). The old table stays in the page, hidden.
+   =================================================================================================================== */
+#catalogPanel #csvTable {
+    display: none;
+}
+
+#catalogPanel .catalog-view {
+    margin-top: 4px;
+}
+
+#catalogPanel .cat-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0 8px;
+}
+
+#catalogPanel .cat-search {
+    flex: 1 1 260px;
+    min-height: 36px;
+    padding: 6px 12px 6px 34px;
+    font: inherit;
+    font-size: 14px;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234f5f56' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") no-repeat 11px center;
+    border: 1px solid var(--c-border-strong);
+    border-radius: 999px;
+}
+
+#catalogPanel .cat-provider {
+    flex: 0 1 240px;
+    margin: 0;
+}
+
+#catalogPanel .cat-clear,
+#catalogPanel .cat-full {
+    min-height: 36px;
+}
+
+#catalogPanel .cat-full {
+    color: #fff;
+    background: var(--c-primary);
+}
+
+#catalogPanel .cat-full:hover:not(:disabled) {
+    background: var(--c-primary-dark);
+}
+
+#catalogPanel .cat-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 6px;
+}
+
+#catalogPanel .cat-chip {
+    min-height: 28px;
+    padding: 3px 12px;
+    font-size: 12.5px;
+    color: var(--cat-accent, var(--c-primary));
+    background: #fff;
+    border: 1px solid var(--cat-accent, var(--c-primary));
+    border-radius: 999px;
+}
+
+#catalogPanel .cat-chip:hover:not(:disabled) {
+    background: #f4f8f5;
+}
+
+#catalogPanel .cat-chip[aria-pressed="true"] {
+    color: #fff;
+    background: var(--cat-accent, var(--c-primary));
+}
+
+#catalogPanel .cat-chip:disabled {
+    opacity: 0.45;
+}
+
+#catalogPanel .cat-count {
+    margin: 4px 0 8px;
+    font-size: 12.5px;
+    color: var(--c-muted);
+}
+
+#catalogPanel .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px;
+}
+
+#catalogPanel .cat-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 11px 12px 10px;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    border-left: 5px solid var(--cat-accent, var(--c-primary));
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s;
+}
+
+#catalogPanel .cat-card:hover {
+    box-shadow: var(--shadow);
+}
+
+#catalogPanel .cat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+#catalogPanel .cat-db {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--cat-accent, var(--c-primary));
+}
+
+#catalogPanel .cat-id {
+    font-size: 11.5px;
+    color: var(--c-muted);
+}
+
+#catalogPanel .cat-name {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+    color: var(--c-text);
+    overflow-wrap: anywhere;
+}
+
+#catalogPanel .cat-prov {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--c-muted);
+}
+
+#catalogPanel .cat-prov::before {
+    content: "Provider: ";
+    font-weight: 700;
+}
+
+#catalogPanel .cat-prov--none {
+    font-style: italic;
+}
+
+#catalogPanel .cat-prov--none::before {
+    content: "";
+}
+
+#catalogPanel .cat-foot {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 4px;
+}
+
+#catalogPanel .cat-dl {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 4px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    background: var(--c-primary);
+    border: 0;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+}
+
+#catalogPanel .cat-dl::before {
+    content: "\2193";
+    font-weight: 700;
+}
+
+#catalogPanel .cat-dl:hover {
+    background: var(--c-primary-dark);
+}
+
+#catalogPanel .cat-dl--none {
+    color: var(--c-disabled-text);
+    background: var(--c-disabled-bg);
+    cursor: default;
+}
+
+#catalogPanel .cat-dl--none::before {
+    content: "";
+}
+
+#catalogPanel .cat-empty {
+    padding: 28px 12px;
+    text-align: center;
+    color: var(--c-muted);
+}
+
+#catalogPanel .cat-empty-title {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--c-primary-dark);
+}
+
+#catalogPanel .cat-none {
+    grid-column: 1 / -1;
+    padding: 18px 0;
+    text-align: center;
+    color: var(--c-muted);
+}
+
+/* ===================================================================================================================
+   7. Help window: one step at a time. Banner on top, step dots, the text beside a photo and a video, buttons at the bottom.
+   The window is 980 px wide and as high as the screen allows; only the step area scrolls when a step is taller than the room it has.
+   =================================================================================================================== */
+#readme-modal {
+    z-index: 2000;
+    padding: 12px;
+}
+
+#readme-modal .modal-content {
+    display: flex;
+    flex-direction: column;
+    width: min(980px, 100%);
+    min-width: 0;
+    max-width: none;
+    height: min(720px, calc(100vh - 24px));
+    max-height: calc(100vh - 24px);
+    padding: 0;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+#readme-modal .welcome-banner {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 10px 18px;
+    margin: 0;
+    text-align: center;
+    background: linear-gradient(180deg, #f4f8f5, #ffffff);
+    border-bottom: 1px solid var(--c-border);
+}
+
+#readme-modal .welcome-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+#readme-modal .welcome-banner h2 {
+    margin: 0 0 2px;
+    font-size: 1.3rem;
+    line-height: 1.2;
+    text-align: center;
+}
+
+#readme-modal .welcome-ministry,
+#readme-modal .welcome-project {
+    margin: 0;
+    line-height: 1.3;
+}
+
+#readme-modal .welcome-ministry {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--c-primary);
+}
+
+#readme-modal .welcome-project {
+    font-size: 0.85rem;
+    color: var(--c-muted);
+}
+
+#readme-modal .welcome-logo {
+    flex: 0 0 auto;
+    width: auto;
+    height: 56px;
+    max-width: 22%;
+    object-fit: contain;
+}
+
+#readme-modal .step-progress {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 18px 4px;
+}
+
+#readme-modal .step-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+#readme-modal .step-dot {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    padding: 0;
+    cursor: pointer;
+    background: #fff;
+    border: 2px solid var(--c-primary);
+    border-radius: 50%;
+}
+
+#readme-modal .step-dot::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+}
+
+#readme-modal .step-dot.is-done {
+    background: #9cc7ae;
+}
+
+#readme-modal .step-dot.is-current {
+    background: var(--c-primary);
+    transform: scale(1.3);
+}
+
+#readme-modal .step-count {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: var(--c-muted);
+}
+
+#readme-modal .flowchart,
+#readme-modal .flowchart.step-mode {
+    position: static;
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 6px 18px 12px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#readme-modal .flowchart.step-mode .flow-node {
+    position: static;
+    display: none;
+    width: 100%;
+    max-width: none;
+    transform: none;
+    opacity: 1;
+    transition: none;
+    box-shadow: none;
+}
+
+#readme-modal .flowchart.step-mode .flow-node.current-step {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    grid-template-areas: "title media" "body media";
+    grid-template-rows: auto 1fr;
+    gap: 10px 22px;
+    align-items: start;
+    padding: 16px 18px;
+    background: var(--c-primary-light);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+}
+
+#readme-modal .flow-node::after {
+    display: none;
+}
+
+#readme-modal .flow-title {
+    grid-area: title;
+    display: inline-flex;
+    align-self: start;
+    width: fit-content;
+    margin: 0;
+    padding: 4px 16px;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    background: var(--c-primary);
+    border-radius: 999px;
+}
+
+#readme-modal .flow-body {
+    grid-area: body;
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--c-text);
+}
+
+#readme-modal .flow-body > div + div {
+    margin-top: 10px;
+}
+
+#readme-modal .step-media {
+    grid-area: media;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+#readme-modal .step-photo,
+#readme-modal .step-video {
+    display: block;
+    width: 100%;
+    height: clamp(120px, 26vh, 260px);
+    margin: 0;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+#readme-modal .step-photo {
+    background: #f2f2f2;
+    border: 1px solid var(--c-border);
+}
+
+#readme-modal .step-video {
+    background: #0f1a14;
+}
+
+#readme-modal .modal-footer {
+    position: static;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 18px;
+    background: #fff;
+    border-top: 1px solid var(--c-border);
+}
+
+#readme-modal .step-nav-buttons .close-btn {
+    min-width: 44px;
+    min-height: 38px;
+}
+
+#readme-modal #close-readme {
+    min-height: 38px;
+    padding: 6px 22px;
+}
+
+@media (max-width: 720px) {
+    #readme-modal {
+        padding: 8px;
+    }
+
+    #readme-modal .modal-content {
+        height: calc(100vh - 16px);
+        max-height: calc(100vh - 16px);
+        border-radius: 12px;
+    }
+
+    #readme-modal .welcome-banner {
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        padding: 8px 12px;
+    }
+
+    #readme-modal .welcome-text {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    #readme-modal .welcome-banner h2 {
+        font-size: 1.1rem;
+    }
+
+    #readme-modal .welcome-ministry {
+        font-size: 0.82rem;
+    }
+
+    #readme-modal .welcome-project {
+        font-size: 0.74rem;
+    }
+
+    #readme-modal .welcome-logo {
+        height: 40px;
+        max-width: 40%;
+    }
+
+    #readme-modal .step-progress {
+        padding: 6px 12px 2px;
+    }
+
+    #readme-modal .flowchart,
+    #readme-modal .flowchart.step-mode {
+        padding: 4px 12px 10px;
+    }
+
+    #readme-modal .flowchart.step-mode .flow-node.current-step {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "title" "body" "media";
+        grid-template-rows: auto;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    #readme-modal .step-photo,
+    #readme-modal .step-video {
+        height: clamp(110px, 26vh, 200px);
+    }
+
+    /* the buttons stay on one row; the "Don't show again" words wrap if they must */
+    #readme-modal .modal-footer {
+        flex-wrap: nowrap;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+
+    #readme-modal .modal-checkbox {
+        flex: 1 1 auto;
+        min-width: 0;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+
+    #readme-modal #close-readme {
+        flex: 0 0 auto;
+        padding: 6px 16px;
+    }
+
+    #readme-modal .step-nav-buttons {
+        flex: 0 0 auto;
+        width: auto;
+        gap: 6px;
+    }
+
+    #readme-modal .step-nav-buttons .close-btn {
+        min-width: 40px;
+    }
+}
+
+@media (max-height: 560px) {
+    #readme-modal .welcome-banner {
+        padding: 6px 14px;
+    }
+
+    #readme-modal .welcome-logo {
+        height: 36px;
+    }
+
+    #readme-modal .welcome-banner h2 {
+        font-size: 1.05rem;
+    }
+
+    #readme-modal .welcome-project {
+        font-size: 0.72rem;
+        line-height: 1.2;
+    }
+
+    #readme-modal .welcome-ministry {
+        font-size: 0.8rem;
+    }
+
+    #readme-modal .step-progress {
+        padding-top: 4px;
+    }
+
+    #readme-modal .flow-body {
+        font-size: 0.95rem;
+        line-height: 1.45;
+    }
+}
+
+/* ===================================================================================================================
+   8. Data provider "i" (layer lists): a small round button at the end of a row and a one-line pop-up with the provider name
+   =================================================================================================================== */
+#basePanel > div > div.src-info-row,
+#areaLayersPanel > div > div.src-info-row {
+    flex-wrap: wrap;
+}
+
+#basePanel .src-info-btn,
+#areaLayersPanel .src-info-btn {
+    flex: 0 0 auto;
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    min-height: 0;
+    margin: 0 0 0 auto;
+    padding: 0;
+    font: italic 700 13px/1 Georgia, "Times New Roman", serif;
+    color: var(--c-primary, #1d5c3a);
+    cursor: pointer;
+    background: #fff;
+    border: 1.5px solid var(--c-primary, #1d5c3a);
+    border-radius: 50%;
+}
+
+#basePanel .src-info-btn:hover,
+#areaLayersPanel .src-info-btn:hover {
+    background: var(--c-primary-light, #e8f1ec);
+}
+
+#basePanel .src-info-btn[aria-expanded="true"],
+#areaLayersPanel .src-info-btn[aria-expanded="true"] {
+    color: #fff;
+    background: var(--c-primary, #1d5c3a);
+}
+
+#basePanel .src-pop,
+#areaLayersPanel .src-pop {
+    flex: 0 0 100%;
+    margin: 2px 0 4px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: var(--c-text, #1f2a24);
+    cursor: default;
+    background: #fff;
+    border: 1px solid var(--c-border, #c9d3cd);
+    border-left: 4px solid var(--c-primary, #1d5c3a);
+    border-radius: 4px;
+    box-shadow: var(--shadow-sm);
+}
+
+#basePanel .src-pop .src-pop-label,
+#areaLayersPanel .src-pop .src-pop-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--c-muted, #4f5f56);
+}
+
+#basePanel .src-pop strong,
+#areaLayersPanel .src-pop strong {
+    font-weight: 700;
+    color: var(--c-primary-dark, #14432a);
+    overflow-wrap: anywhere;
+}
+
+#basePanel .src-pop--note,
+#areaLayersPanel .src-pop--note {
+    font-style: italic;
+    color: var(--c-muted, #4f5f56);
+}
+
+@media (max-width: 768px) {
+    #basePanel .src-info-btn,
+    #areaLayersPanel .src-info-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+}
+
+/* ===================================================================================================================
+   9. GN / DSD / District / MWS search (js/location/gn-search.js): the box and its two buttons in the dark bar, the result list that opens
+   under it, and the orange label the map shows beside an outlined GN (the label style is from the updated dashboard, index (4).html).
+   =================================================================================================================== */
+.gn-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gn-search .mws-search {
+    width: clamp(9.5rem, 15vw, 16rem);
+    min-height: 36px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 14px;
+    color: var(--c-text, #1f2a24);
+    background: #fff;
+    border: 1px solid var(--c-border-strong, #8a9a91);
+    border-radius: var(--radius-sm, 4px);
+}
+
+/* The box has its own Clear button (which also removes the outlines on the map), so the browser's little x is hidden */
+.gn-search .mws-search::-webkit-search-cancel-button {
+    display: none;
+    -webkit-appearance: none;
+}
+
+.gn-search .search-icon-btn {
+    min-width: 36px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+.gn-search .search-icon-btn[aria-busy="true"] {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+.gn-search .search-clear-btn {
+    white-space: nowrap;
+}
+
+.gn-search .search-clear-btn[hidden] {
+    display: none;
+}
+
+/* The result list: it opens under the box, over the toolbar and the map, inside the header (which is above every map window) */
+.gn-suggest {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 40;
+    width: max(100%, 23rem);
+    max-width: min(32rem, calc(100vw - 24px));
+    max-height: min(62vh, 27rem);
+    overflow-y: auto;
+    font-size: 14px;
+    color: var(--c-text, #1f2a24);
+    background: #fff;
+    border: 1px solid var(--c-border-strong, #8a9a91);
+    border-radius: 10px;
+    box-shadow: var(--shadow, 0 4px 16px rgba(20, 40, 30, 0.18));
+}
+
+.gn-suggest[hidden] {
+    display: none;
+}
+
+.gn-msg {
+    padding: 9px 12px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    color: var(--c-muted, #4f5f56);
+}
+
+.gn-msg:empty {
+    display: none;
+}
+
+/* Text for screen readers only */
+.gn-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.gn-group-title {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--c-primary-dark, #14432a);
+    background: var(--c-primary-light, #e8f1ec);
+    border-top: 1px solid var(--c-border, #c9d3cd);
+    border-bottom: 1px solid var(--c-border, #c9d3cd);
+}
+
+.gn-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eef2ef;
+}
+
+.gn-option[aria-selected="true"] {
+    background: #dcebe2;
+}
+
+.gn-badge {
+    flex: 0 0 auto;
+    min-width: 54px;
+    padding: 2px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    color: #fff;
+    border-radius: 999px;
+}
+
+.gn-badge--gn { background: #9a4f00; }
+.gn-badge--mws { background: #1d5c3a; }
+.gn-badge--dsd { background: #0d47a1; }
+.gn-badge--district { background: #6a1b9a; }
+
+.gn-opt-text {
+    min-width: 0;
+}
+
+.gn-opt-name {
+    display: block;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.gn-opt-sub {
+    display: block;
+    font-size: 12px;
+    color: var(--c-muted, #4f5f56);
+    overflow-wrap: anywhere;
+}
+
+.gn-suggest mark {
+    padding: 0 1px;
+    color: inherit;
+    background: #ffe58a;
+    border-radius: 2px;
+}
+
+.gn-more {
+    padding: 5px 12px 7px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--c-muted, #4f5f56);
+}
+
+.gn-foot {
+    position: sticky;
+    bottom: 0;
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--c-muted, #4f5f56);
+    background: #fafcfb;
+    border-top: 1px solid var(--c-border, #c9d3cd);
+}
+
+.gn-foot:empty {
+    display: none;
+}
+
+.gn-foot .gn-widen {
+    display: block;
+    min-height: 28px;
+    margin-top: 6px;
+    padding: 2px 10px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c-primary, #1d5c3a);
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid var(--c-primary, #1d5c3a);
+    border-radius: 4px;
+}
+
+.gn-foot .gn-widen:hover {
+    background: var(--c-primary-light, #e8f1ec);
+}
+
+.gn-progress {
+    height: 4px;
+    margin-top: 5px;
+    overflow: hidden;
+    background: #e3e9e5;
+    border-radius: 2px;
+}
+
+.gn-progress > i {
+    display: block;
+    height: 100%;
+    background: var(--c-primary, #1d5c3a);
+    transition: width 0.15s;
+}
+
+/* The orange label on the map beside an outlined GN */
+.gn-search-label {
+    padding: 2px 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #5f3300;
+    pointer-events: none;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 140, 0, 0.75);
+    border-radius: 3px;
+    box-shadow: none;
+}
+
+.gn-popup {
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.forest-management-popup .leaflet-popup-content-wrapper {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 10px;
+}
+
+.forest-management-popup .leaflet-popup-content {
+    width: min(480px, calc(100vw - 72px)) !important;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.fm-popup {
+    color: #25313d;
+    font-size: 13px;
+}
+
+.fm-popup__header {
+    padding: 16px 18px 12px;
+    border-top: 4px solid #365d4a;
+}
+
+.fm-popup__title,
+.fm-popup__subtitle,
+.fm-popup__metric-label,
+.fm-popup__metric-value,
+.fm-popup__activity-note,
+.fm-popup__amount span {
+    display: block;
+}
+
+.fm-popup__title { font-size: 19px; }
+.fm-popup__subtitle,
+.fm-popup__activity-note,
+.fm-popup__amount span,
+.fm-popup__empty { color: #687887; }
+.fm-popup__subtitle { margin-top: 2px; }
+
+.fm-popup__metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: #f4f6f7;
+    border-top: 1px solid #e4e8eb;
+    border-bottom: 1px solid #e4e8eb;
+}
+
+.fm-popup__metrics > div { padding: 10px 14px; }
+.fm-popup__metrics > div + div { border-left: 1px solid #e0e5e8; }
+.fm-popup__metric-label { color: #71808d; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.fm-popup__metric-value { margin-top: 2px; font-size: 16px; }
+.fm-popup__section-title { margin: 14px 16px 4px; font-size: 11px; color: #71808d; text-transform: uppercase; letter-spacing: .04em; }
+.fm-popup__activity { display: flex; justify-content: space-between; gap: 16px; padding: 10px 16px; border-top: 1px solid #edf0f2; }
+.fm-popup__activity-name { display: block; font-size: 13px; }
+.fm-popup__activity-note { margin-top: 2px; }
+.fm-popup__amount { flex: 0 0 auto; text-align: right; white-space: nowrap; }
+.fm-popup__amount span { margin-top: 2px; }
+.fm-popup__empty { margin: 8px 16px 14px; }
+.fm-popup__footer { display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; padding: 12px 16px; background: #f4f6f7; border-top: 1px solid #e4e8eb; }
+
+.fm-summary {
+    clear: both;
+    max-height: calc(100% - 55px);
+    overflow: auto;
+    color: #25313d;
+    font-size: 13px;
+}
+
+.fm-summary__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+    margin: 8px -14px 12px;
+    background: #f4f6f7;
+    border-block: 1px solid #e4e8eb;
+}
+
+.fm-summary__metrics > div {
+    padding: 9px 12px;
+    border-right: 1px solid #e0e5e8;
+}
+
+.fm-summary__label,
+.fm-summary__note { display: block; color: #687887; }
+.fm-summary__label { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+.fm-summary__metrics strong { display: block; margin-top: 2px; font-size: 15px; }
+.fm-summary__heading { margin: 12px 0 4px; color: #71808d; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.fm-summary__activity { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid #edf0f2; }
+.fm-summary__activity > div:first-child { min-width: 0; }
+.fm-summary__badge { display: inline-block; margin-left: 6px; padding: 1px 4px; color: #687887; border: 1px solid #cbd4da; border-radius: 3px; font-size: 10px; }
+.fm-summary__note { margin-top: 2px; font-size: 12px; line-height: 1.4; }
+.fm-summary__amount { flex: 0 0 auto; text-align: right; white-space: nowrap; }
+.fm-summary__footer { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; margin: 4px -14px -14px; padding: 11px 14px; background: #f4f6f7; border-top: 1px solid #e4e8eb; }
+
+@media (max-width: 768px) {
+    .field--search {
+        grid-column: 1 / -1;
+    }
+
+    .gn-search .mws-search {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
+
+    .gn-suggest {
+        width: 100%;
+        max-width: none;
+    }
+}
