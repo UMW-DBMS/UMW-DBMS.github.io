@@ -301,6 +301,33 @@
     padding: 3px 12px;
 }
 
+.app-footer .footer-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.footer-logos {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+}
+
+.footer-logos img {
+    display: block;
+    width: auto;
+    height: 27px;
+    max-width: 82px;
+    object-fit: contain;
+}
+
+.footer-logos img:last-child {
+    height: 23px;
+    max-width: 64px;
+}
+
 .app-footer .footer-center {
     align-items: center;
     gap: 6px 10px;
@@ -979,6 +1006,25 @@
     object-fit: contain;
 }
 
+#readme-modal .welcome-project-logos {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+#readme-modal .welcome-project-logos .welcome-logo {
+    max-width: 72px;
+    height: 48px;
+}
+
+#readme-modal .welcome-project-logos .welcome-logo:last-child {
+    max-width: 58px;
+    height: 38px;
+}
+
 #readme-modal .step-progress {
     flex: 0 0 auto;
     display: flex;
@@ -1180,6 +1226,21 @@
         max-width: 40%;
     }
 
+    #readme-modal .welcome-project-logos {
+        gap: 5px;
+        max-width: 52%;
+    }
+
+    #readme-modal .welcome-project-logos .welcome-logo {
+        max-width: 48px;
+        height: 34px;
+    }
+
+    #readme-modal .welcome-project-logos .welcome-logo:last-child {
+        max-width: 40px;
+        height: 28px;
+    }
+
     #readme-modal .step-progress {
         padding: 6px 12px 2px;
     }
@@ -1239,6 +1300,14 @@
 
     #readme-modal .welcome-logo {
         height: 36px;
+    }
+
+    #readme-modal .welcome-project-logos .welcome-logo {
+        height: 32px;
+    }
+
+    #readme-modal .welcome-project-logos .welcome-logo:last-child {
+        height: 26px;
     }
 
     #readme-modal .welcome-banner h2 {
