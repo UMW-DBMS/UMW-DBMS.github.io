@@ -17,9 +17,13 @@ const WELCOME_BANNER = {
     title: 'Welcome to the Upper Mahaweli Database',
     ministry: 'Ministry of Agriculture, Livestock, Land and Irrigation',
     project: 'Integrated Watershed and Water Resources Management Project',
-    // Left of the names: the ministry logo. Right of the names: the IWWRMP logo.
+    // Left of the names: the ministry logo. Right of the names: project partner logos.
     ministryLogo: { src: 'assets/logos/ministry-logo.png', alt: 'Emblem of the Ministry of Agriculture, Livestock, Land and Irrigation' },
-    projectLogo: { src: 'assets/logos/iwwrmp-logo.png', alt: 'Logo of the Integrated Watershed and Water Resources Management Project (IWWRMP)' }
+    projectLogos: [
+        { src: 'assets/logos/iwwrmp-logo.png', alt: 'Logo of the Integrated Watershed and Water Resources Management Project (IWWRMP)' },
+        { src: 'assets/logos/WorldBank.png', alt: 'World Bank logo' },
+        { src: 'assets/logos/IWMI%20logo.png', alt: 'IWMI logo' }
+    ]
 };
 
 function initHelpModal() {
@@ -87,7 +91,7 @@ function initHelpModal() {
     }
 
     // -----------------------------------------------------------------------------------------------------------------
-    // Welcome banner: ministry logo | title, ministry and project names | IWWRMP logo
+    // Welcome banner: ministry logo | title, ministry and project names | partner logos
     // -----------------------------------------------------------------------------------------------------------------
     function makeBannerLogo(logo) {
         const img = document.createElement('img');
@@ -122,7 +126,10 @@ function initHelpModal() {
         text.appendChild(project);
         banner.appendChild(makeBannerLogo(WELCOME_BANNER.ministryLogo));
         banner.appendChild(text);
-        banner.appendChild(makeBannerLogo(WELCOME_BANNER.projectLogo));
+        const projectLogos = document.createElement('div');
+        projectLogos.className = 'welcome-project-logos';
+        WELCOME_BANNER.projectLogos.forEach((logo) => projectLogos.appendChild(makeBannerLogo(logo)));
+        banner.appendChild(projectLogos);
         helpModalContent.insertBefore(banner, helpModalContent.firstChild);
     }
     addWelcomeBanner();
