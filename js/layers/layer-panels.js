@@ -361,7 +361,7 @@ function appendForestManagementCheckbox(parent, mwsId) {
                 // The HTML file is a standalone Folium map page. Its paired GeoJSON
                 // is the feature layer that can be drawn on this map.
                 const fileCode = String(mwsId).trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
-                const url = `https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Forest%20Management/MWS_${encodeURIComponent(fileCode)}.geojson`;
+                const url = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT/GEOJSON/MWS_${encodeURIComponent(fileCode)}.geojson`;
                 loadGeoJsonLayerP(url, layerName);
             }
         } else {
@@ -389,8 +389,9 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
     const panel = document.getElementById('attributePanel');
     if (!panel) return;
     const fileCode = String(mwsId).trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
-    const csvUrl = `https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Forest%20Management/MWS_${encodeURIComponent(fileCode)}.csv`;
-    const geojsonUrl = `https://raw.githubusercontent.com/Dilshi-1997/MWS_001/main/Forest%20Management/MWS_${encodeURIComponent(fileCode)}.geojson`;
+    const forestManagementBase = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT';
+    const csvUrl = `${forestManagementBase}/CSV/MWS_${encodeURIComponent(fileCode)}.csv`;
+    const geojsonUrl = `${forestManagementBase}/GEOJSON/MWS_${encodeURIComponent(fileCode)}.geojson`;
     const forestKey = String(forestName || '').trim().toLowerCase();
     panel.dataset.forestManagement = 'true';
     panel.dataset.forestManagementMws = fileCode;
