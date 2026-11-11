@@ -144,12 +144,18 @@ async function resolveGithubAssetUrlCaseInsensitive(rawUrl) {
 async function resolveForestManagementFileUrl(folder, fileCode, extension) {
     const base = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT';
     const normalizedCode = String(fileCode || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
-    const directUrl = `${base}/${folder}/MWS_${encodeURIComponent(fileCode)}.${extension}`;
-    try {
-        const directResponse = await fetch(directUrl, { method: 'HEAD' });
-        if (directResponse.ok) return directUrl;
-    } catch (_) {
-        // Raw GitHub may not support HEAD in some browsers; use the directory listing below.
+    const directUrls = [
+        `${base}/${folder}/MWS_${encodeURIComponent(fileCode)}.${extension}`,
+        `${base}/${folder}/MWS${encodeURIComponent(fileCode)}.${extension}`,
+        `${base}/${folder}/${encodeURIComponent(fileCode)}.${extension}`
+    ];
+    for (const directUrl of directUrls) {
+        try {
+            const directResponse = await fetch(directUrl, { method: 'HEAD' });
+            if (directResponse.ok) return directUrl;
+        } catch (_) {
+            // Raw GitHub may not support HEAD in some browsers; use the directory listing below.
+        }
     }
 
     const directoryPath = `IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT/${folder}`;
@@ -161,10 +167,14 @@ async function resolveForestManagementFileUrl(folder, fileCode, extension) {
         }));
     }
     const files = await forestManagementDirectoryCache.get(folder);
+    const digits = String(fileCode || '').replace(/\D/g, '');
+    const numericCode = digits.replace(/^0+/, '') || '0';
+    const numericCodePattern = digits ? new RegExp(`(^|\\D)0*${numericCode}(\\D|$)`) : null;
     const match = (Array.isArray(files) ? files : []).find((file) => {
         const name = String(file && file.name || '').toLowerCase();
         const normalizedName = name.replace(/[^a-z0-9]/gi, '');
-        return name.endsWith(`.${extension.toLowerCase()}`) && normalizedName.includes(normalizedCode);
+        return name.endsWith(`.${extension.toLowerCase()}`) &&
+            (normalizedName.includes(normalizedCode) || (numericCodePattern && numericCodePattern.test(name)));
     });
     if (match && match.download_url) return match.download_url;
     throw new Error(`No ${extension.toUpperCase()} file found for MWS_${fileCode} in ${folder}`);
