@@ -200,8 +200,8 @@ function loadGeoJsonLayerP(url, layerName) {
             if (isForestManagement) {
                 const selectedMwsId = String(layerName).replace(/^Forest Management\s*\(/i, '').replace(/\)$/, '');
                 const fileCode = selectedMwsId.trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
-                const csvUrl = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT/CSV/MWS_${encodeURIComponent(fileCode)}.csv`;
                 try {
+                    const csvUrl = await resolveForestManagementFileUrl('CSV', fileCode, 'csv');
                     const response = await fetch(csvUrl);
                     if (response.ok) forestManagementRows = Papa.parse(await response.text(), { header: true, skipEmptyLines: true }).data || [];
                 } catch (error) {

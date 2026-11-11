@@ -117,3 +117,34 @@ function getSelectedMwsCode() {
 async function resolveEnvironmentalProtectionUrls() {
     return [ENVIRONMENTAL_PROTECTION_LAYER_URL];
 }
+const forestManagementDirectoryCache = new Map();
+
+async function resolveForestManagementFileUrl(folder, fileCode, extension) {
+    const base = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT';
+    const normalizedCode = String(fileCode || '').replace(/[^a-z0-9]/gi, '').toLowerCase();
+    const directUrl = `${base}/${folder}/MWS_${encodeURIComponent(fileCode)}.${extension}`;
+    try {
+        const directResponse = await fetch(directUrl, { method: 'HEAD' });
+        if (directResponse.ok) return directUrl;
+    } catch (_) {
+        // Raw GitHub may not support HEAD in some browsers; use the directory listing below.
+    }
+
+    const directoryPath = `IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT/${folder}`;
+    const apiUrl = `https://api.github.com/repos/MWS003-GIS/MWS003-GIS.github.io/contents/${directoryPath}`;
+    if (!forestManagementDirectoryCache.has(folder)) {
+        forestManagementDirectoryCache.set(folder, fetch(apiUrl).then(async (response) => {
+            if (!response.ok) throw new Error(`Forest Management ${folder} directory returned ${response.status}`);
+            return response.json();
+        }));
+    }
+    const files = await forestManagementDirectoryCache.get(folder);
+    const match = (Array.isArray(files) ? files : []).find((file) => {
+        const name = String(file && file.name || '').toLowerCase();
+        const normalizedName = name.replace(/[^a-z0-9]/gi, '');
+        return name.endsWith(`.${extension.toLowerCase()}`) && normalizedName.includes(normalizedCode);
+    });
+    if (match && match.download_url) return match.download_url;
+    throw new Error(`No ${extension.toUpperCase()} file found for MWS_${fileCode} in ${folder}`);
+}
+

@@ -361,8 +361,9 @@ function appendForestManagementCheckbox(parent, mwsId) {
                 // The HTML file is a standalone Folium map page. Its paired GeoJSON
                 // is the feature layer that can be drawn on this map.
                 const fileCode = String(mwsId).trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
-                const url = `https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT/GEOJSON/MWS_${encodeURIComponent(fileCode)}.geojson`;
-                loadGeoJsonLayerP(url, layerName);
+                resolveForestManagementFileUrl('GEOJSON', fileCode, 'geojson')
+                    .then((url) => loadGeoJsonLayerP(url, layerName))
+                    .catch((error) => console.error('Forest Management GeoJSON unavailable:', error));
             }
         } else {
             const attributePanel = document.getElementById('attributePanel');
@@ -389,9 +390,6 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
     const panel = document.getElementById('attributePanel');
     if (!panel) return;
     const fileCode = String(mwsId).trim().replace(/^MWS[-_\s]*/i, '').replace(/-/g, '_');
-    const forestManagementBase = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT';
-    const csvUrl = `${forestManagementBase}/CSV/MWS_${encodeURIComponent(fileCode)}.csv`;
-    const geojsonUrl = `${forestManagementBase}/GEOJSON/MWS_${encodeURIComponent(fileCode)}.geojson`;
     const forestKey = String(forestName || '').trim().toLowerCase();
     panel.dataset.forestManagement = 'true';
     panel.dataset.forestManagementMws = fileCode;
@@ -419,11 +417,11 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
     panel.appendChild(status);
 
     Promise.all([
-        fetch(csvUrl).then((response) => {
+        resolveForestManagementFileUrl('CSV', fileCode, 'csv').then((url) => fetch(url)).then((response) => {
             if (!response.ok) throw new Error(`CSV request returned ${response.status}`);
             return response.text();
         }),
-        fetch(geojsonUrl).then((response) => response.ok ? response.json() : null).catch(() => null)
+        resolveForestManagementFileUrl('GEOJSON', fileCode, 'geojson').then((url) => fetch(url)).then((response) => response.ok ? response.json() : null).catch(() => null)
     ]).then(([csvText, geojsonData]) => {
         if (panel.dataset.forestManagement !== 'true' || panel.dataset.forestManagementMws !== fileCode || panel.dataset.forestManagementForest !== forestKey) return;
         const parsed = Papa.parse(csvText, { header: true, skipEmptyLines: true });
@@ -434,7 +432,8 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
         const activityColumn = headerKey('activity');
         const detailsColumn = headerKey('description') || headerKey('location');
         const locationColumn = headerKey('location');
-        const amountColumn = headerKey('amountlkr') || headerKey('amount');
+        const amountColumn = ['costlkr', 'activitycostlkr', 'amountlkr', 'totalcostlkr', 'cost', 'amount', 'totalcost']
+            .map((key) => headerKey(key)).find(Boolean);
         const durationColumn = headerKey('duration') || headerKey('years');
         const scopeColumn = headerKey('scope');
         const areaColumn = headers.find((header) => /area/i.test(header) && /ha/i.test(header));
@@ -485,7 +484,7 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
             const activityName = row.__fmActivity || 'Other activities';
             if (!grouped.has(activityName)) grouped.set(activityName, { amount: 0, details: [], locations: [], durations: [], shared: false });
             const group = grouped.get(activityName);
-            group.amount += amountColumn ? asAmount(row[amountColumn]) : 0;
+            if (amountColumn && String(row[amountColumn] || '').trim()) group.amount += asAmount(row[amountColumn]);
             if (detailsColumn && row[detailsColumn] && !group.details.includes(String(row[detailsColumn]).trim())) group.details.push(String(row[detailsColumn]).trim());
             if (row.__fmLocation && !group.locations.includes(row.__fmLocation)) group.locations.push(row.__fmLocation);
             if (row.__fmDuration && !group.durations.includes(row.__fmDuration)) group.durations.push(row.__fmDuration);
@@ -527,7 +526,7 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
             if (area) addMetric('Area', `${area.toLocaleString('en-LK', { maximumFractionDigits: 2 })} ha`);
         }
         addMetric('Activities', String(activities.length));
-        addMetric('Total cost', money(totalCost));
+        if (amountColumn) addMetric('Total cost', money(totalCost));
         summary.appendChild(metrics);
 
         const activityHeading = document.createElement('h4');
@@ -559,18 +558,24 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
             if (activity.durations.length) noteParts.push(activity.durations.join(', '));
             note.textContent = noteParts.join(' · ');
             detail.appendChild(note);
-            const amountBlock = document.createElement('div');
-            amountBlock.className = 'fm-summary__amount';
-            const amount = document.createElement('strong');
-            amount.textContent = money(activity.amount);
-            amountBlock.appendChild(amount);
-            item.append(detail, amountBlock);
+            if (amountColumn) {
+                const amountBlock = document.createElement('div');
+                amountBlock.className = 'fm-summary__amount';
+                const amountLabel = document.createElement('span');
+                amountLabel.textContent = 'Cost (LKR)';
+                const amount = document.createElement('strong');
+                amount.textContent = money(activity.amount);
+                amountBlock.append(amountLabel, amount);
+                item.append(detail, amountBlock);
+            } else {
+                item.appendChild(detail);
+            }
             list.appendChild(item);
         });
         summary.appendChild(list);
         const footer = document.createElement('div');
         footer.className = 'fm-summary__footer';
-        const footerRows = scopeColumn
+        const footerRows = !amountColumn ? [] : scopeColumn
             ? [['Site-specific cost', siteCost], ['Shared programme', sharedCost]]
             : [['Total planned cost', totalCost]];
         footerRows.forEach(([label, amount]) => {
@@ -580,7 +585,7 @@ function showForestManagementCsvPanel(mwsId, forestName = '') {
             value.textContent = money(amount);
             footer.append(caption, value);
         });
-        summary.appendChild(footer);
+        if (footerRows.length) summary.appendChild(footer);
         panel.appendChild(summary);
     }).catch((error) => {
         if (panel.dataset.forestManagement !== 'true' || panel.dataset.forestManagementMws !== fileCode || panel.dataset.forestManagementForest !== forestKey) return;
