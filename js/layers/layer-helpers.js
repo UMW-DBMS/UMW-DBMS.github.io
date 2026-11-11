@@ -118,6 +118,28 @@ async function resolveEnvironmentalProtectionUrls() {
     return [ENVIRONMENTAL_PROTECTION_LAYER_URL];
 }
 const forestManagementDirectoryCache = new Map();
+const githubDirectoryListingCache = new Map();
+
+async function resolveGithubAssetUrlCaseInsensitive(rawUrl) {
+    const assetUrl = new URL(String(rawUrl || ''), window.location.href);
+    if (assetUrl.hostname !== 'raw.githubusercontent.com') return rawUrl;
+    const parts = assetUrl.pathname.split('/').filter(Boolean);
+    if (parts.length < 4) return rawUrl;
+    const [owner, repository, reference, ...pathParts] = parts;
+    const fileName = decodeURIComponent(pathParts.pop() || '');
+    const directoryPath = pathParts.map(decodeURIComponent).join('/');
+    const cacheKey = `${owner}/${repository}/${reference}/${directoryPath}`;
+    const apiUrl = `https://api.github.com/repos/${owner}/${repository}/contents/${directoryPath}?ref=${encodeURIComponent(reference)}`;
+    if (!githubDirectoryListingCache.has(cacheKey)) {
+        githubDirectoryListingCache.set(cacheKey, fetch(apiUrl).then(async (response) => {
+            if (!response.ok) throw new Error(`GitHub directory lookup returned ${response.status}`);
+            return response.json();
+        }));
+    }
+    const files = await githubDirectoryListingCache.get(cacheKey);
+    const match = (Array.isArray(files) ? files : []).find((file) => String(file && file.name || '').toLowerCase() === fileName.toLowerCase());
+    return match && match.download_url ? match.download_url : rawUrl;
+}
 
 async function resolveForestManagementFileUrl(folder, fileCode, extension) {
     const base = 'https://raw.githubusercontent.com/MWS003-GIS/MWS003-GIS.github.io/main/IWWRMP/Data/EXD/100_PRP/FOREST_MANAGEMENT';

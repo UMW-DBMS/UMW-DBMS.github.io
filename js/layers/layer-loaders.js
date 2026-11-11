@@ -190,8 +190,12 @@ function loadPngOverlay(url, layerName) {
 // Function to load a single GeoJSON layer with custom red cross for point features
 function loadGeoJsonLayerP(url, layerName) {
     fetch(url)
-        .then(response => {
-            if (!response.ok) throw new Error('Network response was not ok');
+        .then(async response => {
+            if (!response.ok) {
+                const matchingCaseUrl = await resolveGithubAssetUrlCaseInsensitive(url).catch(() => url);
+                if (matchingCaseUrl !== url) response = await fetch(matchingCaseUrl);
+            }
+            if (!response.ok) throw new Error(`GeoJSON request returned ${response.status}`);
             return response.json();
         })
         .then(async geojsonData => {
