@@ -1,0 +1,141 @@
+/**
+ * UMW dashboard: header layout (index.html). Load LAST, after css/umw-enhancements.css: it replaces the order of the banner of section 1 of that file
+ * and adds the Help / User Guide / Map Symbols / Log in buttons next to Explore area. Nothing in umw-enhancements.css has to be changed or removed
+ * (its old rules for the "UMW" tile and for the old order are simply no longer used).
+ *
+ *   1  Banner, left to right: IWWRMP logo, the dashboard title (no "UMW" tile), then at the right the ministry and project names and the ministry emblem
+ *   2  The dark bar: the location block shares the row with the language box, so the controls wrap inside it instead of pushing the language box down
+ *   3  Help / User Guide / Map Symbols / Log in next to Explore area: names and icons when they fit, icons only when they do not (js/core/header-links.js decides),
+ *      a row of four on a phone
+ */
+
+/* ===================================================================================================================
+   1. Banner
+   =================================================================================================================== */
+.agency-banner .agency-text {
+    flex: 1 1 260px;
+    min-width: 0;
+    text-align: right;
+}
+
+/* The title now follows the IWWRMP logo; the thin gold rule between them stays */
+.agency-banner .brand {
+    flex: 0 1 auto;
+    gap: 0;
+    padding-left: 16px;
+    border-left: 2px solid var(--c-accent, #f2b705);
+}
+
+/* Narrow: the logos and the names stay on the first row, the title goes on a row of its own under them */
+@media (max-width: 940px) {
+    .agency-banner .agency-logo--project {
+        order: 1;
+    }
+
+    .agency-partner-logos {
+        order: 2;
+    }
+
+    .agency-banner .agency-text {
+        order: 3;
+        flex-basis: 0;
+    }
+
+    .agency-banner .agency-logo--ministry {
+        order: 4;
+    }
+
+    .agency-banner .brand {
+        order: 5;
+        flex: 1 0 100%;
+        padding: 3px 0 0;
+        margin-top: 1px;
+        border-top: 1px solid var(--c-border, #c9d3cd);
+        border-left: 0;
+    }
+}
+
+/* ===================================================================================================================
+   2. The dark bar: the location block takes the room between the left edge and the language box
+   =================================================================================================================== */
+@media (min-width: 769px) {
+    .location-block {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+}
+
+/* ===================================================================================================================
+   3. Help, User Guide, Map Symbols and Log in
+   =================================================================================================================== */
+.header-links {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-end;
+    gap: 5px;
+    margin-left: 6px;
+}
+
+.header-links .button {
+    min-height: 36px;
+    padding: 6px 9px;
+    gap: 5px;
+    font-size: 13px;
+    color: #fff;
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.header-links .button:hover:not(:disabled),
+.header-links .button:focus-visible {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Icons only: js/core/header-links.js adds this class when the names would not fit beside Explore area (the name stays in the tooltip and is still
+   read out by screen readers) */
+.header-links--icons .button {
+    min-width: 36px;
+}
+
+.header-links--icons .button > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+/* A phone: the four buttons in one row across the bar, icon above the name (the names always show here) */
+@media (max-width: 768px) {
+    .header-links {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+        margin-left: 0;
+    }
+
+    .header-links .button {
+        flex-direction: column;
+        gap: 2px;
+        min-height: 48px;
+        padding: 4px 2px;
+        font-size: 11px;
+        line-height: 1.15;
+    }
+
+    .header-links .button > i {
+        width: auto;
+        font-size: 15px;
+    }
+
+    .header-links--icons .button > span {
+        position: static;
+        width: auto;
+        height: auto;
+        overflow: visible;
+        clip: auto;
+    }
+}

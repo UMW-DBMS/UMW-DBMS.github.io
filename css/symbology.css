@@ -1,0 +1,279 @@
+/**
+ * Map symbology styling: legends, point markers, labels.
+ *
+ * Used by the dashboard (index.html), the print view (print-map.html), the catalog (MWSDataCatalog.html)
+ * and the symbology guide. The markup is produced by js/layers/symbology.js. Legend rules are written
+ * so they also work when only a legend's inner HTML is copied (print view).
+ */
+
+/* ===== Legend card ===== */
+
+.leaflet-control.umw-legend,
+.umw-legend {
+    width: auto;
+    min-width: 176px;
+    max-width: 270px;
+    max-height: 46vh;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font: 12.5px/1.35 var(--font, "Segoe UI", Arial, sans-serif);
+    color: var(--c-text, #1f2a24);
+    background: #fff;
+    border: 1px solid var(--c-border, #c9d3cd);
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(20, 40, 30, 0.22);
+}
+
+.lg-stack > .lg + .lg {
+    border-top: 2px solid var(--c-border, #c9d3cd);
+}
+
+.lg-head {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    padding: 7px 10px 6px;
+    background: #f1f6f3;
+    border-bottom: 1px solid #dfe7e2;
+}
+
+.lg-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--c-primary-dark, #14432a);
+}
+
+.lg-sub {
+    font-size: 11px;
+    color: var(--c-muted, #4f5f56);
+}
+
+.lg-head--compact {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border-bottom: 0;
+}
+
+.lg-body {
+    padding: 4px 10px 8px;
+}
+
+.lg-group + .lg-group {
+    margin-top: 2px;
+}
+
+.lg-heading {
+    margin: 7px 0 3px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--c-muted, #4f5f56);
+}
+
+.lg-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.lg-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.lg-sw {
+    display: inline-flex;
+    flex: 0 0 28px;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+}
+
+.lg-sw--fill {
+    height: 14px;
+    border-radius: 2px;
+    box-sizing: border-box;
+}
+
+.lg-sw--point {
+    height: 22px;
+}
+
+.lg-sw svg {
+    display: block;
+}
+
+.lg-note {
+    padding: 0 10px 8px;
+    font-size: 11px;
+    color: var(--c-muted, #4f5f56);
+}
+
+/* Continuous colour ramp with three labels */
+.lg-ramp-wrap {
+    padding-top: 4px;
+}
+
+.lg-ramp {
+    display: flex;
+    height: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+}
+
+.lg-ramp span {
+    flex: 1 1 0;
+}
+
+.lg-ticks {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 3px;
+    font-size: 10.5px;
+    color: var(--c-muted, #4f5f56);
+}
+
+/* Proposal circle sizes */
+.lg-sizes {
+    margin-top: 4px;
+}
+
+.lg-size-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.lg-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lg-circle {
+    display: inline-block;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    border-radius: 50%;
+}
+
+.lg-size-slot {
+    display: inline-flex;
+    flex: 0 0 34px;
+    justify-content: center;
+}
+
+/* Only inside the live map: clickable title with a chevron, and the collapsed state */
+.umw-legend .lg:not(.lg--compact) .lg-head {
+    position: relative;
+    padding-right: 28px;
+    cursor: pointer;
+}
+
+.umw-legend .lg:not(.lg--compact) .lg-head::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 11px;
+    width: 7px;
+    height: 7px;
+    margin-top: -5px;
+    border-right: 2px solid var(--c-muted, #4f5f56);
+    border-bottom: 2px solid var(--c-muted, #4f5f56);
+    transform: rotate(45deg);
+    transition: transform 0.15s;
+}
+
+.umw-legend .lg.is-collapsed .lg-head::after {
+    margin-top: -2px;
+    transform: rotate(-135deg);
+}
+
+.umw-legend .lg.is-collapsed .lg-head {
+    border-bottom: 0;
+}
+
+.umw-legend .lg.is-collapsed .lg-body,
+.umw-legend .lg.is-collapsed .lg-note {
+    display: none;
+}
+
+.umw-legend .lg:not(.lg--compact) .lg-head:hover {
+    background: #e6efe9;
+}
+
+/* ===== Point markers ===== */
+
+.umw-marker {
+    background: none;
+    border: 0;
+}
+
+.umw-marker svg {
+    display: block;
+    overflow: visible;
+}
+
+.umw-marker.is-selected::after {
+    content: "";
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    bottom: -4px;
+    left: -4px;
+    border: 3px solid #00BCD4;
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px #fff;
+    pointer-events: none;
+}
+
+/* ===== Labels on the map ===== */
+
+.leaflet-tooltip.proposal-no-label {
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--c-text, #1f2a24);
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--c-primary, #1d5c3a);
+    border-radius: 9px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.leaflet-tooltip.proposal-no-label::before {
+    display: none;
+}
+
+/* Name next to a water-feature point (Base Layers > Water features-point): text only, white halo for legibility on any base map */
+.leaflet-tooltip.water-feature-point-label {
+    padding: 0;
+    font-size: 11px;
+    font-weight: 600;
+    color: #1f1f1f;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    text-shadow: 0 0 2px #ffffff, 0 0 2px #ffffff;
+}
+
+.leaflet-tooltip.water-feature-point-label::before {
+    display: none;
+}
+
+/* ===== Legend stack on the dashboard map ===== */
+
+/* A long stack of legends scrolls inside the map instead of running into the raster legends at the bottom */
+#map .leaflet-top.leaflet-right {
+    max-height: calc(100% - 170px);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
